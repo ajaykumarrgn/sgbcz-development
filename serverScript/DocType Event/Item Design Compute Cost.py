@@ -1,0 +1,52 @@
+def find_row_by_key_value(dict_array, key, value):
+    for row in dict_array:
+        if row.get(key) == value:
+            return row
+    return None
+
+# Find the the array with
+# Returns the first record matching the condition
+# similar to array.find of javascript or READ TABLE of ABAP
+def find_dict_with_keys(dict_row, dict_array):
+    predicate = lambda x: int(x.get('rating')) >= int(dict_row.get('rating')) and int(x.get('hv',0)) >= int(dict_row.get('hv_rated_voltage'))
+    for d in dict_array:
+        if predicate(d):
+            return d
+    return None
+
+    
+if doc.material_cost and doc.variant_of:
+    # Get the Gitra Settings
+    gitra_settings = frappe.get_doc("Gitra Settings", "Gitra Settings")
+    
+    rating_row = find_row_by_key_value(doc.attributes, 'attribute', 'Power (kVA)')
+    hv_row = find_row_by_key_value(doc.attributes, 'attribute', 'HV (kV)')
+    
+    attributes = {
+        #'rating': rating_row.attribute_value,
+        #'hv_rated_voltage': hv_row.attribute_value,
+        'rating': rating_row.attribute_value, 
+        'hv_rated_voltage': int(float(hv_row.attribute_value.replace(',', '.')) * 1000),
+    }
+    # Read the production hours record from Gitra Setting labour hours child TABLE
+    # identify the record higher then than the Design rating and Design hv_rated_voltage
+    # for ex if Design rating is 900KVA and HV is 10000v 
+    # then the record identified will be Rating(1000) and HV Up to(24000)
+    design_production_hours = find_dict_with_keys(attributes, gitra_settings.labour_hours)
+    # design_production_hours = {}
+    # design_production_hours['hours'] = 44
+    
+    # Compute the labour cost as design production hours * labour rate set in Gitra setting
+    labour =  design_production_hours.hours * gitra_settings.labour_rate
+    production_overhead =  design_production_hours.hours * gitra_settings.production_rate
+    cost_of_goods = doc.material_cost + labour + production_overhead
+    
+    # Compute sales overhead and administrative overhead.
+    # These will be computed as percent(from Gitra Settings) of cost of goods obtained above
+    sales_overhead = cost_of_goods * gitra_settings.sales_overhead/100
+    administrative_overhead = cost_of_goods * gitra_settings.administrative_overhead/100
+    
+    # Compute total cost
+    # = cost of goods + sales overhead and administrative overhead
+    # and round to nearest ten
+    doc.total_cost = cost_of_goods + sales_overhead + administrative_overhead
