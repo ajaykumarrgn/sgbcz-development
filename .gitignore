@@ -1,6 +1,1 @@
-clientScript.js
-serverScript.js
-report.js
-putClientSCript.js
-putServerScript.js
-putReports.js
+.env

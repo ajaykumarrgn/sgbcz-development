@@ -1,10 +1,18 @@
+# Change References
+# Performance Optimization:(Issue# : ISS-2024-00002)
+# Link more Control Units:(Issue# : ISS-2024-00012)
+# Silicon-free is not Visible: (Issue# : ISS-2024-00018)
+# Some Columns not visible using Saved Column (Issue# : ISS-2024-00020)
+# Remove the duplicate records from the sales table based on payment terms(ISS-2024-00045)
+
 # Change Request
 # Transfer Reservation field from Sales order to Delivery Schedule (Task#: TASK-2024-00155)
+# Transfer Note section from Sales order to Delivery Schedule (Task#: TASK-2024-00221)
+# Increse the sales table performance (Task#: TASK-2024-00216)
 
 def get_columns(filters):
     columns = []
     # >>ISS-2024-00020
-    # >>TASK-2024-00221
     columns = [
         {"fieldname": "sales_order", "label": _(
             "Sales<br>Order"), "fieldtype": "Link", "options": "Sales Order", "width": 140},
@@ -138,9 +146,8 @@ def get_columns(filters):
                 "SGB Account"), "fieldtype": "Link",  "options": "Sales Person", "width": 100},
             {"fieldname": "sales_team", "label": _(
                 "Agent"), "fieldtype": "Data", "width": 100},
-            # {"fieldname": "comments", "label" : _("Notes"), "fieldtype": "Small Text","width": 200},
-            {"fieldname": "notes", "label": _(
-                "Notes"), "fieldtype": "Small Text", "width": 200},
+            {"fieldname": "comments", "label" : _(
+                "Notes"), "fieldtype": "Small Text","width": 200}, #Use this Column for the (TASK-2024-00221)
             {"fieldname": "prepayment_invoice", "label": _(
                 "Prepayment<br>Invoice"), "fieldtype": "Data", "width": 100},
             {"fieldname": "prepayment_status", "label": _(
@@ -151,10 +158,9 @@ def get_columns(filters):
                 "Prepayment2<br>Status"), "fieldtype": "Select", "width": 100},
         ]
         # << ISS-2024-00020
-        # << TASK-2024-00221
         columns.extend(accessories_columns)
     return columns
-################################################
+
 def set_session_defaults(filters):
 
     # Get the current logged in user
@@ -281,9 +287,6 @@ def sort_output(data_table, sort_sequence):
         # Sort the data_table based on both Rating and RDG Number on 18 Jul
         return sorted(data_table, key=sort_key)
 
-
-##########################################################
-
 def get_result(filters):
     #   Get All Sales Orders
     def get_all_sales_orders(filters):
@@ -323,7 +326,7 @@ def get_result(filters):
                 "second_language",
                 "agent",
                 "owner",
-                # "comments",
+                # "comments", #<<commented this line in sales order for Note section (#TASK-2024-00221)
                 "incoterms",
                 "prepayment_invoice",
                 "prepayment_status",
@@ -343,6 +346,7 @@ def get_result(filters):
                 "`tabSales Order Item`.rate",
                 "`tabSales Order Item`.sensor_name",
                 "`tabSales Order Item`.engineering_required",
+                "`tabSales Order Item`.accessories_specification",
                 # >> ISS-2024-00018
                 "`tabSales Order Item`.silicon_free",
                 # << ISS-2024-00018
@@ -591,12 +595,20 @@ def get_result(filters):
 
     def map_accessories(item, po_item_row):
         item_master = frappe.db.get_value('Item', item.item_code, ['item_group', 'accessories_specification'], as_dict=1)
-        
-        if item_master.accessories_specification:
-            accessories_specification = item_master.accessories_specification
+
+        so_item_accessories = frappe.db.get_value('Sales Order Item', {'parent': sales_order, 'item_code': item.item_code}, 'accessories_specification')
+
+        # If accessories_specification is found in the sales order item, use it
+        if so_item_accessories:
+            accessories_specification = so_item_accessories
+
+            po_item_row[item.item_code] = accessories_specification
         else:
-            accessories_specification = "Yes" 
-            
+            if item_master.accessories_specification:
+                accessories_specification = item_master.accessories_specification
+            else:
+                accessories_specification = "Yes" 
+                        
         if item_master.item_group == 'Antivibration Pads':
             po_item_row['antivibration_pads'] = accessories_specification
         elif item_master.item_group == 'Enclosure':
@@ -682,12 +694,12 @@ def get_result(filters):
     # Get all Schedule lines for the Delivery Notes List
     la_schedule_line_list = fn_get_schedule_lines(sales_order_list)
 
-    # ISS-2024-00045
+    # ISS-2024-00045 || TASK-2024-00450
     ld_item_current = { 
         "name": '', 
         "pos": 0
     }
-    ## ISS-2024-00045
+    ## ISS-2024-00045 || TASK-2024-00450
     
     for sales_order in sales_order_list:
   
@@ -753,7 +765,7 @@ def get_result(filters):
         order_value = 0
         order_values = []
         for item in items_rev_sorted:
-            # ISS-2024-00045
+            # ISS-2024-00045 || TASK-2024-00450
 
             if ld_item_current['name'] == item['name'] and ld_item_current['pos'] == item['pos']:
                 
@@ -762,7 +774,7 @@ def get_result(filters):
                ld_item_current['name'] = item['name']
                ld_item_current['pos'] =  item['pos']
 
-            # ISS-2024-00045
+            # ISS-2024-00045 || TASK-2024-00450
             
             # Order value of a transformer is computed per set of transformer including its accessories and services
             order_value = order_value + item.rate

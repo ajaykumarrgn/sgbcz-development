@@ -1,5 +1,5 @@
-//this is from vs code "Testing"
-
+// Change Request : TASK-2024-00157
+// Set the filters to display the information based on the date
 frappe.query_reports['EBITDA Compute Cost'] = {
     "filters": [
         {

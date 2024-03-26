@@ -8,7 +8,7 @@ frappe.ui.form.on('Design', {
         * @params {xmlString} string calculated xml received from Gitra
         * @params {fileUrl} string cdn of xml-js javascript library
         */
-	    function convertXmlToJson(xmlString, fileUrl) {
+	    function convertXmlToJson(i_xmlString, l_fileUrl) {
             const OPTIONS = {
               compact: true,
               ignoreAttributes: true, //ignores attributes and nodes
@@ -16,17 +16,17 @@ frappe.ui.form.on('Design', {
             
             // create a script node in the html document
             //equivalent to <script src="https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js" type="text/javascript"></script>
-            let scriptEle = document.createElement("script");
+            let l_DOM_scriptEle = document.createElement("script");
                 
-            scriptEle.setAttribute("src", fileUrl);
-            scriptEle.setAttribute("type", "text/javascript");
+            l_DOM_scriptEle.setAttribute("src", l_fileUrl);
+            l_DOM_scriptEle.setAttribute("type", "text/javascript");
                 
-            document.body.appendChild(scriptEle);
+            document.body.appendChild(l_DOM_scriptEle);
                 
             // success event 
-            scriptEle.addEventListener("load", () => {
+            l_DOM_scriptEle.addEventListener("load", () => {
                 // Call the xml2json from the xml-js library and parse the as Json object
-                const JSONDATA = JSON.parse(xml2json(xmlString, OPTIONS));
+                const JSONDATA = JSON.parse(xml2json(i_xmlString, OPTIONS));
                 //console.log()
                 // convert to string so that it can be stored to the code field
                 frm.doc.gitra_json_downstream = JSON.stringify(JSONDATA, null, 2);
@@ -39,6 +39,7 @@ frappe.ui.form.on('Design', {
                 frm.set_value('direct_material_cost', parseFloat(JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(",", ".")));
                 
                 //>>TASK-2024-00299
+                //If a parallel coil appears in the design, add 200 to the direct material cost
                 const TGTSPULE = JSONDATA.sgb.TGtWickelzettel.TGtWickelzettelSystemeListe.TGtWickelzettelSystem[1].TGtWicklungenListe.TGtWicklung.TGtSpulenListe.TGtSpule;
                 if (TGTSPULE.length === 2) {
                     frm.set_value('direct_material_cost', (parseFloat(JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(",", ".")) + 200));
@@ -50,22 +51,22 @@ frappe.ui.form.on('Design', {
                 frm.save();
             });
             // error event
-            scriptEle.addEventListener("error", (ev) => {
+            l_DOM_scriptEle.addEventListener("error", (ev) => {
                 console.log("Error on loading file", ev);
             });
 
         }
         // CDN Url of script
-        var fileUrl = 'https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js' ;  
+        var l_fileUrl = 'https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js' ;  
         // Convert the Gitra XML to Json
         if(!frm.doc.gitra_json_downstream && frm.doc.gitra_xml_downstream) {
-            convertXmlToJson(frm.doc.gitra_xml_downstream, fileUrl);  
+            convertXmlToJson(frm.doc.gitra_xml_downstream, l_fileUrl);  
         }// Convert XML to JSON
         
         // update the last file pulled date to last changed on.        
         if(frm.doc.upstream_file && !frm.doc.last_calculated_on){
-            const datePart = frm.doc.upstream_file.split('_')[1]; // Extract the date part
-            frm.set_value('last_calculated_on',datePart );
+            const DATEPART = frm.doc.upstream_file.split('_')[1]; // Extract the date part
+            frm.set_value('last_calculated_on',DATEPART );
             // refresh changes
             frm.refresh_fields();
             // save the form
