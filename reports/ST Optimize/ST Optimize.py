@@ -4,7 +4,7 @@
 
 def get_columns(filters):
     columns = []
-    
+
     columns = [
         {"fieldname": "sales_order", "label": _(
             "Sales<br>Order"), "fieldtype": "Link", "options": "Sales Order", "width": 140},
@@ -150,41 +150,43 @@ def get_columns(filters):
             {"fieldname": "prepayment2_status", "label": _(
                 "Prepayment2<br>Status"), "fieldtype": "Select", "width": 100},
         ]
-        
+
         columns.extend(accessories_columns)
     return columns
+
 
 def set_session_defaults(filters):
 
     # Get the current logged in user
     ld_user = frappe.session.user
-    
+
     # Get the session default stored earlier for the logged in user
-    ld_user_session_default_if_exist = frappe.db.exists("User Session Defaults", ld_user)
+    ld_user_session_default_if_exist = frappe.db.exists(
+        "User Session Defaults", ld_user)
 
     # If the session data available for user
     if ld_user_session_default_if_exist:
         # Set "from date" and "to date" for the existing logging-in user
         user_session_default = frappe.get_doc("User Session Defaults", ld_user)
-        
+
         # initialize session data update as false
         update_required = False
-        
+
         # Check if there is change in the session params
         if user_session_default.from_date != filters.from_date:
             user_session_default.from_date = filters.from_date
             update_required = True
-            
+
         if user_session_default.to_date != filters.to_date:
             user_session_default.to_date = filters.to_date
             update_required = True
-        
-        # If there is a change in the session variables then update the session      
+
+        # If there is a change in the session variables then update the session
         if update_required:
             user_session_default.save(ignore_permissions=True)
             frappe.db.commit()
-            
-    # If the session data not available, then create a new session data for the user        
+
+    # If the session data not available, then create a new session data for the user
     else:
         # Insert "from date" and "to date" for the new login user
         user_session_default = frappe.get_doc({
@@ -192,20 +194,22 @@ def set_session_defaults(filters):
             'user': ld_user,
             'from_date': filters.from_date,
             'to_date': filters.to_date,
-            
+
         })
         user_session_default.insert()
         frappe.db.commit()
-        
+
     return user_session_default
-    
+
 # Re order the output columns based on the user preference
+
+
 def reorder_columns_for_user_preference(columns, user_session_default):
     # initialize
     la_reordered_columns = []
     # convert the column preference stored as string to Json array
-    ld_user_columns=json.loads(user_session_default.report_columns)
-    
+    ld_user_columns = json.loads(user_session_default.report_columns)
+
     # Reorder the output column based on the user preference
     # iterate user preference columns
     for ld_fieldname in ld_user_columns:
@@ -215,10 +219,11 @@ def reorder_columns_for_user_preference(columns, user_session_default):
             if la_item['label'] == la_fieldname:
                 la_reordered_columns.append(la_item)
 
-        
     return reordered_columns
+
+
 def get_filtered_records_for_date_type(it_data_table, filters):
-   
+
     if not filters.date_type or len(filters.months) == 0:
         return it_data_table
     else:
@@ -231,8 +236,8 @@ def get_filtered_records_for_date_type(it_data_table, filters):
         elif filters.date_type == 'Delivery Date':
             date_field = 'delivery_date'
         elif filters.date_type == 'Invoice Date':
-            date_field = 'invoice_date'    
-            
+            date_field = 'invoice_date'
+
         la_filtered_table = []
         for it_data in it_data_table:
             if (frappe.utils.formatdate(it_data[date_field], format_string="MMM") in filters.months):
@@ -240,28 +245,31 @@ def get_filtered_records_for_date_type(it_data_table, filters):
 
         return la_filtered_table
 
-## Filter invoiced and expedited records from the list
-## the condition is for the transformer that are invoiced and with status "Done - Expedited"
-## are considered to be sold items. they are no more required in open list
+# Filter invoiced and expedited records from the list
+# the condition is for the transformer that are invoiced and with status "Done - Expedited"
+# are considered to be sold items. they are no more required in open list
+
+
 def filter_invoiced_records(it_data_table, ifilters):
 
     # Initialize the array
     la_filtered_table = []
-    
+
     # Iterate the output table
     for it_data in it_data_table:
-        
+
         # if the record has invoice number then check if the status is
         # not Done - Expedited only then include in the final output
         if it_data['invoice_number']:
             if it_data['transformer_status'] != "Done - Expedited":
                 la_filtered_table.append(it_data)
         else:
-        # if there is no invoice number then include in the final output
+            # if there is no invoice number then include in the final output
             la_filtered_table.append(it_data)
 
     return la_filtered_table
-    
+
+
 def sort_output(it_data_table, it_sort_sequence):
     def sort_key(it_data_row):
         la_key = []
@@ -269,16 +277,19 @@ def sort_output(it_data_table, it_sort_sequence):
             la_value = it_data_row[it_sort.field_name]
             if it_sort.field_type == 'Int':
                 la_value = int(la_value)
-            key.append((-la_value, la_value) if it_sort.sort_order == 'Descending' else (la_value, la_value))
+            key.append((-la_value, la_value) if it_sort.sort_order ==
+                       'Descending' else (la_value, la_value))
         return la_key
-        
+
     if not it_sort_sequence:
         # Sort the data_table based on both Rating and RDG Number on 18 Jul
-        la_sorted_table = sorted(it_data_table, la_key=lambda x: (int(x['power']), x['rdg_number']))
+        la_sorted_table = sorted(it_data_table, la_key=lambda x: (
+            int(x['power']), x['rdg_number']))
         return la_sorted_table
     else:
         # Sort the data_table based on both Rating and RDG Number on 18 Jul
         return sorted(it_data_table, la_key=sort_key)
+
 
 def get_result(filters):
     #   Get All Sales Orders
@@ -291,9 +302,9 @@ def get_result(filters):
                             WHERE po_date BETWEEN %(from_date)s AND %(to_date)s
                             AND docstatus != 2
                             """,
-                            {"to_date": filters['to_date'],
+                               {"to_date": filters['to_date'],
                                 "from_date": filters['from_date']},
-                            as_dict=1)
+                               as_dict=1)
         # >> ISS-2024-00002
         # Get the Unique Sales order for the obtained Sales Order List
         la_so_unique = get_unique(ld_sos, 'name')
@@ -328,8 +339,8 @@ def get_result(filters):
                 "po_no",
                 "po_date",
                 "company_guarantee",
-                #Commented for the change request for moving reservation from sales order to delivery note (#TASK-2024-00155) 
-                #"is_reservation",
+                # Commented for the change request for moving reservation from sales order to delivery note (#TASK-2024-00155)
+                # "is_reservation",
                 "`tabSales Order Item`.item_code",
                 "`tabSales Order Item`.qty",
                 "`tabSales Order Item`.pos",
@@ -378,59 +389,91 @@ def get_result(filters):
 
 #   The function gets the attributes of the given items in sales order items table
 #   it_sales_order_list is an array of sales orde
-    def get_item_attributes(it_sales_order_list):
+    def get_item_attributes_and_accessory_specification(it_sales_order_list):
 
         la_unique_transformer_items = get_unique_transformer_items(
             it_sales_order_list, 'item_code')
-        filters = filters = {
+
+        la_unique_accessory_items = get_unique_accessory_items(
+            it_sales_order_list, 'item_code')
+        
+        
+
+        ld_attributes_filter = {
             'parent': ('IN', la_unique_transformer_items),
         }
-        ld_item_attributes = frappe.get_all('Item Variant Attribute', fields=[
-                                         'attribute', 'attribute_value', 'parent'], filters=filters)
-        ld_item_attributes_sorted = sorted(
-            ld_item_attributes, key=lambda x: x['parent'])
-        return ld_item_attributes_sorted
+
+        ld_items_filter = {
+            "item_code": ('IN', la_unique_accessory_items)
+        }
+        ld_item_attributes = frappe.get_all(
+            'Item Variant Attribute',
+            fields=['attribute', 'attribute_value', 'parent'],
+            filters=ld_attributes_filter,
+            order_by='parent')
+
+        # commenting as order_by is used in the above api call
+        # ld_item_attributes_sorted = sorted(
+        #     ld_item_attributes, key=lambda x: x['parent'])
+
+        la_item_accessories = frappe.get_all(
+            "Item",
+            fields=["item_code", "item_group", "accessories_specification"],
+            filters=ld_items_filter,
+            order_by='item_code'
+        )
+        
+        return ld_item_attributes, la_item_accessories
 
 # End of function  get_item_attributes
+
 
 #   Get Unique Transformer items from the sales order items
 #   The record with pos in multiples of 10 are Transformer Items
 #   it_table[] sales order items
 #   i_key key to look for
+
     def get_unique_transformer_items(it_table, i_key):
-        la_unique = list(set([d[i_key] for d in it_table if d['pos'] % 10 == 0]))
+        la_unique = list(set([d[i_key]
+                         for d in it_table if d['pos'] % 10 == 0]))
         return la_unique
 
-# This function is to get the schedule lines corresponding to the delivery notes 
-    def fn_get_schedule_lines(i_sales_order_list): 
-        pos = [10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190] 
-        la_delivery_schedules = frappe.get_all( 'Delivery Note', 
-                                               fields=( '`tabDelivery Note Item`.parent', 
-                                                       '`tabDelivery Note Item`.against_sales_order', 
-                                                       '`tabDelivery Schedule`.name', 
+    def get_unique_accessory_items(it_table, i_key):
+        la_unique = list(set([d[i_key]
+                         for d in it_table if d['pos'] % 10 != 0]))
+        return la_unique
+
+# This function is to get the schedule lines corresponding to the delivery notes
+    def fn_get_schedule_lines(i_sales_order_list):
+        pos = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100,
+               110, 120, 130, 140, 150, 160, 170, 180, 190]
+        la_delivery_schedules = frappe.get_all('Delivery Note',
+                                               fields=('`tabDelivery Note Item`.parent',
+                                                       '`tabDelivery Note Item`.against_sales_order',
+                                                       '`tabDelivery Schedule`.name',
                                                        '`tabDelivery Schedule`.pos',
-                                                       '`tabDelivery Schedule`.serial_number', 
-                                                       '`tabDelivery Schedule`.delivery_date', 
-                                                       '`tabDelivery Schedule`.status', 
-                                                       '`tabDelivery Schedule`.oa_confirmed_date', 
-                                                       '`tabDelivery Schedule`.production_end_date', 
-                                                       '`tabDelivery Schedule`.planned_production_end_date', 
-                                                       '`tabDelivery Schedule`.invoice_number', 
-                                                       '`tabDelivery Schedule`.invoice_date', 
-                                                       '`tabDelivery Schedule`.storage_fee', 
-                                                       '`tabDelivery Schedule`.gta_serial_number', 
-                                                       '`tabDelivery Schedule`.on_time_delivery', 
+                                                       '`tabDelivery Schedule`.serial_number',
+                                                       '`tabDelivery Schedule`.delivery_date',
+                                                       '`tabDelivery Schedule`.status',
+                                                       '`tabDelivery Schedule`.oa_confirmed_date',
+                                                       '`tabDelivery Schedule`.production_end_date',
+                                                       '`tabDelivery Schedule`.planned_production_end_date',
+                                                       '`tabDelivery Schedule`.invoice_number',
+                                                       '`tabDelivery Schedule`.invoice_date',
+                                                       '`tabDelivery Schedule`.storage_fee',
+                                                       '`tabDelivery Schedule`.gta_serial_number',
+                                                       '`tabDelivery Schedule`.on_time_delivery',
                                                        '`tabDelivery Schedule`.notes',
-                                                       #>>TASK-2024-00155
-                                                        '`tabDelivery Note`.is_reservation'), 
-                                                       #<<TASK-2024-00155 
-                                                       filters= {
-                                                           "against_sales_order": ("IN", i_sales_order_list), 
-                                                           'pos': ("IN", pos), 
-                                                           'docstatus': 1,} , 
-                                                           distinct=True,
-                                                           order_by='customer_name' 
-                                                           )
+                                                       # >>TASK-2024-00155
+                                                       '`tabDelivery Note`.is_reservation'),
+                                               # <<TASK-2024-00155
+                                               filters={
+                                                   "against_sales_order": ("IN", i_sales_order_list),
+                                                   'pos': ("IN", pos),
+                                                   'docstatus': 1, },
+                                               distinct=True,
+                                               order_by='customer_name'
+                                               )
         return la_delivery_schedules
 
     def binary_search_leftmost(i_sorted_list, i_key, i_search_key):
@@ -441,7 +484,7 @@ def get_result(filters):
         while low <= high:
             mid = (low + high) // 2
             mid_dict = i_sorted_list[mid]
-        
+
             if mid_dict[i_key] < i_search_key:
                 low = mid + 1
             elif mid_dict[i_key] > i_search_key:
@@ -451,10 +494,10 @@ def get_result(filters):
                 high = mid - 1  # Move towards left for leftmost occurrence
         return result
 
-## finding a record from the dictionary array
-## it_dict_array is a dictionary array
-## i_key the key to searched for
-## i_value the value to searched for
+# finding a record from the dictionary array
+# it_dict_array is a dictionary array
+# i_key the key to searched for
+# i_value the value to searched for
     def find_dict_with_keys(it_dict_array, i_key, i_value):
 
         # Iterate the array
@@ -465,21 +508,24 @@ def get_result(filters):
 
     def get_sales_team_text(sales_team):
         # Combine the list of Sales Persons in Sales Team by using Commas. Done on 18 Jul
-        sales_team_text = ", ".join(sales_person.sales_person for sales_person in sales_team if sales_person.sales_person is not None)
+        sales_team_text = ", ".join(
+            sales_person.sales_person for sales_person in sales_team if sales_person.sales_person is not None)
         return sales_team_text
-    
-    #   Map Item attributes        
+
+    #   Map Item attributes
+    #   The below method uses parallel cursor concept
     def map_item_attribute(item_attributes, po_item_row, i_index):
         for attribute in item_attributes[i_index:]:
-            # Filter only the respective Item code        
-            if attribute.parent != po_item_row['item_code']: # << ISS-2024-00002 <<
+            # Filter only the respective Item code
+            # << ISS-2024-00002 <<
+            if attribute.parent != po_item_row['item_code']:
                 break
-            
+
             if attribute.attribute == 'Power (kVA)':
                 po_item_row['power'] = attribute.attribute_value
             elif attribute.attribute == 'HV (kV)':
                 po_item_row['hv'] = attribute.attribute_value
-                    #po_item_row['hv'] = attribute.attribute_value.replace('.', ',')
+                # po_item_row['hv'] = attribute.attribute_value.replace('.', ',')
             elif attribute.attribute == 'LV (V)':
                 po_item_row['lv'] = attribute.attribute_value
             elif attribute.attribute == 'Vector Group':
@@ -502,24 +548,25 @@ def get_result(filters):
                 po_item_row['hv1'] = attribute.attribute_value
             elif attribute.attribute == 'HV 2 (kV)':
                 po_item_row['hv2'] = attribute.attribute_value
-        
-        # Return the Item row    
+
+        # Return the Item row
         return po_item_row
-    
+
     def clear_item_row_values(item_row):
         # Initialize Item fields
         item_row['pos'] = 0
         item_row['item_code'] = item_row['id_number'] = item_row['rdg_number'] = item_row['item_group'] = ''
         item_row['power'] = item_row['hv'] = item_row['lv'] = item_row['vector_group'] = item_row['uk'] = ''
         item_row['thdi'] = item_row['ip_protection'] = item_row['electrostatic_screen'] = item_row['hv1'] = item_row['hv2'] = ''
-        item_row['tappings']= '+ - 2 * 2,5%'
-        item_row['no_load_loss']= item_row['load_loss'] = item_row['li'] = ''
-        #item_row['po_no']: sales_order_header.po_no, 'po_date': sales_order_header.po_date,
+        item_row['tappings'] = '+ - 2 * 2,5%'
+        item_row['no_load_loss'] = item_row['load_loss'] = item_row['li'] = ''
+        # item_row['po_no']: sales_order_header.po_no, 'po_date': sales_order_header.po_date,
         item_row['serial_number'] = item_row['delivery_date'] = item_row['transformer_status'] = ''
-        #item_row['company_guarantee': sales_order_header.company_guarantee,
-        item_row['oa_confirmed_date'] = item_row['planned_production_end_date'] = item_row['planned_week'] = item_row['order_value'] = item_row['price_gts'] = item_row['storage_row'] = item_row['gta_serial_number'] = ''
-        # Order value table 
-        #'order_values': [],
+        # item_row['company_guarantee': sales_order_header.company_guarantee,
+        item_row['oa_confirmed_date'] = item_row['planned_production_end_date'] = item_row['planned_week'] = item_row[
+            'order_value'] = item_row['price_gts'] = item_row['storage_row'] = item_row['gta_serial_number'] = ''
+        # Order value table
+        # 'order_values': [],
         # Initialize Accessories status
         item_row['antivibration_pads'] = item_row['enclosure'] = item_row['ballpoint'] = item_row['cupal'] = item_row['busbars'] = " "
         item_row['fans'] = item_row['control_unit'] = item_row['forklift'] = item_row['surge_arrester'] = item_row['earthing_switch'] = " "
@@ -528,58 +575,61 @@ def get_result(filters):
         item_row['test_lab_qty'] = 0
         item_row['others2'] = item_row['others2_qty'] = " "
         return item_row
-    
-    def add_delivery_schedule(i_sales_order, i_pos, item_row, ifilters, i_delivery_schedules): 
-        la_schedule_table = [] 
-        ld_schedule_lines = fn_find_rows_by_key_value(i_delivery_schedules, "against_sales_order", i_sales_order)
-        
-        for index, ld_schedule_line in enumerate(ld_schedule_lines): 
-            if ld_schedule_line.pos == i_pos: 
-                ld_schedule_line_row = {} 
-                # Initialize the work area 
-                ld_schedule_line_row = dict(item_row) 
-                # Fill order value 
-                try: 
-                    ld_schedule_line_row['order_value'] = item_row['order_values'][index] 
-                except IndexError: 
-                    ld_schedule_line_row['order_value'] = 0 
-                #log(schedule_line) 
-                ld_schedule_line_row['delivery_note'] = ld_schedule_line.parent 
-                ld_schedule_line_row['serial_number'] = ld_schedule_line.serial_number 
-                ld_schedule_line_row['delivery_date'] = ld_schedule_line.delivery_date 
-                ld_schedule_line_row['transformer_status'] = ld_schedule_line.status 
-                ld_schedule_line_row['oa_confirmed_date'] = ld_schedule_line.oa_confirmed_date 
-                ld_schedule_line_row['planned_production_end_date'] = ld_schedule_line.planned_production_end_date 
-                ld_schedule_line_row['production_end_date'] = ld_schedule_line.production_end_date 
-                ld_schedule_line_row['invoice_number'] = ld_schedule_line.invoice_number 
-                ld_schedule_line_row['invoice_date'] = ld_schedule_line.invoice_date 
-                #>>TASK-2024-00155
+
+    def add_delivery_schedule(i_sales_order, i_pos, item_row, ifilters, i_delivery_schedules):
+        la_schedule_table = []
+        ld_schedule_lines = fn_find_rows_by_key_value(
+            i_delivery_schedules, "against_sales_order", i_sales_order)
+
+        for index, ld_schedule_line in enumerate(ld_schedule_lines):
+            if ld_schedule_line.pos == i_pos:
+                ld_schedule_line_row = {}
+                # Initialize the work area
+                ld_schedule_line_row = dict(item_row)
+                # Fill order value
+                try:
+                    ld_schedule_line_row['order_value'] = item_row['order_values'][index]
+                except IndexError:
+                    ld_schedule_line_row['order_value'] = 0
+                # log(schedule_line)
+                ld_schedule_line_row['delivery_note'] = ld_schedule_line.parent
+                ld_schedule_line_row['serial_number'] = ld_schedule_line.serial_number
+                ld_schedule_line_row['delivery_date'] = ld_schedule_line.delivery_date
+                ld_schedule_line_row['transformer_status'] = ld_schedule_line.status
+                ld_schedule_line_row['oa_confirmed_date'] = ld_schedule_line.oa_confirmed_date
+                ld_schedule_line_row['planned_production_end_date'] = ld_schedule_line.planned_production_end_date
+                ld_schedule_line_row['production_end_date'] = ld_schedule_line.production_end_date
+                ld_schedule_line_row['invoice_number'] = ld_schedule_line.invoice_number
+                ld_schedule_line_row['invoice_date'] = ld_schedule_line.invoice_date
+                # >>TASK-2024-00155
                 ld_schedule_line_row['is_reservation'] = "Yes" if ld_schedule_line.is_reservation == 1 else " "
-                #<<TASK-2024-00155
-                # >> TASK-2024-00221 
-                ld_schedule_line_row['notes'] = ld_schedule_line.notes 
-                # << TASK-2024-00221 
-                #schedule_line_row['storage_fee'] = schedule_line.storage_fee 
-                ld_schedule_line_row['storage_fee'] = '' if ld_schedule_line.storage_fee == "NO" else (ld_schedule_line.storage_fee) 
-                # Check if planned_production_end_date is not None before accessing its attributes 
-                if ld_schedule_line.planned_production_end_date: 
-                    l_planned_week = ld_schedule_line.planned_production_end_date.isocalendar()[1] 
-                    ld_schedule_line_row['planned_week'] = l_planned_week 
-                else: 
-                    # Handle the case when planned_production_end_date is None 
-                    ld_schedule_line_row['planned_week'] = None 
-                ld_schedule_line_row['gta_serial_number'] = ld_schedule_line.gta_serial_number 
-                ld_schedule_line_row['on_time_delivery'] = ld_schedule_line.on_time_delivery 
-                # Tests are generally performed for 1 transformer. The quantity is always lesser than parent 
-                # The qty of tests are captured in the map_accessories function 
-                # If the parent qty(schedule line count) is more than tests qty then do not include in the respective line 
-                if ld_schedule_line_row['test_lab'] != ' ' and int(ld_schedule_line_row['test_lab_qty']) < (index + 1): 
-                    ld_schedule_line_row['test_lab'] = ' ' 
-                
-                #if ld_schedule_line_row['invoice_number']:
-                    #if schedule_line_row['transformer_status'] != "Done - Expedited":
-                        #schedule_table.append(schedule_line_row)
-                #else:
+                # <<TASK-2024-00155
+                # >> TASK-2024-00221
+                ld_schedule_line_row['notes'] = ld_schedule_line.notes
+                # << TASK-2024-00221
+                # schedule_line_row['storage_fee'] = schedule_line.storage_fee
+                ld_schedule_line_row['storage_fee'] = '' if ld_schedule_line.storage_fee == "NO" else (
+                    ld_schedule_line.storage_fee)
+                # Check if planned_production_end_date is not None before accessing its attributes
+                if ld_schedule_line.planned_production_end_date:
+                    l_planned_week = ld_schedule_line.planned_production_end_date.isocalendar()[
+                        1]
+                    ld_schedule_line_row['planned_week'] = l_planned_week
+                else:
+                    # Handle the case when planned_production_end_date is None
+                    ld_schedule_line_row['planned_week'] = None
+                ld_schedule_line_row['gta_serial_number'] = ld_schedule_line.gta_serial_number
+                ld_schedule_line_row['on_time_delivery'] = ld_schedule_line.on_time_delivery
+                # Tests are generally performed for 1 transformer. The quantity is always lesser than parent
+                # The qty of tests are captured in the map_accessories function
+                # If the parent qty(schedule line count) is more than tests qty then do not include in the respective line
+                if ld_schedule_line_row['test_lab'] != ' ' and int(ld_schedule_line_row['test_lab_qty']) < (index + 1):
+                    ld_schedule_line_row['test_lab'] = ' '
+
+                # if ld_schedule_line_row['invoice_number']:
+                    # if schedule_line_row['transformer_status'] != "Done - Expedited":
+                    # schedule_table.append(schedule_line_row)
+                # else:
                 la_schedule_table.append(ld_schedule_line_row)
         return la_schedule_table
 
@@ -587,14 +637,19 @@ def get_result(filters):
 #   In general if an accessory is found then display the quantity in braces in the output of the report
 #   Few accessories need prefix - refer to individual accessories section for the prefix logic
 
-    def map_accessories(item, po_item_row):
-        ld_item_master = frappe.db.get_value('Item', item.item_code, ['item_group', 'accessories_specification'], as_dict=1)
-        
+    def map_accessories(item, po_item_row, ima_items):
+        # ld_item_master = frappe.db.get_value('Item', item.item_code, ['item_group', 'accessories_specification'], as_dict=1)
+     
+        l_index = binary_search_leftmost(
+            ima_items, 'item_code', item.item_code)
+
+        ld_item_master = ima_items[l_index]
+
         if ld_item_master.accessories_specification:
             accessories_specification = ld_item_master.accessories_specification
         else:
-            accessories_specification = "Yes" 
-            
+            accessories_specification = "Yes"
+
         if ld_item_master.item_group == 'Antivibration Pads':
             po_item_row['antivibration_pads'] = accessories_specification
         elif ld_item_master.item_group == 'Enclosure':
@@ -603,60 +658,64 @@ def get_result(filters):
             po_item_row['ballpoint'] = accessories_specification
         elif ld_item_master.item_group == 'CUPAL':
             po_item_row['cupal'] = accessories_specification
-            
+
         # >>ISS-2024-00012
-        # In general, it should display a single control unit for the specific sales order; however, it currently displays two control units. 
+        # In general, it should display a single control unit for the specific sales order; however, it currently displays two control units.
         # After the changes, it should correctly reflect the two control units for the specific sales order.
         elif ld_item_master.item_group == 'Control Unit':
-            #po_item_row['control_unit'] = accessories_specification
-            #po_item_row['control_unit'] = (po_item_row['control_unit'] + ', ' if po_item_row['control_unit'] != ' ' else '')  + item.item_code
+            # po_item_row['control_unit'] = accessories_specification
+            # po_item_row['control_unit'] = (po_item_row['control_unit'] + ', ' if po_item_row['control_unit'] != ' ' else '')  + item.item_code
             if po_item_row['control_unit'] != ' ':
-            # Append a comma before adding the new accessories_specification
+                # Append a comma before adding the new accessories_specification
                 po_item_row['control_unit'] = po_item_row['control_unit'] + ', '
             # Append the current accessories_specification to 'control_unit'
-            po_item_row['control_unit'] = po_item_row['control_unit'] + accessories_specification
-            
-        #<< ISS-2024-00012    
-        # For service item like tests concatenate services into single line     
+            po_item_row['control_unit'] = po_item_row['control_unit'] + \
+                accessories_specification
+
+        # << ISS-2024-00012
+        # For service item like tests concatenate services into single line
         elif ld_item_master.item_group == 'Services':
             # test_lab is defaulted to ' '. So for first time concatenate '' with item code
-            po_item_row['test_lab'] = (po_item_row['test_lab'] + ', ' if po_item_row['test_lab'] != ' ' else '')  + item.item_code
-            
-            # This step is required for Tests alone. Tests will generally have one quantity or less than the 
+            po_item_row['test_lab'] = (
+                po_item_row['test_lab'] + ', ' if po_item_row['test_lab'] != ' ' else '') + item.item_code
+
+            # This step is required for Tests alone. Tests will generally have one quantity or less than the
             # main transformer
             po_item_row['test_lab_qty'] = item.qty
-            
+
         elif ld_item_master.item_group == 'Others 2':
             # others2 is defaulted to ' '. So for first time concatenate '' with item code
-            po_item_row['others2'] = (po_item_row['others2'] + ', ' if po_item_row['others2'] != ' ' else '')  + item.item_code
-            
-            # This step is required for Tests alone. Tests will generally have one quantity or less than the 
+            po_item_row['others2'] = (
+                po_item_row['others2'] + ', ' if po_item_row['others2'] != ' ' else '') + item.item_code
+
+            # This step is required for Tests alone. Tests will generally have one quantity or less than the
             # main transformer
             po_item_row['others2_qty'] = item.qty
-            
+
         elif ld_item_master.item_group == 'Others':
             if (item.item_code.startswith("Fan")):
-                po_item_row['fans'] = "Yes" 
-                        
+                po_item_row['fans'] = "Yes"
+
             elif (item.item_code.startswith("Forklift")):
                 po_item_row['forklift'] = "Yes"
-            
+
             elif (item.item_code.startswith("Earthing switch")):
                 po_item_row['earthing_switch'] = accessories_specification
-                
+
             elif (item.item_code.startswith("Surge arrester")):
                 po_item_row['surge_arrester'] = accessories_specification
             elif (item.item_code.startswith("Extended")):
                 po_item_row['busbars'] = accessories_specification
-            
+
         return po_item_row
 
-    def fn_find_rows_by_key_value(i_dict_array, key, value): 
-        rows = [] 
-        for row in i_dict_array: 
-            if row.get(key) == value: rows.append(row) 
+    def fn_find_rows_by_key_value(i_dict_array, key, value):
+        rows = []
+        for row in i_dict_array:
+            if row.get(key) == value:
+                rows.append(row)
         return rows
-    
+
     table = []
 #   Do not proceed if sales order filter is not set
     if not filters.from_date:
@@ -675,96 +734,100 @@ def get_result(filters):
     ld_customer_list = get_customer_details(ld_sos_details)
 
     # Get the attributes of all the items
-    ld_item_attributes_list = get_item_attributes(ld_sos_details)
+    la_items = get_item_attributes_and_accessory_specification(ld_sos_details)
+    ld_item_attributes_list = la_items[0]
+
+    ld_item_accessory_specification = la_items[1]
 
     # Get all Schedule lines for the Delivery Notes List
     la_schedule_line_list = fn_get_schedule_lines(ld_sales_order_list)
 
-
     for ld_sales_order in ld_sales_order_list:
         # Filter the records for the current Sales Order number
-        ld_sales_order_items = [item for item in ld_sos_details if item['name'] == ld_sales_order]
-        
+        ld_sales_order_items = [
+            item for item in ld_sos_details if item['name'] == ld_sales_order]
+
         ld_sales_order_header = ld_sales_order_items[0]
-        
+
         # Get the corresponding customer details for the customer in the Sales Order
-        ld_customer_data = find_dict_with_keys(ld_customer_list, 'name', ld_sales_order_header.customer) 
+        ld_customer_data = find_dict_with_keys(
+            ld_customer_list, 'name', ld_sales_order_header.customer)
 
         la_payment_schedule = [ld_sales_order_header]
-        
+
         # Get the Sales Persons from sales team in sales order on 18 Jul
         la_sales_team = [ld_sales_order_header]
 
-        # Fill sales order header details        
-        po_item_row =dict({ # Fill Detail from Sales Order header
-                                'sales_order': ld_sales_order_header.name, 'customer': ld_sales_order_header.customer, 'incoterms': ld_sales_order_header.incoterms,
-                            
-                                'customer_group': ld_customer_data.customer_group, 'territory': ld_sales_order_header.territory, 
-                                #Commented for the change request in sales order level (#TASK-2024-00155)
-                                #'is_reservation': "Yes" if sales_order_header.is_reservation == 1 else " ",
-                                'documentation_language': ((ld_sales_order_header.documentation_language) if ld_sales_order_header.documentation_language else ""
-                                    ) + (", " + ld_sales_order_header.second_language if ld_sales_order_header.second_language else ""),
+        # Fill sales order header details
+        po_item_row = dict({  # Fill Detail from Sales Order header
+            'sales_order': ld_sales_order_header.name, 'customer': ld_sales_order_header.customer, 'incoterms': ld_sales_order_header.incoterms,
+
+            'customer_group': ld_customer_data.customer_group, 'territory': ld_sales_order_header.territory,
+            # Commented for the change request in sales order level (#TASK-2024-00155)
+            # 'is_reservation': "Yes" if sales_order_header.is_reservation == 1 else " ",
+            'documentation_language': ((ld_sales_order_header.documentation_language) if ld_sales_order_header.documentation_language else ""
+                                       ) + (", " + ld_sales_order_header.second_language if ld_sales_order_header.second_language else ""),
 
 
 
-                                #Fill the Sales Persons name on 18 Jul 
-                                'la_sales_team': get_sales_team_text(la_sales_team),
-                                'agent': (ld_sales_order_header.agent if ld_sales_order_header.agent else ld_sales_order_header.owner),
-                                #>> Commented this line for moving note section from here to delivery schedule(TASK-2024-00221)
-                                #'comments': sales_order_header.comments, 
-                                # << TASK-2024-00221
-                                'prepayment_invoice': ld_sales_order_header.prepayment_invoice, 'prepayment_status': ld_sales_order_header.prepayment_status,
-                                'prepayment_invoice2': ld_sales_order_header.prepayment_invoice2, 'prepayment2_status': ld_sales_order_header.prepayment2_status,
-                                # If invoice portion is 100% then prepayment is Rejected
-                                'payment_condition': (
-                                    'Rejected'    
-                                    if la_payment_schedule[0].invoice_portion == 100 
-                                    else (str(int(la_payment_schedule[0].invoice_portion)) + "%")
-                                    ),
-                                
-                                # Initialize Item fields
-                                'item_code': '','pos': 0,'id_number': '', 'rdg_number': '', "item_group": '', 
-                                'power': '', 'hv': '', 'lv': '', 'vector_group': '', 'uk': '', 
-                                'tappings': '+ - 2 * 2,5%', 'no_load_loss': '', 'load_loss': '', 'li': '',
-                                'po_no': ld_sales_order_header.po_no, 'po_date': ld_sales_order_header.po_date,
-                                'serial_number': '', 'delivery_date': '', 'transformer_status': '',
-                                'company_guarantee': ld_sales_order_header.company_guarantee,
-                                'oa_confirmed_date': '', 'planned_production_end_date': '', 'planned_week': '', 'storage_fee': '', 'order_value':'', 'price_gts': '', 'gta_serial_number': '',
-                                # Order value table 
-                                'order_values': [],
-                                # Initialize Accessories status
-                                'antivibration_pads': " ", 'enclosure': " ", 'ballpoint': " ", 'cupal': " ", 'busbars': " ",
-                                'fans': " ", 'control_unit': " ", 'sensors': '', 'forklift': " ",
-                                'silicon_free': " ", 'test_lab': " ", 'test_lab_qty': 0, 'others2': " ", 'others2_qty': 0, 'engineering_required': " ", 'earthing_switch': " ", 'surge_arrester': " ", 
-                                })
+            # Fill the Sales Persons name on 18 Jul
+            'la_sales_team': get_sales_team_text(la_sales_team),
+            'agent': (ld_sales_order_header.agent if ld_sales_order_header.agent else ld_sales_order_header.owner),
+            # >> Commented this line for moving note section from here to delivery schedule(TASK-2024-00221)
+            # 'comments': sales_order_header.comments,
+            # << TASK-2024-00221
+            'prepayment_invoice': ld_sales_order_header.prepayment_invoice, 'prepayment_status': ld_sales_order_header.prepayment_status,
+            'prepayment_invoice2': ld_sales_order_header.prepayment_invoice2, 'prepayment2_status': ld_sales_order_header.prepayment2_status,
+            # If invoice portion is 100% then prepayment is Rejected
+            'payment_condition': (
+                'Rejected'
+                if la_payment_schedule[0].invoice_portion == 100
+                else (str(int(la_payment_schedule[0].invoice_portion)) + "%")
+            ),
+
+            # Initialize Item fields
+            'item_code': '', 'pos': 0, 'id_number': '', 'rdg_number': '', "item_group": '',
+            'power': '', 'hv': '', 'lv': '', 'vector_group': '', 'uk': '',
+            'tappings': '+ - 2 * 2,5%', 'no_load_loss': '', 'load_loss': '', 'li': '',
+            'po_no': ld_sales_order_header.po_no, 'po_date': ld_sales_order_header.po_date,
+            'serial_number': '', 'delivery_date': '', 'transformer_status': '',
+            'company_guarantee': ld_sales_order_header.company_guarantee,
+            'oa_confirmed_date': '', 'planned_production_end_date': '', 'planned_week': '', 'storage_fee': '', 'order_value': '', 'price_gts': '', 'gta_serial_number': '',
+            # Order value table
+            'order_values': [],
+            # Initialize Accessories status
+            'antivibration_pads': " ", 'enclosure': " ", 'ballpoint': " ", 'cupal': " ", 'busbars': " ",
+            'fans': " ", 'control_unit': " ", 'sensors': '', 'forklift': " ",
+            'silicon_free': " ", 'test_lab': " ", 'test_lab_qty': 0, 'others2': " ", 'others2_qty': 0, 'engineering_required': " ", 'earthing_switch': " ", 'surge_arrester': " ",
+        })
     #   Fill the Final Output
     #   Important step. Sort in reverse pos order to fill the details of accessories
-        ld_items_rev_sorted = sorted(ld_sales_order_items, key=lambda x: x['pos'], reverse=1)
+        ld_items_rev_sorted = sorted(
+            ld_sales_order_items, key=lambda x: x['pos'], reverse=1)
         la_delivery_items = []
         l_order_value = 0
         l_order_values = []
         for ld_item in ld_items_rev_sorted:
-        
-            
+
             # Order value of a transformer is computed per set of transformer including its accessories and services
             l_order_value = l_order_value + ld_item.rate
-            
+
             # Little complex logic converted to simple one
             # Transformer set price is computed as transformer base price + 1 set of all accessories and services
             # eg DTTHZ2N 2000/20/6/95 2 PC, Enclosure 2000/IP31/CM 2 PC and Temperature rise test 1 PC
             # then price of 1 set of transformer will be (DTTHZ2N 2000/20/6/95 1 PC + Enclosure 2000/IP31/CM 1 PC +
             # Temperature rise test 1 PC) and  (DTTHZ2N 2000/20/6/95 1 PC + Enclosure 2000/IP31/CM 1 PC)
             # as tempearature rise test is not considered for second transformer
-            
+
             # Create an order value array for the quanity times the item
             # eg Enclosure 2000/IP31/CM 2 PC order value array will two items with unit price of the item
 
             # The flow goes like this.
             # Order values will get cleard for evey Transformer item(items with mod 10s)
-            # First Accessories per transformer will be totaled 
-            # for POS 10 DTTHZ2N 2000/20/6/95 2 PC $300, POS 10.1 Enclosure 2000/IP31/CM 2 PC $150 
+            # First Accessories per transformer will be totaled
+            # for POS 10 DTTHZ2N 2000/20/6/95 2 PC $300, POS 10.1 Enclosure 2000/IP31/CM 2 PC $150
             # and POS 10.2 Temperature rise test 1 PC $100
-            # Loop for the quantity times the item eg Temperature rise test 1 here 1 times. 
+            # Loop for the quantity times the item eg Temperature rise test 1 here 1 times.
             # Output order_values = [100]
             # Next Loop 2 times for Enclosure 2000/IP31/CM
             # Output order_values = [250,150]
@@ -772,71 +835,80 @@ def get_result(filters):
             # Output order_values = [550,450]
             # the output array will be formed like
             # [(100 + 150 + 300),(150+300)]
-            
-            for ld_setid in range (0, int(ld_item.qty)):
+
+            for ld_setid in range(0, int(ld_item.qty)):
                 if ld_setid < len(l_order_values):
-                    l_order_values[ld_setid] = l_order_values[ld_setid] + ld_item.rate
+                    l_order_values[ld_setid] = l_order_values[ld_setid] + \
+                        ld_item.rate
                 else:
                     l_order_values.append(ld_item.rate)
-                    
-    #       Only get the Main items. Ignore accessories and services    
+
+    #       Only get the Main items. Ignore accessories and services
             if (ld_item.pos % 10 == 0):
-                
+
                 # Build the basic price for individual transformer
-                po_item_row['order_values']  =  l_order_values
-                
+                po_item_row['order_values'] = l_order_values
+
                 # Clear order values
                 l_order_values = []
-                
+
                 po_item_row['pos'] = ld_item.pos
                 po_item_row['item_code'] = ld_item.item_code
-                
+
                 # Introduce empty value if rdg_number is not present. Used during the sort
                 # Otherwise sort will throw error
-                po_item_row['rdg_number'] = (ld_item.rdg_number if ld_item.rdg_number else '')
-                
+                po_item_row['rdg_number'] = (
+                    ld_item.rdg_number if ld_item.rdg_number else '')
+
                 po_item_row['sap_reference'] = ld_item.sap_reference
                 po_item_row['id_number'] = ld_item.id_number
                 po_item_row['item_group'] = ld_item.item_group
                 po_item_row['price_gts'] = ld_item.rate
-                po_item_row['engineering_required'] = '' if ld_item.engineering_required == "No" else str(ld_item.engineering_required)
-                #po_item_row['silicon_free'] = (ld_item.silicon_free if ld_item.silicon_free else '')
-                po_item_row['silicon_free'] = '' if ld_item.silicon_free == "No" else str(ld_item.silicon_free)
+                po_item_row['engineering_required'] = '' if ld_item.engineering_required == "No" else str(
+                    ld_item.engineering_required)
+                # po_item_row['silicon_free'] = (ld_item.silicon_free if ld_item.silicon_free else '')
+                po_item_row['silicon_free'] = '' if ld_item.silicon_free == "No" else str(
+                    ld_item.silicon_free)
 
                 # Sensor name from transformer items table
                 if ld_item.sensor_name:
                     po_item_row['sensors'] = ld_item.sensor_name
-                
+
         #       Order value is the sum of 1 set of transformers with accessoaries
         #       Clear the order value for each Main item after filling it
-                #po_item_row['order_value'] = order_value
+                # po_item_row['order_value'] = order_value
                 l_order_value = 0
 
-                l_index = binary_search_leftmost(ld_item_attributes_list, 'parent', po_item_row['item_code'])
+                l_index = binary_search_leftmost(
+                    ld_item_attributes_list, 'parent', po_item_row['item_code'])
         #       Filter Fill the Item Attributes from the List of Item and its attributes
-                po_item_row = map_item_attribute(ld_item_attributes_list, po_item_row, l_index)
+                po_item_row = map_item_attribute(
+                    ld_item_attributes_list, po_item_row, l_index)
 
-        #       Add delivery schedule 
-                la_delivery_items.extend(add_delivery_schedule(ld_sales_order_header.name, ld_item.pos, po_item_row, filters, la_schedule_line_list))
-                
+        #       Add delivery schedule
+                la_delivery_items.extend(add_delivery_schedule(
+                    ld_sales_order_header.name, ld_item.pos, po_item_row, filters, la_schedule_line_list))
+
         #       Initialize the Item fields
                 po_item_row = clear_item_row_values(po_item_row)
 
             else:
-                po_item_row = map_accessories(ld_item, po_item_row)
-        
+                # po_item_row = map_accessories(ld_item, po_item_row)
+                po_item_row = map_accessories(
+                    ld_item, po_item_row, ld_item_accessory_specification)
+
     #   Sort the table back with pos and append it to output table
-        table.extend(sorted(la_delivery_items, key=lambda x: x['pos'])) 
+        table.extend(sorted(la_delivery_items, key=lambda x: x['pos']))
     return table
 
 
-#data = []
-#data_table = get_result(filters)
-#columns = get_columns(filters)
-#data = columns, data_table
+# data = []
+# data_table = get_result(filters)
+# columns = get_columns(filters)
+# data = columns, data_table
 
 
-# Begin of execute    
+# Begin of execute
 data = []
 user_session_default = set_session_defaults(filters)
 data_table = get_result(filters)
@@ -846,10 +918,11 @@ if filters.open == 1:
 
 columns = get_columns(filters)
 
-## if there is   column preference set by the user then use the default settings
+# if there is   column preference set by the user then use the default settings
 if user_session_default.la_report_columns:
-   la_reordered_columns = reorder_columns_for_user_preference(columns, user_session_default)
+    la_reordered_columns = reorder_columns_for_user_preference(
+        columns, user_session_default)
 else:
     la_reordered_columns = columns
-    
+
 data = la_reordered_columns, data_table
