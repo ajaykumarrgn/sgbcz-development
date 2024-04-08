@@ -9,13 +9,15 @@ def get_columns(filters):
         # Return the Calendar Week as a String
         return(str(date.isocalendar()[1]))
     
-    def get_calander_year(i_date):
-        date = frappe.utils.getdate(i_date)
-        return (str(date.isocalendar()[0]))
-    from_date = filters.get('from_date')
-    to_date = filters.get('to_date')
-    if (int(get_calander_year(from_date)) != int(get_calander_year(to_date)) ):
-        frappe.throw('Please use the Same Year')       
+    # def get_calander_year(i_date):
+    #     date = frappe.utils.getdate(i_date)
+    #     return (str(date.isocalendar()[0]))
+    # from_date = filters.get('from_date')
+    # to_date = filters.get('to_date')
+    # #frappe.msgprint('From Date: ' + str(get_calander_year(from_date)) + ', To Date: ' + str(get_calander_year(to_date)))
+
+    # if (int(get_calander_year(from_date)) != int(get_calander_year(to_date))):
+    #     frappe.throw('Please use the Same Year')       
     
     columns = [{"fieldname": "power", "label": _("power"), "fieldtype": "Data", "width": 100},
                 {"fieldname": "weekly_capacity", "label": _("Weekly Capacity"), "fieldtype": "Int", "width": 50},
@@ -27,6 +29,7 @@ def get_columns(filters):
     #frappe.msgprint('From Week' + str(from_week))
     to_week = get_calander_week(filters['to_date'])
     #log(to_week)
+    
     # Loop through calendar weeks between the "from_date" and "to_date".
     for wk in range(int(from_week), int(to_week)):
         column = dict({"fieldname": str(wk), "label" : _(str(wk)), "fieldtype": "Int", "width": 50 })
@@ -45,8 +48,21 @@ def get_columns(filters):
 def get_final_data(filters):
 
 #  Begin of sub functions
-#   
+    # Get the from date and to date for the year
+    def fn_get_calander_year(i_date):
+        l_date = frappe.utils.getdate(i_date)
+        # Returns the week number of the year by using the ISO calendar and especially returns the [0] only for the year
+        return (str(l_date.isocalendar()[0]))
+    
+    l_from_date = filters['from_date']
+    l_to_date = filters['to_date']
+    # Check if the calendar years of 'from_date' and 'to_date' are different
+    if (int(fn_get_calander_year(l_from_date)) != int(fn_get_calander_year(l_to_date))):
+        # If the years are different, raise an exception with a message
+        frappe.throw('Please use the Same Year in the Date Range')    
+        
     #   Get unique list in a given array for the specified key 
+
     def get_unique(table, key):
         unique = list(set([d[key] for d in table]))
         return unique
@@ -395,6 +411,7 @@ def get_chart_data(i_planning_data, i_filters):
 ####
 # Report Block
 ####
+
 final_data = get_final_data(filters)
 data = get_columns(filters), final_data, None, get_chart_data(final_data, filters)
 #result = [final_data]

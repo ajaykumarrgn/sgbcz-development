@@ -40,7 +40,7 @@ frappe.query_reports['Weekly Load'] = {
         }
         if (data) {
             if (data['power'] !== 'Weekly Capacity') {
-                console.log('Logging the data', data, column.fieldname, data['2'])
+                //console.log('Logging the data', data, column.fieldname, data['2'])
                 if (data['power'] === 'Total') {
                     var report_data = frappe.query_report.data;
                     var weekly_capacity_row = frappe.query_report.data.find(row => row.power === 'Weekly Capacity');
