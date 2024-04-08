@@ -2,8 +2,8 @@
 # Calculate the EBITDA margin for Design items, Catalog items, and Accessories based on their Material cost, Total Cost, and Selling Price.
 # Define the Columns for generating the EBITDA Calcultaion Report.
 def get_columns(filters):
-    columns = []
-    columns = [
+    la_columns = []
+    la_columns = [
         {"fieldname": "sales_order", "label": _("Sales Order"), "fieldtype": "Link", "options": "Sales Order", "width": 140},
         {"fieldname": "customer", "label": _("Customer"), "fieldtype": "Link", "options": "Customer", "width": 180},
         {"fieldname": "customer_group", "label": _("Customer Group"), "fieldtype": "Link", "options": "Customer Group", "width": 140},
@@ -18,7 +18,7 @@ def get_columns(filters):
         {"fieldname": "material_cost", "label": _("Material Cost"), "fieldtype": "Currency", "width": 100},
         {"fieldname": "total_cost", "label": _("Total Cost"), "fieldtype": "Currency", "width": 100},
     ]
-    return columns
+    return la_columns
 
 def get_data(i_filters):
     report_data = []
@@ -35,7 +35,7 @@ def get_data(i_filters):
             #'po_date': ("between", [i_filters.from_date, i_filters.to_date])
         #}
         
-        ld_filters = {"po_date":("between", [i_filters.from_date, i_filters.to_date])}
+        ld_filters = {"po_date":("between", [i_filters.from_date, i_filters.to_date]), 'docstatus': ("!=",2) }
         # Get details of Sales Order based on filters    
         ld_sos_details = frappe.get_all(
                     'Sales Order', 
