@@ -11,8 +11,8 @@ l_final_price = frappe.form_dict.get('i_final_price')
 # Get the value for 'i_parent_itemgroup' from the form data
 l_item_group = frappe.form_dict.get('i_parent_itemgroup')
 
-# Check if 'i_total_cost' is not None
-if l_total_cost is not None:
+# Check if total cost and final price passed are not None
+if l_total_cost and l_final_price:
     # Check if the parent_item_group is "Accessories"
     if l_item_group['parent_item_group'] == "Accessories":
         
@@ -22,7 +22,7 @@ if l_total_cost is not None:
         
         # Calculate EBITDA based on the formula for design and catalog prices
         l_ebitda = 100 * (l_final_price - l_price_list['transport'] - l_total_cost - (l_price_list['provision'] * l_final_price)) / (l_final_price - l_price_list['transport'] - (l_price_list['provision']* l_final_price))
-    
+
     # Create a message dictionary with the calculated EBITDA
     ld_message = {"ebitda": l_ebitda}
     frappe.flags.message = ld_message
