@@ -1,7 +1,7 @@
 #Transformer with status Purchsing or Purchasing/Stock only :(Issue : ISS-2024-00033)
 #The chart's total weekly capacity doesn't consider the deduction from parallel coils :(Issue : ISS-2024-00035)
 #Set the filter to enable the checkbox for setting the weekly capacity chart size to 40. (Issue : ISS-2024-00007)
-#Set the date ranges in the report are from the same year. If they are not, an error message should be raised (Issue : ISS-2024-00054)
+#Throw error message if years are different in the from and to date filters(Issue : ISS-2024-00054)
 def get_columns(filters):
     # To Get the Calendar Week from a given Date
     def get_calander_week(i_date):
@@ -11,15 +11,13 @@ def get_columns(filters):
         return(str(date.isocalendar()[1]))
     
     #commented the section of code because it would execute before displaying the error message.>>ISS-2024-00054
-    # def get_calander_year(i_date):
+    #  def get_calander_year(i_date):
     #     date = frappe.utils.getdate(i_date)
     #     return (str(date.isocalendar()[0]))
     # from_date = filters.get('from_date')
     # to_date = filters.get('to_date')
-    # #frappe.msgprint('From Date: ' + str(get_calander_year(from_date)) + ', To Date: ' + str(get_calander_year(to_date)))
-
-    # if (int(get_calander_year(from_date)) != int(get_calander_year(to_date))):
-    #     frappe.throw('Please use the Same Year')       
+    # if (int(get_calander_year(from_date)) != int(get_calander_year(to_date)) ):
+    #     frappe.throw('Please use the Same Year')          
     #<<ISS-2024-00054
 
     columns = [{"fieldname": "power", "label": _("power"), "fieldtype": "Data", "width": 100},
