@@ -1,6 +1,7 @@
 #Transformer with status Purchsing or Purchasing/Stock only :(Issue : ISS-2024-00033)
 #The chart's total weekly capacity doesn't consider the deduction from parallel coils :(Issue : ISS-2024-00035)
 #Set the filter to enable the checkbox for setting the weekly capacity chart size to 40. (Issue : ISS-2024-00007)
+#Set the date ranges in the report are from the same year. If they are not, an error message should be raised (Issue : ISS-2024-00054)
 def get_columns(filters):
     # To Get the Calendar Week from a given Date
     def get_calander_week(i_date):
@@ -9,6 +10,7 @@ def get_columns(filters):
         # Return the Calendar Week as a String
         return(str(date.isocalendar()[1]))
     
+    #commented the section of code because it would execute before displaying the error message.>>ISS-2024-00054
     # def get_calander_year(i_date):
     #     date = frappe.utils.getdate(i_date)
     #     return (str(date.isocalendar()[0]))
@@ -18,7 +20,8 @@ def get_columns(filters):
 
     # if (int(get_calander_year(from_date)) != int(get_calander_year(to_date))):
     #     frappe.throw('Please use the Same Year')       
-    
+    #<<ISS-2024-00054
+
     columns = [{"fieldname": "power", "label": _("power"), "fieldtype": "Data", "width": 100},
                 {"fieldname": "weekly_capacity", "label": _("Weekly Capacity"), "fieldtype": "Int", "width": 50},
                 ]
@@ -48,6 +51,7 @@ def get_columns(filters):
 def get_final_data(filters):
 
 #  Begin of sub functions
+    #>>ISS-2024-00054
     # Get the from date and to date for the year
     def fn_get_calander_year(i_date):
         l_date = frappe.utils.getdate(i_date)
@@ -60,6 +64,7 @@ def get_final_data(filters):
     if (int(fn_get_calander_year(l_from_date)) != int(fn_get_calander_year(l_to_date))):
         # If the years are different, raise an exception with a message
         frappe.throw('Please use the Same Year in the Date Range')    
+    #<<ISS-2024-00054
         
     #   Get unique list in a given array for the specified key 
 
