@@ -146,7 +146,9 @@ def get_columns(filters):
                 "SGB Account"), "fieldtype": "Link",  "options": "Sales Person", "width": 100},
             {"fieldname": "sales_team", "label": _(
                 "Agent"), "fieldtype": "Data", "width": 100},
-            {"fieldname": "comments", "label" : _("Notes"), "fieldtype": "Small Text","width": 200}, #Use this Column for the (TASK-2024-00221)
+            # Use this Column for the (TASK-2024-00221)
+            {"fieldname": "comments", "label": _(
+                "Notes"), "fieldtype": "Small Text", "width": 200},
             {"fieldname": "prepayment_invoice", "label": _(
                 "Prepayment<br>Invoice"), "fieldtype": "Data", "width": 100},
             {"fieldname": "prepayment_status", "label": _(
@@ -345,7 +347,7 @@ def get_result(filters):
                 "po_no",
                 "po_date",
                 "company_guarantee",
-                #"is_reservation", #<< Commented for the change request for moving reservation from sales order to delivery note (#TASK-2024-00155) 
+                # "is_reservation", #<< Commented for the change request for moving reservation from sales order to delivery note (#TASK-2024-00155)
                 "`tabSales Order Item`.item_code",
                 "`tabSales Order Item`.qty",
                 "`tabSales Order Item`.pos",
@@ -356,8 +358,8 @@ def get_result(filters):
                 "`tabSales Order Item`.rate",
                 "`tabSales Order Item`.sensor_name",
                 "`tabSales Order Item`.engineering_required",
-                "`tabSales Order Item`.accessories_specification", #<<TASK-2024-00307
-                "`tabSales Order Item`.silicon_free", # << ISS-2024-00018
+                "`tabSales Order Item`.accessories_specification",  # <<TASK-2024-00307
+                "`tabSales Order Item`.silicon_free",  # << ISS-2024-00018
                 "`tabPayment Schedule`.invoice_portion",
                 "`tabSales Team`.sales_person",
             ),
@@ -368,8 +370,9 @@ def get_result(filters):
         # et_sos_details = sorted(et_delivery_items, key=lambda x: (x['parent'], x['pos']) )
         # Return the sorted 'et_delivery_items' list
         return ld_sos_details
-# >> ISS-2024-00002  
+# >> ISS-2024-00002
 #   Get Unique record based on key
+
     def get_unique(it_table, i_key):
         la_unique = list(set([it_d[i_key] for it_d in it_table]))
         return la_unique
@@ -400,7 +403,7 @@ def get_result(filters):
 
         la_unique_accessory_items = get_unique_accessory_items(
             it_sales_order_list, 'item_code')
-        
+
         ld_attributes_filter = {
             'parent': ('IN', la_unique_transformer_items),
         }
@@ -424,7 +427,7 @@ def get_result(filters):
             filters=ld_items_filter,
             order_by='item_code'
         )
-        
+
         return ld_item_attributes, la_item_accessories
 
 # End of function  get_item_attributes
@@ -465,7 +468,7 @@ def get_result(filters):
                                                        '`tabDelivery Schedule`.storage_fee',
                                                        '`tabDelivery Schedule`.gta_serial_number',
                                                        '`tabDelivery Schedule`.on_time_delivery',
-                                                       '`tabDelivery Schedule`.comments', # <<TASK-2024-00221
+                                                       '`tabDelivery Schedule`.comments',  # <<TASK-2024-00221
                                                        # >>TASK-2024-00155
                                                        '`tabDelivery Schedule`.is_reservation'),
                                                # <<TASK-2024-00155
@@ -510,7 +513,8 @@ def get_result(filters):
 
     def get_sales_team_text(sales_team):
         # Combine the list of Sales Persons in Sales Team by using Commas. Done on 18 Jul
-        sales_team_text = ", ".join(sales_person.sales_person for sales_person in sales_team if sales_person.sales_person is not None)
+        sales_team_text = ", ".join(
+            sales_person.sales_person for sales_person in sales_team if sales_person.sales_person is not None)
         return sales_team_text
 
     #   Map Item attributes
@@ -579,55 +583,62 @@ def get_result(filters):
 
     def add_delivery_schedule(i_sales_order, i_pos, item_row, ifilters, i_delivery_schedules):
         la_schedule_table = []
-        ld_schedule_lines = fn_find_rows_by_key_value(
+        # Filter scedules lines for the sales order
+        ld_schedule_lines_all = fn_find_rows_by_key_value(
             i_delivery_schedules, "against_sales_order", i_sales_order)
 
+        # Filter schedule lines for the intended Position
+        ld_schedule_lines = [
+            line for line in ld_schedule_lines_all if line['pos'] == i_pos]
+        
         for index, ld_schedule_line in enumerate(ld_schedule_lines):
-            if ld_schedule_line.pos == i_pos:
-                ld_schedule_line_row = {}
-                # Initialize the work area
-                ld_schedule_line_row = dict(item_row)
-                # Fill order value
-                try:
-                    ld_schedule_line_row['order_value'] = item_row['order_values'][index]
-                except IndexError:
-                    ld_schedule_line_row['order_value'] = 0
-                # log(schedule_line)
-                ld_schedule_line_row['delivery_note'] = ld_schedule_line.parent
-                ld_schedule_line_row['serial_number'] = ld_schedule_line.serial_number
-                ld_schedule_line_row['delivery_date'] = ld_schedule_line.delivery_date
-                ld_schedule_line_row['transformer_status'] = ld_schedule_line.status
-                ld_schedule_line_row['oa_confirmed_date'] = ld_schedule_line.oa_confirmed_date
-                ld_schedule_line_row['planned_production_end_date'] = ld_schedule_line.planned_production_end_date
-                ld_schedule_line_row['production_end_date'] = ld_schedule_line.production_end_date
-                ld_schedule_line_row['invoice_number'] = ld_schedule_line.invoice_number
-                ld_schedule_line_row['invoice_date'] = ld_schedule_line.invoice_date
-                ld_schedule_line_row['is_reservation'] = "Yes" if ld_schedule_line.is_reservation == 1 else " " #<<TASK-2024-00155
-                ld_schedule_line_row['comments'] = ld_schedule_line.comments # << TASK-2024-00221
-                # schedule_line_row['storage_fee'] = schedule_line.storage_fee
-                ld_schedule_line_row['storage_fee'] = '' if ld_schedule_line.storage_fee == "NO" else (
-                    ld_schedule_line.storage_fee)
-                # Check if planned_production_end_date is not None before accessing its attributes
-                if ld_schedule_line.planned_production_end_date:
-                    l_planned_week = ld_schedule_line.planned_production_end_date.isocalendar()[
-                        1]
-                    ld_schedule_line_row['planned_week'] = l_planned_week
-                else:
-                    # Handle the case when planned_production_end_date is None
-                    ld_schedule_line_row['planned_week'] = None
-                ld_schedule_line_row['gta_serial_number'] = ld_schedule_line.gta_serial_number
-                ld_schedule_line_row['on_time_delivery'] = ld_schedule_line.on_time_delivery
-                # Tests are generally performed for 1 transformer. The quantity is always lesser than parent
-                # The qty of tests are captured in the map_accessories function
-                # If the parent qty(schedule line count) is more than tests qty then do not include in the respective line
-                if ld_schedule_line_row['test_lab'] != ' ' and int(ld_schedule_line_row['test_lab_qty']) < (index + 1):
-                    ld_schedule_line_row['test_lab'] = ' '
+            # if ld_schedule_line.pos == i_pos:
+            ld_schedule_line_row = {}
+            # Initialize the work area
+            ld_schedule_line_row = dict(item_row)
+            # Fill order value
+            try:
+                ld_schedule_line_row['order_value'] = item_row['order_values'][index]
+            except IndexError:
+                ld_schedule_line_row['order_value'] = 0
+            # log(schedule_line)
+            ld_schedule_line_row['delivery_note'] = ld_schedule_line.parent
+            ld_schedule_line_row['serial_number'] = ld_schedule_line.serial_number
+            ld_schedule_line_row['delivery_date'] = ld_schedule_line.delivery_date
+            ld_schedule_line_row['transformer_status'] = ld_schedule_line.status
+            ld_schedule_line_row['oa_confirmed_date'] = ld_schedule_line.oa_confirmed_date
+            ld_schedule_line_row['planned_production_end_date'] = ld_schedule_line.planned_production_end_date
+            ld_schedule_line_row['production_end_date'] = ld_schedule_line.production_end_date
+            ld_schedule_line_row['invoice_number'] = ld_schedule_line.invoice_number
+            ld_schedule_line_row['invoice_date'] = ld_schedule_line.invoice_date
+            # <<TASK-2024-00155
+            ld_schedule_line_row['is_reservation'] = "Yes" if ld_schedule_line.is_reservation == 1 else " "
+            # << TASK-2024-00221
+            ld_schedule_line_row['comments'] = ld_schedule_line.comments
+            # schedule_line_row['storage_fee'] = schedule_line.storage_fee
+            ld_schedule_line_row['storage_fee'] = '' if ld_schedule_line.storage_fee == "NO" else (
+                ld_schedule_line.storage_fee)
+            # Check if planned_production_end_date is not None before accessing its attributes
+            if ld_schedule_line.planned_production_end_date:
+                l_planned_week = ld_schedule_line.planned_production_end_date.isocalendar()[
+                    1]
+                ld_schedule_line_row['planned_week'] = l_planned_week
+            else:
+                # Handle the case when planned_production_end_date is None
+                ld_schedule_line_row['planned_week'] = None
+            ld_schedule_line_row['gta_serial_number'] = ld_schedule_line.gta_serial_number
+            ld_schedule_line_row['on_time_delivery'] = ld_schedule_line.on_time_delivery
+            # Tests are generally performed for 1 transformer. The quantity is always lesser than parent
+            # The qty of tests are captured in the map_accessories function
+            # If the parent qty(schedule line count) is more than tests qty then do not include in the respective line
+            if ld_schedule_line_row['test_lab'] != ' ' and int(ld_schedule_line_row['test_lab_qty']) < (index + 1):
+                ld_schedule_line_row['test_lab'] = ' '
 
-                # if ld_schedule_line_row['invoice_number']:
-                    # if schedule_line_row['transformer_status'] != "Done - Expedited":
-                    # schedule_table.append(schedule_line_row)
-                # else:
-                la_schedule_table.append(ld_schedule_line_row)
+            # if ld_schedule_line_row['invoice_number']:
+                # if schedule_line_row['transformer_status'] != "Done - Expedited":
+                # schedule_table.append(schedule_line_row)
+            # else:
+            la_schedule_table.append(ld_schedule_line_row)
         return la_schedule_table
 
 #   Map Accessories
@@ -636,10 +647,10 @@ def get_result(filters):
 
     def map_accessories(item, po_item_row, ima_items):
         # ld_item_master = frappe.db.get_value('Item', item.item_code, ['item_group', 'accessories_specification'], as_dict=1)
-        ld_item_master = {"item_group":"",
+        ld_item_master = {"item_group": "",
                           "item_code": "",
                           "accessories_specification": ""}
-        
+
         if item['accessories_specification']:
 
             ld_item_master["item_code"] = item['item_code']
@@ -652,7 +663,8 @@ def get_result(filters):
                 ima_items, 'item_code', item.item_code)
             ld_item_master = ima_items[l_index]
 
-        accessories_specification = ld_item_master["accessories_specification"] if ld_item_master["accessories_specification"] else "Yes"
+        accessories_specification = ld_item_master[
+            "accessories_specification"] if ld_item_master["accessories_specification"] else "Yes"
         # if ld_item_master["accessories_specification"]:
         #     accessories_specification = ld_item_master["accessories_specification"]
         # else:
@@ -671,18 +683,19 @@ def get_result(filters):
         # In general, it should display a single control unit for the specific sales order; however, it currently displays two control units.
         # After the changes, it should correctly reflect the two control units for the specific sales order.
         elif ld_item_master["item_group"] == 'Control Unit':
-            #>> Commented this lines for the CR :(#TASK-2024-00307)
+            # >> Commented this lines for the CR :(#TASK-2024-00307)
             if accessories_specification not in po_item_row['control_unit']:
-                po_item_row['control_unit'] = (po_item_row['control_unit'] + ', ' if po_item_row['control_unit'] != ' ' else '') + accessories_specification
+                po_item_row['control_unit'] = (
+                    po_item_row['control_unit'] + ', ' if po_item_row['control_unit'] != ' ' else '') + accessories_specification
 
-            #<< Commented Upto here (#TASK-2024-00307)
+            # << Commented Upto here (#TASK-2024-00307)
 
-            #>>TASK-2024-00307  
+            # >>TASK-2024-00307
             # Check if the accessories_specification is not already in control_unit
             # if accessories_specification not in po_item_row['control_unit']:
             #     # Append a comma before adding the new accessories_specification
             #     po_item_row['control_unit'] = (po_item_row['control_unit'] + ', ' if po_item_row['control_unit'] != ' ' else '') + accessories_specification
-            #<<TASK-2024-00307
+            # <<TASK-2024-00307
         # << ISS-2024-00012
         # For service item like tests concatenate services into single line
         elif ld_item_master["item_group"] == 'Services':
@@ -748,12 +761,12 @@ def get_result(filters):
     la_items = get_item_attributes_and_accessory_specification(ld_sos_details)
     ld_item_attributes_list = la_items[0]
 
-    # >> ISS-2024-00045 
-    ld_item_current = { 
-        "name": '', 
+    # >> ISS-2024-00045
+    ld_item_current = {
+        "name": '',
         "pos": 0
     }
-    # <<ISS-2024-00045 
+    # <<ISS-2024-00045
 
     ld_item_accessory_specification = la_items[1]
 
@@ -781,7 +794,7 @@ def get_result(filters):
             'sales_order': ld_sales_order_header.name, 'customer': ld_sales_order_header.customer, 'incoterms': ld_sales_order_header.incoterms,
 
             'customer_group': ld_customer_data.customer_group, 'territory': ld_sales_order_header.territory,
-            #'is_reservation': "Yes" if sales_order_header.is_reservation == 1 else " ", #<<Commented for the change request in sales order level (#TASK-2024-00155)
+            # 'is_reservation': "Yes" if sales_order_header.is_reservation == 1 else " ", #<<Commented for the change request in sales order level (#TASK-2024-00155)
             'documentation_language': ((ld_sales_order_header.documentation_language) if ld_sales_order_header.documentation_language else ""
                                        ) + (", " + ld_sales_order_header.second_language if ld_sales_order_header.second_language else ""),
 
@@ -790,7 +803,7 @@ def get_result(filters):
             # Fill the Sales Persons name on 18 Jul
             'sales_team': get_sales_team_text(sales_team),
             'agent': (ld_sales_order_header.agent if ld_sales_order_header.agent else ld_sales_order_header.owner),
-            #'comments': sales_order_header.comments, #<< Commented this line for moving note section from here to delivery schedule(TASK-2024-00221)
+            # 'comments': sales_order_header.comments, #<< Commented this line for moving note section from here to delivery schedule(TASK-2024-00221)
             'prepayment_invoice': ld_sales_order_header.prepayment_invoice, 'prepayment_status': ld_sales_order_header.prepayment_status,
             'prepayment_invoice2': ld_sales_order_header.prepayment_invoice2, 'prepayment2_status': ld_sales_order_header.prepayment2_status,
             # If invoice portion is 100% then prepayment is Rejected
@@ -823,10 +836,11 @@ def get_result(filters):
         l_order_value = 0
         l_order_values = []
         for ld_item in ld_items_rev_sorted:
-            # >>ISS-2024-00045 
+        
+            # >>ISS-2024-00045
 
             if ld_item_current['name'] == ld_item['name'] and ld_item_current['pos'] == ld_item['pos']:
-                
+
                 continue
             else:
                ld_item_current['name'] = ld_item['name']
