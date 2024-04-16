@@ -516,7 +516,7 @@ def get_result(filters):
                 ld_schedule_line_row['is_reservation'] = "Yes" if ld_schedule_line.is_reservation == 1 else " " #<<TASK-2024-00155
                 ld_schedule_line_row['comments'] = ld_schedule_line.comments # << TASK-2024-00221
                 #schedule_line_row['storage_fee'] = schedule_line.storage_fee
-                ld_schedule_line_row['storage_fee'] = '' if ld_schedule_line.storage_fee == "No" else (ld_schedule_line.storage_fee)
+                ld_schedule_line_row['storage_fee'] = '' if ld_schedule_line.storage_fee == "NO" else (ld_schedule_line.storage_fee)
                 # Check if planned_production_end_date is not None before accessing its attributes
                 if ld_schedule_line.planned_production_end_date:
                     l_planned_week = ld_schedule_line.planned_production_end_date.isocalendar()[1]

@@ -1,4 +1,5 @@
 //Set the filter to enable the checkbox for setting the weekly capacity chart size to 40.(#Issue: ISS-2024-00007)
+
 frappe.query_reports['Weekly Load'] = {
     "filters": [
         {

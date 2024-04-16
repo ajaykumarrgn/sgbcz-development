@@ -2,6 +2,7 @@
 #The chart's total weekly capacity doesn't consider the deduction from parallel coils :(Issue : ISS-2024-00035)
 #Set the filter to enable the checkbox for setting the weekly capacity chart size to 40. (Issue : ISS-2024-00007)
 #Throw error message if years are different in the from and to date filters(Issue : ISS-2024-00054)
+
 def get_columns(filters):
     # To Get the Calendar Week from a given Date
     def get_calander_week(i_date):
