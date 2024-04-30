@@ -136,20 +136,20 @@ def set_session_defaults(filters):
     return user_session_default
     
 # Re order the output columns based on the user preference
-def reorder_columns_for_user_preference(columns, user_session_default):
+def reorder_columns_for_user_preference(ima_columns, imd_user_session_default):
     # initialize
     la_reordered_columns = []
     # convert the column preference stored as string to Json array
-    ld_user_columns=json.loads(user_session_default.report_columns)
+    la_report_columns=json.loads(imd_user_session_default.report_columns)
     
     # Reorder the output column based on the user preference
     # iterate user preference columns
-    for ld_fieldname in ld_user_columns:
+    for l_report_column in la_report_columns:
         # Find the actual report column corresponding to the position of the user preference
-        for la_item in columns:
+        for ld_column in ima_columns:
             #  If found append
-            if la_item['label'] == ld_fieldname:
-                la_reordered_columns.append(la_item)
+            if ld_column['label'] == l_report_column:
+                la_reordered_columns.append(ld_column)
         
     return la_reordered_columns
     
