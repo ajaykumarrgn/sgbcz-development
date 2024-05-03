@@ -3,7 +3,7 @@
 // Remove the columns filter when there is no data for the filter (Issue# : ISS-2024-00008)
 // Some Columns not visible using Saved Column (Issue# : ISS-2024-00020)
 
-frappe.query_reports['ST Remove'] = {
+frappe.query_reports['Sales Table'] = {
     "filters": [
         {
             "fieldname": "from_date",

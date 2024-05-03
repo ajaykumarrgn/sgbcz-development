@@ -110,6 +110,17 @@ async function processFilesInFolder(folderPath, baseFolder) {
         processFilesInFolder(filePath, baseFolder);
       } else if ((isFileNew(filePath) || isFileModified(filePath)) && fileExtension !== '.meta' && !errorFile.has(file.replace(new RegExp(`\\${fileExtension}$`), ''))) {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const metaFilePathPut = path.join(baseFolder, folderName, `${folderName}.meta`);
+        const metaContentPutString = fs.readFileSync(metaFilePathPut, 'utf-8');
+        const metaContentPut = JSON.parse(metaContentPutString);
+
+        delete metaContentPut.name;
+        delete metaContentPut.owner;
+        delete metaContentPut.modified;
+        delete metaContentPut.modified_by;
+        delete metaContentPut.creation;
+        delete metaContentPut.roles;
+
         const encodedFilename = encodeURIComponent(file.replace(new RegExp(`\\${fileExtension}$`), ''));
 
         const requestOptions = {
@@ -118,6 +129,7 @@ async function processFilesInFolder(folderPath, baseFolder) {
           body: JSON.stringify({
             filename: encodedFilename,
             [fileExtension === '.js' ? 'javascript' : (fileExtension === '.py' ? 'report_script' : 'query')]: fileContent,
+            ...metaContentPut,
           }),
           redirect: 'follow',
         };
