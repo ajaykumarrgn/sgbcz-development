@@ -1,3 +1,5 @@
+# Change References
+# Labour Cost value is not calculated in the Total cost (#ISS-2024-00057)
 ## finding a record from the dictionary array
 ## it_dict_array is a dictionary array
 ## i_key the key to searched for
@@ -18,25 +20,33 @@ def find_dict_with_keys(dict_row, it_dict_array):
             return it_d
     return None
 
+   
 # Begin of Change EBITDA Report (>> #TASK-2024-00157)
 if doc.material_cost: 
+     
     # Get the Gitra Settings
     ld_gitra_settings = frappe.get_doc("Gitra Settings", "Gitra Settings")
     # Get the Parent Item Group to validate if it is Transformer or Accessory
     l_parent_item_group = frappe.db.get_value("Item Group", doc.item_group, ["parent_item_group"])
+    
     labour = 0
     production_overhead = 0
     # This block is only of Transformer Items
-    if doc.variant_of and l_parent_item_group == "DTTHZ2N":
+    #>>commented this line for the issue #ISS-2024-00057 
+    # Because it does not include labor costs in the total cost calculation in the Item Doctype 
+    #if doc.variant_of and l_parent_item_group == "DTTHZ2N"
+    
+    if (doc.variant_of and l_parent_item_group == "DTTHZ2N") or (doc.variant_of and doc.item_group == "DTTHZ2N"):
+    #<<ISS-2024-00057   
         rating_row = find_row_by_key_value(doc.attributes, 'attribute', 'Power (kVA)')
         hv_row = find_row_by_key_value(doc.attributes, 'attribute', 'HV (kV)')
-        
         attributes = {
             #'rating': rating_row.attribute_value,
             #'hv_rated_voltage': hv_row.attribute_value,
             'rating': rating_row.attribute_value, 
             'hv_rated_voltage': int(float(hv_row.attribute_value.replace(',', '.')) * 1000),
         }
+        
         # Read the production hours record from Gitra Setting labour hours child TABLE
         # identify the record higher then than the Design rating and Design hv_rated_voltage
         # for ex if Design rating is 900KVA and HV is 10000v 
