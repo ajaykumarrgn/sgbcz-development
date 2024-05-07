@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process'; 
+import fetch from 'node-fetch';
+
 dotenv.config();
 
 const baseFolder = 'serverScript';
@@ -94,6 +96,12 @@ function processFilesInFolder(folderPath, parentFolder = null) {
             } else {
               try {
                 metaContent = JSON.parse(metaContent) // Parse the JSON content of .meta file
+                delete metaContent.name;
+                delete metaContent.owner;
+                delete metaContent.modified;
+                delete metaContent.modified_by;
+                delete metaContent.roles;
+                delete metaContent.creation;
               } catch (error) {
                 console.error(`Error parsing meta file ${metaFilePath}: ${error}`);
                 console.log(`Skipping file ${file} due to invalid meta content`);
@@ -105,75 +113,44 @@ function processFilesInFolder(folderPath, parentFolder = null) {
             const postFilename = file.replace(/\.py$/, '');
             const folderName = parentFolder ? parentFolder : '';
 
-            if (isFileNew(filePath)) {
-              // Use POST for new files
+            if (isFileNew(filePath) || isFileChanged(filePath)) {
+              // Use PUT for changed files or new files
               const requestOptions = {
-                method: 'POST',
+                method: 'PUT',
                 headers,
                 body: JSON.stringify({
                   name: postFilename,
                   script: fileContent,
-                  ...metaContent, 
+                  ...metaContent,
                   script_type: folderName,
                   disabled: 0
                 }),
                 redirect: 'follow',
               };
-              const url = baseUrl;
-              
-              fetch(url, requestOptions)
-                .then(response => {
-                  if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                  }
-                  return response.json();
-                })
-                .then(result => {
-                  console.log(`Processing new file: ${file}`);
-                 
-                })
-                .catch(error => {
-                  console.error(`Error processing new file ${file}:`, error);
-                });
-            } else if (isFileChanged(filePath)) {
-              // Use PUT for changed files
-              const requestOptions = {
-                method: 'PUT',
-                headers,
-                body: JSON.stringify({
-                  filename: encodedFilename,
-                  script: fileContent,
-                 
-                }),
-                redirect: 'follow',
-              };
 
-              const url = `${baseUrl}/${encodedFilename}`
+              const url = `${baseUrl}/${encodedFilename}`;
 
               fetch(url, requestOptions)
                 .then(response => {
                   if (!response.ok) {
                     if (response.status === 404) {
-                      // If the file doesn't exist, create a new resource
+                      // If the file doesn't exist, create a new resource using POST
                       createNewResource( {
-                          name: postFilename,
-                          script: fileContent,
-                          ...metaContent,
-                          script_type: folderName,
-                          disabled: 0
-                      });
-                  } else {
+                        name: postFilename,
+                        script: fileContent,
+                        ...metaContent,
+                        script_type: folderName,
+                        disabled: 0
+                    });
+                    } else {
                       throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                  } else {
+                    console.log(`Updated script: ${file}`);
                   }
-                  }
-                  return response.json();
-                })
-                .then(result => {
-                  console.log(`Processing changed file: ${file}`);
-                 
                 })
                 .catch(error => {
-                  console.error(`Error processing changed file ${file}:`, error);
+                  console.error(`Error processing file ${file}:`, error);
                 });
             }
           } else {
@@ -186,6 +163,5 @@ function processFilesInFolder(folderPath, parentFolder = null) {
     console.error(`Error reading folder ${folderPath}: ${error}`);
   }
 }
-
 // Start processing the base folder
 processFilesInFolder(baseFolder);

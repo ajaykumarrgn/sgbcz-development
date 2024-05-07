@@ -6,14 +6,15 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process'; 
+import fetch from "node-fetch";
 dotenv.config();
 
 const baseFolder = 'clientScript';
 
-const myHeaders = new Headers();
-myHeaders.append("Authorization", process.env.KEY)
-myHeaders.append('Content-Type', 'application/json');
-
+const headers = {
+  'Content-Type': 'application/json',
+  'Authorization': process.env.KEY,
+};
 const baseUrl = getEndPointForDoctype("Client Script")
 
 
@@ -42,7 +43,7 @@ function isFileNew(filePath) {
 function createNewResource( requestBody) {
   const requestOptions = {
       method: 'POST',
-      headers: myHeaders,
+      headers: headers,
       body: JSON.stringify(requestBody),
       redirect: 'follow',
   };
@@ -94,6 +95,12 @@ function processFilesInFolder(folderPath, parentFolder = null) {
             } else {
               try {
                 metaContent = JSON.parse(metaContent); // Parse the JSON content of .meta file
+                delete metaContent.name;
+                delete metaContent.owner;
+                delete metaContent.modified;
+                delete metaContent.modified_by;
+                delete metaContent.roles;
+                delete metaContent.creation;
               } catch (error) {
                 console.error(`Error parsing meta file ${metaFilePath}: ${error}`);
                 console.log(`Skipping file ${file} due to invalid meta content`);
@@ -103,54 +110,23 @@ function processFilesInFolder(folderPath, parentFolder = null) {
 
             const encodedFilename = encodeURIComponent(file.replace(/\.js$/, ''));
             const postFilename = file.replace(/\.js$/, '');
-            const folderName = parentFolder ? encodeURIComponent(parentFolder) : '';
+            const folderName = parentFolder ? parentFolder : '';
 
-            if (isFileNew(filePath)) {
-              
-              // Use POST for new files
-              const requestOptions = {
-                method: 'POST',
-                headers: myHeaders,
-                body: JSON.stringify({
-                  name: postFilename,
-                  script: fileContent,
-                  ...metaContent, // Include meta content directly in the request body
-                  dt: folderName,
-                  enabled: 1
-                }),
-                redirect: 'follow',
-              };
-
-              const url = baseUrl;
-
-              fetch(url, requestOptions)
-                .then(response => {
-                  if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                  }
-                  return response.json();
-                })
-                .then(result => {
-                  console.log(`Processing new file: ${file}`);
-                 
-                })
-                .catch(error => {
-                  console.error(`Error processing new file ${file}:`, error);
-                });
-            } else if (isFileChanged(filePath)) {
-              // Use PUT for changed files
+            if (isFileNew(filePath) || isFileChanged(filePath)) {
+              // Use PUT for changed files or new files
               const requestOptions = {
                 method: 'PUT',
-                headers: myHeaders,
+                headers: headers,
                 body: JSON.stringify({
-                  filename: encodedFilename,
+                  filename: postFilename,
                   script: fileContent,
+                  ...metaContent,
                  
                 }),
                 redirect: 'follow',
               };
-
-              const url = `${baseUrl}/${encodedFilename}`
+              
+              const url = `${baseUrl}/${encodedFilename}`;
 
               fetch(url, requestOptions)
                 .then(response => {
@@ -188,6 +164,5 @@ function processFilesInFolder(folderPath, parentFolder = null) {
     console.error(`Error reading folder ${folderPath}: ${error}`);
   }
 }
-
 // Start processing the base folder
 processFilesInFolder(baseFolder);
