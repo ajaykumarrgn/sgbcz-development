@@ -44,13 +44,13 @@ cur_frm.cscript.custom_validate = function(doc) {
             case "Umschaltbar ECO+":
                 doc.item_name = doc.variant_of;
                 // Find the index of the "Power (kVA)" attribute in the attributes array
-                let lIndexvalue = doc.attributes.findIndex(element => element.attribute=="Power (kVA)");
+                let lIndex = doc.attributes.findIndex(element => element.attribute=="Power (kVA)");
                 // Check if the "Power (kVA)" attribute exists and has a value
-        	    if(lIndexvalue>=0){
+        	    if(lIndex>=0){
         	        //check if attribute value is filled
-        	       if(doc.attributes[lIndexvalue].attribute_value) {
+        	       if(doc.attributes[lIndex].attribute_value) {
         	           // Append the "Power (kVA)" attribute value to the item_name
-        	            doc.item_name   = doc.item_name  + ' ' + (doc.attributes[lIndexvalue].attribute_value).toString();
+        	            doc.item_name   = doc.item_name  + ' ' + (doc.attributes[lIndex].attribute_value).toString();
         	            }
         	   }
         	   // Add other specified attributes to the item_name 
@@ -75,20 +75,24 @@ cur_frm.cscript.custom_validate = function(doc) {
                //<<ISS-2024-00013
         	   break;
         	// >> ISS-2024-00004  
-            // Item Name for RGB group 
+ 
             //<< TASK-2024-0580
+            //<< TASK-2024-0581
+            // Item Name for RGB and NEU group
             case "RGB":
+            case "NEU":
                 doc.item_name = doc.variant_of;
                 // Find the index of the "Power (kVA)" attribute in the attributes array
-                let lIndex = doc.attributes.findIndex(element => element.attribute=="Power (kVA)");
+                let lIndexvalue = doc.attributes.findIndex(element => element.attribute=="Power (kVA)");
                 // Check if the "Power (kVA)" attribute exists and has a value
-        	    if(lIndex>=0){
+        	    if(lIndexvalue>=0){
         	        //check if attribute value is filled
-        	       if(doc.attributes[lIndex].attribute_value) {
+        	       if(doc.attributes[lIndexvalue].attribute_value) {
         	           // Append the "Power (kVA)" attribute value to the item_name
-        	            doc.item_name   = doc.item_name  + ' ' + (doc.attributes[lIndex].attribute_value).toString();
+        	            doc.item_name   = doc.item_name  + ' ' + (doc.attributes[lIndexvalue].attribute_value).toString();
         	        }
         	   }
+                // Add other specified attributes to the item_name 
                 doc.item_name = add_attribute_to_item_name(doc, "HV (kV)");
                 doc.item_name = add_attribute_to_item_name(doc, "HV 1 (kV)");
                 doc.item_name = add_attribute_to_item_name(doc, "HV 2 (kV)");
@@ -96,15 +100,22 @@ cur_frm.cscript.custom_validate = function(doc) {
                 doc.item_name = add_attribute_to_item_name(doc, "Uk (%)");
                 doc.item_name = add_attribute_to_item_name(doc, "Power LV 1 (KV)");
                 doc.item_name = add_attribute_to_item_name(doc, "LV 1 (V)");
-                doc.item_name = add_attribute_to_item_name(doc, "UK L1 (%)");
+                doc.item_name = add_attribute_to_item_name(doc, "Uk LV 1 (%)");
                 doc.item_name = add_attribute_to_item_name(doc, "Power LV 2 (KV)");
                 doc.item_name = add_attribute_to_item_name(doc, "LV 2 (V)");
-                doc.item_name = add_attribute_to_item_name(doc, "UK L2 (%)");
-
+                doc.item_name = add_attribute_to_item_name(doc, "Uk LV 2 (%)");
+                //replaces all occurrences of "-" with "/" and "." with "," here -g is flag denote global search
                 doc.item_code =  doc.item_code.replace(/-/g, '/').replace(/\./g, ',');
+                // incase the HV1 or HV2 is not entered replace  /// to /0/0/
                 doc.item_code = doc.item_code.replace(/\/\/\//g, '/0/0/');
+                // replaces all whitespace characters (\s) with '0'
+                // replaces two or more consecutive slashes with "/0/"
+        	    //If the HV Value is not provided, and either the LPA or LWA value is missing
+        	    //should display 0 instead of an empty space.
                 doc.item_code = doc.item_code.replace(/\s/g, '0').replace(/\/{2,}/g, '/0/');
                 break;
+            //>> TASK-2024-0581
+            //>> TASK-2024-0580
 
         	case "Enclosure":
                 // Add attributes to the item name
