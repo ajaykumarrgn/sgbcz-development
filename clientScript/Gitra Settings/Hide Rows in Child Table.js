@@ -13,7 +13,10 @@ frappe.ui.form.on('Gitra Settings', {
     }
 });
 
+//Function that hides the row that doesn't match the Transformer Type mentioned in the
+//parent doctype "Gitra Settings"
 function fnHideRows(frm, iFieldName) {
+    //Get the Transformer Type from the parent doctype "Gitra Settings"
     var lTransformerType = frm.fields_dict.transformer_type.value;
     var ldGrid = frm.fields_dict[iFieldName].grid;
 
@@ -26,7 +29,8 @@ function fnHideRows(frm, iFieldName) {
                 // Get the value of the 'transformer_type' field in the current row
                 var lTransType = iRow.doc.transformer_type;
 
-                // Check if the transformer_type is not equal to 'DTTH2N'
+                // Check if the transformer_type is not equal to the value of Transformer Type
+                //of the parent doctype
                 if (lTransType !== lTransformerType) {
                     // If not equal, hide the row
                     iRow.wrapper.hide(true);
