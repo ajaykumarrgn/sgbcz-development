@@ -1,38 +1,38 @@
 frappe.ui.form.on('Gitra Settings', {
     refresh: function(frm) {
-        var fieldsToCheck = ['attributes', 'hv_voltage_setting', 'lv_voltage_setting', 'ip_protection_setting', 'losses_setting'];
-        for (var i = 0; i < fieldsToCheck.length; i++) {
-            hideRows(frm, fieldsToCheck[i]);
+        var laChildTable = ['attributes', 'hv_voltage_setting', 'lv_voltage_setting', 'ip_protection_setting', 'losses_setting'];
+        for (var i = 0; i < laChildTable.length; i++) {
+            fnHideRows(frm, laChildTable[i]);
         }
     },
     transformer_type: function(frm) {
-        var fieldsToCheck = ['attributes', 'hv_voltage_setting', 'lv_voltage_setting', 'ip_protection_setting', 'losses_setting'];
-        for (var i = 0; i < fieldsToCheck.length; i++) {
-            hideRows(frm, fieldsToCheck[i]);
+        var laChildTable = ['attributes', 'hv_voltage_setting', 'lv_voltage_setting', 'ip_protection_setting', 'losses_setting'];
+        for (var i = 0; i < laChildTable.length; i++) {
+            fnHideRows(frm, laChildTable[i]);
         }
     }
 });
 
-function hideRows(frm, fieldName) {
-    var transformerType = frm.fields_dict.transformer_type.value;
-    var grid = frm.fields_dict[fieldName].grid;
+function fnHideRows(frm, iFieldName) {
+    var lTransformerType = frm.fields_dict.transformer_type.value;
+    var ldGrid = frm.fields_dict[iFieldName].grid;
 
     // Check if the grid object and grid_rows property are defined
-    if (grid && grid.grid_rows) {
+    if (ldGrid && ldGrid.grid_rows) {
         // Iterate through each grid row
-        grid.grid_rows.forEach(function(row) {
+        ldGrid.grid_rows.forEach(function(iRow) {
             // Check if the row and row.doc are defined
-            if (row && row.doc) {
+            if (iRow && iRow.doc) {
                 // Get the value of the 'transformer_type' field in the current row
-                var transType = row.doc.transformer_type;
+                var lTransType = iRow.doc.transformer_type;
 
                 // Check if the transformer_type is not equal to 'DTTH2N'
-                if (transType !== transformerType) {
+                if (lTransType !== lTransformerType) {
                     // If not equal, hide the row
-                    row.wrapper.hide(true);
+                    iRow.wrapper.hide(true);
                 } else {
                     // Otherwise, show the row
-                    row.wrapper.show(true);
+                    iRow.wrapper.show(true);
                 }
             }
         });
