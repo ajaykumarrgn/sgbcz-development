@@ -9,6 +9,7 @@
 # Transfer Note section from Sales order to Delivery Schedule (Task#: TASK-2024-00221)
 # Transfer Reservation field from Sales order to Delivery Schedule (Task#: TASK-2024-00155)
 # Improve the sales table report performance (Task#: TASK-2024-00216)
+# wrong accessories displayed  -relay issue# ISS-2024-00061
 
 def get_columns(filters):
     la_columns = []
@@ -408,27 +409,34 @@ def get_result(filters):
             'parent': ('IN', la_unique_transformer_items),
         }
 
-        ld_items_filter = {
+        ld_accerrory_items_filter = {
             "item_code": ('IN', la_unique_accessory_items)
         }
-        ld_item_attributes = frappe.get_all(
+        la_item_attributes = frappe.get_all(
             'Item Variant Attribute',
             fields=['attribute', 'attribute_value', 'parent'],
             filters=ld_attributes_filter,
             order_by='parent')
 
-        # commenting as order_by is used in the above api call
-        # ld_item_attributes_sorted = sorted(
-        #     ld_item_attributes, key=lambda x: x['parent'])
+        # Uncomenting for ISS-2024-00061. Order_by is not working for accessories  
+        # specification. Sorting this for safer side
+        la_item_attributes_sorted = sorted(
+            la_item_attributes, key=lambda x: x['parent'])
 
         la_item_accessories = frappe.get_all(
             "Item",
             fields=["item_code", "item_group", "accessories_specification"],
-            filters=ld_items_filter,
+            filters=ld_accerrory_items_filter,
             order_by='item_code'
         )
 
-        return ld_item_attributes, la_item_accessories
+        # << Begin ISS-2024-00061
+        # Sorting as the order_by  item_code from above did not work
+        la_item_accessories_sorted =  sorted(
+            la_item_accessories, key=lambda x: x['item_code'])
+        # End ISS-2024-00061 >>
+
+        return la_item_attributes_sorted, la_item_accessories_sorted
 
 # End of function  get_item_attributes
 
@@ -768,7 +776,7 @@ def get_result(filters):
     }
     # <<ISS-2024-00045
 
-    ld_item_accessory_specification = la_items[1]
+    la_item_accessory_specification = la_items[1]
 
     # Get all Schedule lines for the Delivery Notes List
     la_schedule_line_list = fn_get_schedule_lines(ld_sales_order_list)
@@ -934,7 +942,7 @@ def get_result(filters):
             else:
                 # po_item_row = map_accessories(ld_item, po_item_row)
                 po_item_row = map_accessories(
-                    ld_item, po_item_row, ld_item_accessory_specification)
+                    ld_item, po_item_row, la_item_accessory_specification)
 
     #   Sort the table back with pos and append it to output table
         table.extend(sorted(la_delivery_items, key=lambda x: x['pos']))
