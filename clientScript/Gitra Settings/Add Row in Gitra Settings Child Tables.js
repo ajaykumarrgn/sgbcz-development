@@ -1,29 +1,37 @@
 frappe.ui.form.on('Gitra Settings', {
-    refresh: function(frm) {
-        var laChildTables = ['attributes', 'hv_voltage_setting', 'lv_voltage_setting', 'ip_protection_setting', 'losses_setting'];
-
-        // Iterate over each child table
-        laChildTables.forEach(function(iChildTableName) {
-            // Get the grid object of the current child table
-            var ldChildTable = frm.fields_dict[iChildTableName].grid;
-            
-            // Find the "Add Row" button within the current child table
-            var lAddButton = ldChildTable.wrapper.find('.grid-add-row');
-            
-            // Attach a one-time click event handler to the "Add Row" button of the current child table
-            lAddButton.one('click', function() {
-                // Get the value of 'transformer_type' field of the parent DocType "Gitra Settings"
-                var lTransformerType = frm.doc.transformer_type;
-                
-                // Get the last added row of the current child table
-                var lLastRow = ldChildTable.grid_rows[ldChildTable.grid_rows.length - 1];
-                
-                // Set the value of 'transformer_type' field in the last added row of the current child table
-                lLastRow.doc.transformer_type = lTransformerType;
-                
-                // Refresh the current child table to reflect changes
-                ldChildTable.refresh();
-            });
-        });
+    transformer_type: function(frm) {
+        setTimeout(function() {
+            fnAddChildTableRows(frm);
+        }, 1000); // Delay execution by 1 second
+    },
+    onload: function(frm) {
+        setTimeout(function() {
+            fnAddChildTableRows(frm);
+        }, 1000); // Delay execution by 1 second
     }
 });
+function fnAddChildTableRows(frm) {
+    //Array of Child Tables in Gitra Settings
+    var laChildTables = ['attributes', 'hv_voltage_setting', 'lv_voltage_setting', 'ip_protection_setting', 'losses_setting'];
+    
+    laChildTables.forEach(function(iChildTableName) {
+        var ldChildTable = frm.fields_dict[iChildTableName].grid;
+
+        // Check if ldChildTable exists and has a wrapper
+        if (ldChildTable && ldChildTable.wrapper) {
+            var lAddButton = ldChildTable.wrapper.find('.grid-add-row');
+
+            // Check if the add button is found
+            if (lAddButton.length > 0) {
+                //One click event is assigned to Add Row Button
+                lAddButton.one('click', function() {
+                    var lTransformerType = frm.doc.transformer_type;
+                    var lLastRow = ldChildTable.grid_rows[ldChildTable.grid_rows.length - 1];
+                    //Assign the transformer_field value to it
+                    lLastRow.doc.transformer_type = lTransformerType;
+                    ldChildTable.refresh();
+                });
+            } 
+        } 
+    });
+}
