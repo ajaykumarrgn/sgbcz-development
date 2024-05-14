@@ -6,9 +6,13 @@ frappe.ui.form.on('Gitra Settings', {
 });
 
 function fnfetchItemsFromAPI(frm) {
+    var laItemGroups = ["DTTHZ2N", "RGB", "NEU"];
     // Call the API to get items
     frappe.call({
         "method": "get_item_template",
+        "args": {
+            "i_item_groups": laItemGroups,
+        },
         "callback": function(response) {
             //console.log(response)
             if(response.message){
