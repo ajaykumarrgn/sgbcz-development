@@ -2,6 +2,7 @@ frappe.ui.form.on('Design', {
 	validate(frm) {
 	    function add_tappings_xml(frm, xml, tappingNodes){
 	       
+
             // Parse the XML template to JavaScript object
             let xmlDoc = new DOMParser().parseFromString(xml, 'text/xml');
             var nodeList = xmlDoc.getElementsByTagName('TGtExportEDSAuftragStellungenListe');
@@ -50,6 +51,10 @@ frappe.ui.form.on('Design', {
             }
             return tappingNodes
         }
+        
+        //only provide gitra intragration for DTTHZ2N transformer
+        
+        if(frm.doc.factory === 'SGBCZ' && frm.doc.transformer_type === 'DTTHZ2N'){
         var doctype = "Gitra Settings";
     	// Initialize the model with doctype Gitra Settings
         frappe.model.with_doc(doctype, doctype, function() {
@@ -79,5 +84,6 @@ frappe.ui.form.on('Design', {
         })
         
         frm.refresh_fields();
+        }
 	}
 })
