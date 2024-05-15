@@ -409,7 +409,7 @@ def get_result(filters):
             'parent': ('IN', la_unique_transformer_items),
         }
 
-        ld_accerrory_items_filter = {
+        ld_accessory_items_filter = {
             "item_code": ('IN', la_unique_accessory_items)
         }
         la_item_attributes = frappe.get_all(
@@ -426,7 +426,7 @@ def get_result(filters):
         la_item_accessories = frappe.get_all(
             "Item",
             fields=["item_code", "item_group", "accessories_specification"],
-            filters=ld_accerrory_items_filter,
+            filters=ld_accessory_items_filter,
             order_by='item_code'
         )
 
