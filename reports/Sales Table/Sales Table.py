@@ -9,7 +9,7 @@
 # Transfer Note section from Sales order to Delivery Schedule (Task#: TASK-2024-00221)
 # Transfer Reservation field from Sales order to Delivery Schedule (Task#: TASK-2024-00155)
 # Improve the sales table report performance (Task#: TASK-2024-00216)
-# wrong accessories displayed  -relay issue# ISS-2024-00061
+# wrong accessories displayed  -relay issue# ISS-2024-00061 
 
 def get_columns(filters):
     la_columns = []
@@ -409,7 +409,7 @@ def get_result(filters):
             'parent': ('IN', la_unique_transformer_items),
         }
 
-        ld_accerrory_items_filter = {
+        ld_accessory_items_filter = {
             "item_code": ('IN', la_unique_accessory_items)
         }
         la_item_attributes = frappe.get_all(
@@ -426,7 +426,7 @@ def get_result(filters):
         la_item_accessories = frappe.get_all(
             "Item",
             fields=["item_code", "item_group", "accessories_specification"],
-            filters=ld_accerrory_items_filter,
+            filters=ld_accessory_items_filter,
             order_by='item_code'
         )
 

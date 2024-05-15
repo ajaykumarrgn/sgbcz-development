@@ -9,7 +9,7 @@
 # Transfer Note section from Sales order to Delivery Schedule (Task#: TASK-2024-00221)
 # Transfer Reservation field from Sales order to Delivery Schedule (Task#: TASK-2024-00155)
 # Improve the sales table report performance (Task#: TASK-2024-00216)
-# wrong accessories displayed  -relay issue# ISS-2024-00061
+# wrong accessories displayed  -relay issue# ISS-2024-00061 
 
 def get_columns(filters):
     la_columns = []
