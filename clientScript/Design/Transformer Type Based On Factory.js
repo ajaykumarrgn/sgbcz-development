@@ -1,5 +1,14 @@
 frappe.ui.form.on('Design', {
    
+	onload(frm){
+		if(frm.doc.status === "Calculation Received"){
+			frm.set_value('factory','SGBCZ')
+			frm.set_value('transformer_type','DTTHZ2N')
+			frm.set_value('status','Calculation Received')
+			frm.doc.save()
+		}
+	},
+
 	factory(frm){
 
         //map the item_group with respective factory
@@ -21,7 +30,17 @@ frappe.ui.form.on('Design', {
 	        
 	    }else{
 	        frm.set_df_property('status', 'read_only', 0);
-	        frm.set_df_property('status', 'options', ['Draft', 'Perform Calculation']);
+	        // frm.set_df_property('status', 'options', ['Draft', 'Perform Calculation', 'Calculation Received']);		
+			
+			frm.fields_dict.status.get_query = function() {
+				const lstatus = ['Draft', 'Perform Calculation']
+				return {
+					filters: {
+						"options": ["in", lstatus]
+					}
+				};
+			};
+			
 	        var lxmlDataTab = document.getElementById('design-xml_data_tab-tab')
 	        lxmlDataTab.hidden = false
 	    }
