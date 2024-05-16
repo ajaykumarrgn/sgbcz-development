@@ -1,3 +1,6 @@
+// Change References
+//Packaging details are not automatically fetched from the customer record during the quotation creation process (ISS-2024-00064)
+
 //Filter Search results
 cur_frm.set_query("parent_item", "items", function(doc, cdt, cdn) {
     var parent_items = [];
@@ -14,6 +17,16 @@ frappe.ui.form.on('Quotation', {
     transaction_date(frm) {
         frm.events.set_valid_till(frm);
     },
+
+	//<<ISS-2024-00064
+	//The doctype functionality fetch if empty has been depreciated
+	//add_fetch function , it take "link_fieldname_that_connect_source_target", "source_fieldname_to_fetch_from", "target_fieldname_in_current_document" as argument
+	onload(frm) {
+		frm.add_fetch("party_name", "packaging", "ll_packaging");
+	},
+
+	//>>ISS-2024-00064
+
 	refresh : function(frm) {
 	   if(!frm.doc.shipping_address_name){ 
     	   frm.doc.shipping_address_name = frm.doc.customer_address;
