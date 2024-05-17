@@ -1,11 +1,14 @@
+// Change References
+//Packaging details are not automatically fetched from the customer record during the quotation creation process (ISS-2024-00064)
+
 //Filter Search results
 cur_frm.set_query("parent_item", "items", function(doc, cdt, cdn) {
-    var parent_items = [];
+    var laParentItems = [];
     //Filter Items not belonging to Accessories
-	parent_items = doc.items.filter(item=> item.item_group !== "Accessories").map((item) => { return item.item_name; });
+	laParentItems = doc.items.filter(item=> item.item_group !== "Accessories").map((item) => { return item.item_name; });
 	return{
 		filters: [
-			['Item', 'name', 'in', parent_items ]
+			['Item', 'name', 'in', laParentItems ]
 		]
 	};
 }),
@@ -14,6 +17,18 @@ frappe.ui.form.on('Quotation', {
     transaction_date(frm) {
         frm.events.set_valid_till(frm);
     },
+
+	//<<ISS-2024-00064
+	//The doctype functionality fetch if empty has been depreciated
+	//add_fetch function , it take "link_fieldname_that_connect_source_target", 
+	//"source_fieldname_to_fetch_from", "target_fieldname_in_current_document" as argument
+
+	onload(frm) {
+		frm.add_fetch("party_name", "packaging", "ll_packaging");
+	},
+
+	//ISS-2024-00064 >>
+
 	refresh : function(frm) {
 	   if(!frm.doc.shipping_address_name){ 
     	   frm.doc.shipping_address_name = frm.doc.customer_address;
@@ -46,7 +61,7 @@ frappe.ui.form.on('Quotation', {
 		args:{
 			doctype: "Quotation Presets",
 			fieldname: ['delivery_time', 'delivery_text', 'packaging'],
-		    async: false,
+		    async: false
 		},
 		callback: function(res){ 
 		    if(!frm.doc.delivery_time) { frm.doc.delivery_time = res.message.delivery_time;}
@@ -63,12 +78,12 @@ frappe.ui.form.on('Quotation', {
 		args:{
 			doctype: "Quotation Presets",
 			fieldname: ["default_validity"],
-		    async: false,
+		    async: false
 		},
     		callback: function(res){ 
     		    
-    		    var default_validity = res.message.default_validity;
-                frm.doc.valid_till = frappe.datetime.add_days(frm.doc.transaction_date, default_validity);
+    		    var lDefaultValidity = res.message.default_validity;
+                frm.doc.valid_till = frappe.datetime.add_days(frm.doc.transaction_date, lDefaultValidity);
                 frm.refresh_fields();
     	    }
         });
@@ -89,7 +104,7 @@ frappe.ui.form.on('Quotation', {
         frm.events.set_terms_and_conditions(frm);
     },
 	get_pos(frm,item){
-	    var prev_item = frm.doc.items[item.idx-2];
+	    var ldPrevItem = frm.doc.items[item.idx-2];
   // If Previous Item is available(eg DTTZ2N-1600/10/6/75)
 	    // Then find the item group
 	    // If parent item group is Accessories or item group is Servies then add .1 to the pos(eg from 10 to 10.1 or 10.1 to 10.2)
@@ -97,7 +112,7 @@ frappe.ui.form.on('Quotation', {
 	    // and add 10 to it( eg 10.4 will become 20)
 	    // Carry forward the Main item Quantity(Items with whole 10s ie item groups other than Accessories and Services)
 	    // to sub items.
-	    if(prev_item){
+	    if(ldPrevItem){
 	        frappe.call({
 	         	"method": "frappe.client.get",
         		"args": {"doctype": "Item", "name": item.item_code, async: false, fields:['item_group']},
@@ -105,11 +120,11 @@ frappe.ui.form.on('Quotation', {
         		    frappe.db.get_value("Item Group", {"name":response.message.item_group}, "old_parent", function(itemgroup){
 
         		        if(itemgroup.old_parent=='Accessories' || response.message.item_group=='Services'){
-            	            item.pos = prev_item.pos + 1/10;
-            	            item.qty = prev_item.qty;
+            	            item.pos = ldPrevItem.pos + 1/10;
+            	            item.qty = ldPrevItem.qty;
             	            frm.refresh_fields();
     	                }else {
-        	                item.pos = Math.floor(prev_item.pos) + 10;
+        	                item.pos = Math.floor(ldPrevItem.pos) + 10;
             	            frm.refresh_fields();
     	                }
         		    });
