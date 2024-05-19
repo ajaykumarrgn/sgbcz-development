@@ -28,13 +28,26 @@ export default [
           },
           {
             selector: "FunctionDeclaration > Identifier",
-            message: "Function names should start with 'im' and follow camelCase",
+            message: "Function names should start with 'fn' and follow camelCase",
           },
           {
             selector: "FunctionDeclaration",
             message: "Function names should start with 'fn' and follow camelCase",
           },
+          {
+            selector: "FunctionDeclaration > Identifier[name=/^(?!im)/]",
+            message: "Function parameter names should start with 'im'"
+          },
+          {
+            selector: "FunctionExpression > Identifier[name=/^(?!im)/]",
+            message: "Function parameter names should start with 'im'"
+          },
+          {
+            selector: "ArrowFunctionExpression > Identifier[name=/^(?!im)/]",
+            message: "Function parameter names should start with 'im'"
+          }
         ],
+        "max-len": ["warn", { "code": 90 }],
         "no-invalid-this": "off",
         "no-console": "off",
       },
