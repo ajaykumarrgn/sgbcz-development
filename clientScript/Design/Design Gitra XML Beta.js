@@ -1,89 +1,89 @@
 frappe.ui.form.on('Design', {
 	validate(frm) {
-	    function add_tappings_xml(frm, xml, tappingNodes){
+	    function fnAddTappingsXml(frm, iXml, iaTappingNodes){
 	       
 
             // Parse the XML template to JavaScript object
-            let xmlDoc = new DOMParser().parseFromString(xml, 'text/xml');
-            var nodeList = xmlDoc.getElementsByTagName('TGtExportEDSAuftragStellungenListe');
+            let loXmlDoc = new DOMParser().parseFromString(iXml, 'text/xml');
+            var lNodeList = loXmlDoc.getElementsByTagName('TGtExportEDSAuftragStellungenListe');
             // Check if the element exists
-            if (nodeList.length > 0) {
-                var targetNode = nodeList[0];
+            if (lNodeList.length > 0) {
+                var lTargetNode = lNodeList[0];
     
                 // Add the new nodes to the target element
-                tappingNodes.forEach(function(nodeData) {
-                    var newNode = xmlDoc.createElement('TGtExportEDSAuftragStellung');
-                    newNode.setAttribute('nodetype', 'class')
-                    var spannungNode = xmlDoc.createElement('spannung');
-                    spannungNode.setAttribute('nodetype','property')
-                    spannungNode.setAttribute('datatype','xs:double')
-                    var spannungText = xmlDoc.createTextNode(nodeData.spannung);
-                    spannungNode.appendChild(spannungText);
-                    newNode.appendChild(spannungNode);
-                    targetNode.appendChild(newNode);
-                    targetNode.appendChild(xmlDoc.createTextNode('\n'));
+                iaTappingNodes.forEach(function(iNodeData) {
+                    var lNewNode = loXmlDoc.createElement('TGtExportEDSAuftragStellung');
+                    lNewNode.setAttribute('nodetype', 'class')
+                    var lSpannungNode = loXmlDoc.createElement('spannung');
+                    lSpannungNode.setAttribute('nodetype','property')
+                    lSpannungNode.setAttribute('datatype','xs:double')
+                    var lSpannungText = loXmlDoc.createTextNode(iNodeData.spannung);
+                    lSpannungNode.appendChild(lSpannungText);
+                    lNewNode.appendChild(lSpannungNode);
+                    lTargetNode.appendChild(lNewNode);
+                    lTargetNode.appendChild(loXmlDoc.createTextNode('\n'));
                 });
             }
             // Convert the XML document to a string
-            var xmlString = new XMLSerializer().serializeToString(xmlDoc);
-            //return xmlString;
-            return formatXml(xmlString);
+            var lXmlString = new XMLSerializer().serializeToString(loXmlDoc);
+            //return lXmlString;
+            return fnFormatXml(lXmlString);
 	    }
-        function formatXml(xml, tab) { // tab = optional indent value, default is tab (\t)
-            var formatted = '', indent= '';
-            tab = tab || '\t';
-            xml.split(/>\s*</).forEach(function(node) {
-                if (node.match( /^\/\w/ )) indent = indent.substring(tab.length); // decrease indent by one 'tab'
-                    formatted += indent + '<' + node + '>\r\n';
-                if (node.match( /^<?\w[^>]*[^\/]$/ )) indent += tab;              // increase indent
+        function fnFormatXml(iXml, iTab) { // tab = optional indent value, default is tab (\t)
+            var lFormatted = '', lIndent= '';
+            iTab = iTab || '\t';
+            iXml.split(/>\s*</).forEach(function(iNode) {
+                if (iNode.match( /^\/\w/ )) lIndent = lIndent.substring(iTab.length); // decrease indent by one 'tab'
+                    lFormatted += lIndent + '<' + iNode + '>\r\n';
+                if (iNode.match( /^<?\w[^>]*[^\/]$/ )) lIndent += iTab;              // increase indent
             });
-            return formatted.substring(1, formatted.length-3);
+            return lFormatted.substring(1, lFormatted.length-3);
         }
 
-        function get_tapping_nodes(frm, tappingNodes, tapping, sign){
+        function fnGetTappingNodes(frm, iaTappingNodes, iTapping, iSign){
             
-            for(var i=1; i<=frm.doc[tapping]; i++){
+            for(var i=1; i<=frm.doc[iTapping]; i++){
                 
-                var tappingNode = {spannung:''}
-                var tapping_step = tapping + '_step'
-                tappingNode.spannung =  frm.doc.hv_rated_voltage + sign*i*frm.doc[tapping_step]*frm.doc.hv_rated_voltage/100
-                tappingNodes.push(tappingNode)
+                var ldTappingNode = {spannung:''}
+                var lTappingStep = iTapping + '_step'
+                ldTappingNode.spannung =  frm.doc.hv_rated_voltage + iSign*i*frm.doc[lTappingStep]*frm.doc.hv_rated_voltage/100
+                iaTappingNodes.push(ldTappingNode)
             }
-            return tappingNodes
+            return iaTappingNodes
         }
         
         //only provide gitra intragration for DTTHZ2N transformer
         
         if(frm.doc.factory === 'SGBCZ' && frm.doc.transformer_type === 'DTTHZ2N'){
-        var doctype = "Gitra Settings";
-    	// Initialize the model with doctype Gitra Settings
-        frappe.model.with_doc(doctype, doctype, function() {
-            // Then from the model get the list. This will return all attributes of the model including child table    
-            var values = frappe.model.get_list(doctype);
-            // Regular expression pattern to match variables in double curly braces
-            var pattern = /\{\{([\w.]+)\}\}/g;
-        
-            // Resolve expressions and variables
-            var xml = values[0].gitra_xml.replace(pattern, function(match, variable) {
-                var value = '';
-                if(variable==='frm.doc.k4_factor'){
-                    var k4 = frm.doc.k4_factor == "Yes" ? '6395' : '6396';
-                    value = k4;
-                } else {
-                    value = eval(variable);
-                }
-                return value || '';
-            });
-            let tappingNodes = [];
-            tappingNodes = get_tapping_nodes(frm,tappingNodes,'tapping_minus', -1);
-            tappingNodes = get_tapping_nodes(frm,tappingNodes,'tapping_plus', 1);
+            var lDoctype = "Gitra Settings";
+            // Initialize the model with doctype Gitra Settings
+            frappe.model.with_doc(lDoctype, lDoctype, function() {
+                // Then from the model get the list. This will return all attributes of the model including child table    
+                var laValues = frappe.model.get_list(lDoctype);
+                // Regular expression pattern to match variables in double curly braces
+                var lPattern = /\{\{([\w.]+)\}\}/g;
             
-            var xmlString = add_tappings_xml(frm,xml,tappingNodes)
-            frm.doc.gitra_xml = xmlString;
+                // Resolve expressions and variables
+                var lXml = laValues[0].gitra_xml.replace(lPattern, function(match, iVariable) {
+                    var lValue = '';
+                    if(iVariable==='frm.doc.k4_factor'){
+                        var lk4 = frm.doc.k4_factor == "Yes" ? '6395' : '6396';
+                        lValue = lk4;
+                    } else {
+                        lValue = eval(iVariable);
+                    }
+                    return lValue || '';
+                });
+                let laTappingNodes = [];
+                laTappingNodes = fnGetTappingNodes(frm,laTappingNodes,'tapping_minus', -1);
+                laTappingNodes = fnGetTappingNodes(frm,laTappingNodes,'tapping_plus', 1);
+                
+                var lXmlString = fnAddTappingsXml(frm,lXml,laTappingNodes)
+                frm.doc.gitra_xml = lXmlString;
+                
+            })
             
-        })
-        
-        frm.refresh_fields();
+            frm.refresh_fields();
         }
 	}
 })

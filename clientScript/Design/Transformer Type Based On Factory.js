@@ -1,48 +1,50 @@
 frappe.ui.form.on('Design', {
     onload(frm) {
-        if (frm.doc.status === 'Calculation Received' && !frm.doc.factory || !frm.doc.transformer_type) {
-            frm.set_value('factory', 'SGBCZ');
-            frm.set_value('transformer_type', 'DTTHZ2N');
-            frm.save()
-            fnUpdateButtonGroup(frm);
+        
+        //if form is not new check the status
+        //if status is Calculation Received & factory or transformer_type is not set
+        //set the default value SGBCZ, DTTHZ2N for factory & transformer_type respectively
+        
+        if(!frm.is_new()){
+            if (frm.doc.status === 'Calculation Received' && (!frm.doc.factory || !frm.doc.transformer_type)) {
+                frm.set_value('factory', 'SGBCZ');
+                frm.set_value('transformer_type', 'DTTHZ2N');
+                if(frm.doc.item){
+                    frm.set_value('status', 'Item Created');
+                }
+                frm.save();
+                fnUpdateButtonGroup(frm);
+            }
         }
-
-        // frappe.call({
-        //     method: "get_item_variant_based_on_factory",
-        //     args: { "factory": 'SGBCZ' },
-        //     callback: function(response) {
-        //         if (response.message) {
-        //             frm.set_df_property('transformer_type', 'options', response.message);
-        //             // Set a default value if it's one of the options
-        //             if (response.message.includes('DTTHZ2N')) {
-        //                 frm.set_value('transformer_type', 'DTTHZ2N');
-        //             } else {
-        //                 frm.set_value('transformer_type', response.message[0]);
-        //             }
-                    
-        //         }
-        //     }
-        // });
     },
 
     factory(frm) {
+        
+        //logic to show or hide is design checkbox
         if (frm.doc.factory != 'SGBCZ') {
+            frm.set_value('is_design', 0);
             frm.set_df_property('is_design', 'hidden', 1);
         } else {
             frm.set_df_property('is_design', 'hidden', 0);
         }
-
+        
+        //Mapped factory with item group
         const ldTransformerMapping = {
             "SGBCZ": "DTTHZ2N",
             "RGB": "RGB"
         };
 
-        var lxmlDataTab = document.getElementById('design-xml_data_tab-tab');
+        //get the item group for the selected factory and
+        //XML Data Tab DOM Element
+        
+        var lXmlDataTab = document.getElementById('design-xml_data_tab-tab');
         const lGetItemGroup = ldTransformerMapping[frm.doc.factory];
+        
+        //logic to show or hide XML Data Tab
         if (frm.doc.factory != "SGBCZ") {
-            lxmlDataTab.hidden = true;
+            lXmlDataTab.hidden = true;
         } else {
-            lxmlDataTab.hidden = false;
+            lXmlDataTab.hidden = false;
         }
 
         //get the current transformer_type
@@ -73,12 +75,12 @@ frappe.ui.form.on('Design', {
     },
 
     is_design(frm) {
-        // Update button group whenever the checkbox is enabled
+        // Update button whenever the checkbox is enabled
         fnUpdateButtonGroup(frm);
     },
 
     status(frm) {
-        // Update button group whenever the status field changes
+        // Update button whenever the status field changes
         fnUpdateButtonGroup(frm);
     }
 });
@@ -89,7 +91,7 @@ function fnUpdateButtonGroup(frm) {
     let iShowCreateDesign = false;
     let iShowViewItem = false;
 
-    // Determine which buttons to show based on status
+    // Determine which button to show based on status
     if (lStatus === 'Draft' && frm.doc.is_design === 1) {
         iShowCreateDesign = true;
     } else if (lStatus === 'Draft' && frm.doc.is_design === 0) {
@@ -108,13 +110,13 @@ function fnUpdateButtonGroup(frm) {
     fnShowButtonGroup(frm, iShowCreateItem, iShowCreateDesign, iShowViewItem);
 }
 
-// Function to show or hide specific buttons in the custom button group
+// Function to show or hide specific button
 function fnShowButtonGroup(frm, iShowCreateItem, iShowCreateDesign, iShowViewItem) {
     // Clear all custom buttons
     frm.clear_custom_buttons();
     // frm.remove_custom_button(__('Create Design'))
     
-    // // Add 'Create Item' button if needed
+    //'Create Item' button with item and pdf creation logic
     if (iShowCreateItem) {
 
           frm.add_custom_button(__("Create Item"), function() {
@@ -151,12 +153,13 @@ function fnShowButtonGroup(frm, iShowCreateItem, iShowCreateDesign, iShowViewIte
                                                 "callback": function(pdfResponse){
                                                     if(pdfResponse.message){
                                                         // frappe.msgprint("The item is created and the PDF is attached successfully.")
-                                                        frappe.hide_progress()
+                                                        frappe.hide_progress();
                                                         frm.set_value('status', 'Item Created');
+                                                        frm.save();
                                                     }
                                                 }
                                         });
-                		    })
+                		    });
                             
                 		      //  var delivery_note = response.message.parent;
                 		      //  frappe.set_route('delivery-note', delivery_note);
@@ -170,14 +173,15 @@ function fnShowButtonGroup(frm, iShowCreateItem, iShowCreateDesign, iShowViewIte
     }
     
 
-    // Add 'Create Design' button if needed
+    //'Create Design' button
     if (iShowCreateDesign) {
         frm.add_custom_button(__('Create Design'), function() {
-            frappe.msgprint('Create Design clicked!');
+            frm.set_value('status', 'Perform Calculation');
+            frm.save();
         });
     }
 
-    // // Add 'View Item' button if needed
+    //'View Item' button with routing logic to created item
     if (iShowViewItem) {
        frm.add_custom_button(__('View Item'), function() {
             frappe.set_route('item', frm.doc.item);
