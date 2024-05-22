@@ -13,10 +13,10 @@ frappe.ui.form.on('Design', {
                 // Add the new nodes to the target element
                 iaTappingNodes.forEach(function(iNodeData) {
                     var lNewNode = loXmlDoc.createElement('TGtExportEDSAuftragStellung');
-                    lNewNode.setAttribute('nodetype', 'class')
+                    lNewNode.setAttribute('nodetype', 'class');
                     var lSpannungNode = loXmlDoc.createElement('spannung');
-                    lSpannungNode.setAttribute('nodetype','property')
-                    lSpannungNode.setAttribute('datatype','xs:double')
+                    lSpannungNode.setAttribute('nodetype','property');
+                    lSpannungNode.setAttribute('datatype','xs:double');
                     var lSpannungText = loXmlDoc.createTextNode(iNodeData.spannung);
                     lSpannungNode.appendChild(lSpannungText);
                     lNewNode.appendChild(lSpannungNode);
@@ -44,12 +44,12 @@ frappe.ui.form.on('Design', {
             
             for(var i=1; i<=frm.doc[iTapping]; i++){
                 
-                var ldTappingNode = {spannung:''}
-                var lTappingStep = iTapping + '_step'
-                ldTappingNode.spannung =  frm.doc.hv_rated_voltage + iSign*i*frm.doc[lTappingStep]*frm.doc.hv_rated_voltage/100
-                iaTappingNodes.push(ldTappingNode)
+                var ldTappingNode = {spannung:''};
+                var lTappingStep = iTapping + '_step';
+                ldTappingNode.spannung =  frm.doc.hv_rated_voltage + iSign*i*frm.doc[lTappingStep]*frm.doc.hv_rated_voltage/100;
+                iaTappingNodes.push(ldTappingNode);
             }
-            return iaTappingNodes
+            return iaTappingNodes;
         }
         
         //only provide gitra intragration for DTTHZ2N transformer
@@ -78,12 +78,12 @@ frappe.ui.form.on('Design', {
                 laTappingNodes = fnGetTappingNodes(frm,laTappingNodes,'tapping_minus', -1);
                 laTappingNodes = fnGetTappingNodes(frm,laTappingNodes,'tapping_plus', 1);
                 
-                var lXmlString = fnAddTappingsXml(frm,lXml,laTappingNodes)
+                var lXmlString = fnAddTappingsXml(frm,lXml,laTappingNodes);
                 frm.doc.gitra_xml = lXmlString;
                 
-            })
+            });
             
             frm.refresh_fields();
         }
 	}
-})
+});
