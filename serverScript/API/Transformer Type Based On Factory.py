@@ -9,3 +9,4 @@ la_item_names = [item['name'] for item in la_item_variants]
 frappe.flags = la_item_names
 
 frappe.response['message'] = la_item_names
+

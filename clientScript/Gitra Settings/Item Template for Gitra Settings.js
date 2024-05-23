@@ -30,6 +30,7 @@ function fnTabManipulation(frm){
        lCostSettingsTab.hidden = false         
        lIpProtectionTab.hidden = false
    }
+   
 }
 
 function fnfetchItemsFromAPI(frm) {

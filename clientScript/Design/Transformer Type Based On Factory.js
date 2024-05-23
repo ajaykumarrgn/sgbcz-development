@@ -6,7 +6,8 @@ frappe.ui.form.on('Design', {
         //set the default value SGBCZ, DTTHZ2N for factory & transformer_type respectively
         
         if(!frm.is_new()){
-            if (frm.doc.status === 'Calculation Received' && (!frm.doc.factory || !frm.doc.transformer_type)) {
+            if (frm.doc.status === 'Calculation Received' && 
+            (!frm.doc.factory || !frm.doc.transformer_type)) {
                 frm.set_value('factory', 'SGBCZ');
                 frm.set_value('transformer_type', 'DTTHZ2N');
                 if(frm.doc.item){
@@ -116,6 +117,16 @@ function fnShowButtonGroup(frm, iShowCreateItem, iShowCreateDesign, iShowViewIte
     frm.clear_custom_buttons();
     // frm.remove_custom_button(__('Create Design'))
     
+    if (frm.doc.status === 'Draft' && frm.doc.is_design === 0) {
+            // Make 'direct_material_cost' editable and mandatory
+            frm.set_df_property('direct_material_cost', 'read_only', 0);
+            frm.set_df_property('direct_material_cost', 'reqd', 1);
+        } else {
+            // Make 'direct_material_cost' read-only and not mandatory
+            frm.set_df_property('direct_material_cost', 'read_only', 1);
+            frm.set_df_property('direct_material_cost', 'reqd', 0);
+        }
+    
     //'Create Item' button with item and pdf creation logic
     if (iShowCreateItem) {
 
@@ -124,7 +135,7 @@ function fnShowButtonGroup(frm, iShowCreateItem, iShowCreateDesign, iShowViewIte
                  frappe.call({
         	         	"method": "create_item_from_design",
                  		"args": {
-                		    "design": frm.doc.name, 
+                		    "design": frm.doc.name 
                  		},
                 		"callback": function(response) {
                 		    if(response.message) {
