@@ -83,6 +83,14 @@ frappe.ui.form.on('Design', {
     status(frm) {
         // Update button whenever the status field changes
         fnUpdateButtonGroup(frm);
+    },
+    item(frm){
+        if(!frm.doc.item && frm.doc.status === "Item Created"){
+            frm.set_value('status', 'Calculation Received');
+            frm.save().then(function() {
+                fnUpdateButtonGroup(frm);
+            });
+        }
     }
 });
 
@@ -104,7 +112,6 @@ function fnUpdateButtonGroup(frm) {
     }else if (lStatus === 'Item Created' && !frm.doc.item) {
         iShowViewItem = false;
         iShowCreateItem = true;
-         frm.set_value('status', 'Calculation Received');
     }
 
     // Show or hide buttons accordingly
