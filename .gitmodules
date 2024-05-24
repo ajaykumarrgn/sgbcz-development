@@ -1,0 +1,3 @@
+[submodule "testAutomate"]
+	path = testAutomate
+	url = https://github.com/lmnaslimited/lens-test-automation.git
