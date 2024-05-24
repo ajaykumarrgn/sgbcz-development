@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 dotenv.config();
 
-const baseFolder = 'clientScript';
+const baseFolder = '../clientScript';
 
 const myHeaders = new Headers();
 myHeaders.append("Authorization", process.env.KEY);
@@ -49,7 +49,7 @@ function processFilesInFolder(folderPath, parentFolder = null) {
         for (const file of files) {
             const filePath = path.join(folderPath, file);
             const stats = fs.statSync(filePath);
-            //const fileExtension = path.extname(file).toLowerCase();
+            //wconst fileExtension = path.extname(file).toLowerCase();
             //const folderName = path.basename(folderPath); // Define folderName within the scope of the loop
 
             const metaFilePath = path.join(folderPath, `${file.replace(/\.js$/, '')}.meta`); // Move this line outside the if block
@@ -73,12 +73,6 @@ function processFilesInFolder(folderPath, parentFolder = null) {
                         } else {
                             try {
                                 metaContent = JSON.parse(metaContent); // Parse the JSON content of .meta file
-                                delete metaContent.name;
-                                delete metaContent.owner;
-                                delete metaContent.modified;
-                                delete metaContent.modified_by;
-                                delete metaContent.roles;
-                                delete metaContent.creation;
                             } catch (error) {
                                 console.error(`Error parsing meta file ${metaFilePath}: ${error}`);
                                 console.log(`Skipping file ${file} due to invalid meta content`);
@@ -94,7 +88,7 @@ function processFilesInFolder(folderPath, parentFolder = null) {
                             method: 'PUT',
                             headers: myHeaders,
                             body: JSON.stringify({
-                                filename: postFilename,
+                                filename: encodedFilename,
                                 script: fileContent,
 
                             }),

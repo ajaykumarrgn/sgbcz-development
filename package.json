@@ -5,9 +5,9 @@
   "main": "getClientScript.js",
   "type": "module",
   "scripts": {
-    "start": "node putClientScript.js && node putServerScript.js && node putReport.js",
-    "get": "node getClientScript.js && node getServerScript.js && node getReport.js",
-    "upload": "node uploadClientScript.js && node uploadServerScript.js && node uploadReport.js",
+    "start": "cd files && node putClientScript.js && node putServerScript.js && node putReport.js",
+    "get": "cd files && node getClientScript.js && node getServerScript.js && node getReport.js",
+    "upload": "cd files && node uploadClientScript.js && node uploadServerScript.js && node uploadReport.js",
     "test": "npx cypress run --spec=cypress/e2e/*.cy.js --config-file=cypress.config.cjs"
   },
   "author": "Your Name",
