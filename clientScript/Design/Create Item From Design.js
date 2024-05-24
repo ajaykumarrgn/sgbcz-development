@@ -25,7 +25,6 @@ frappe.ui.form.on('Design', {
         		//Add the "Create Item" button in Sales Order
         	    frm.add_custom_button(__("Create Item"), function() {
                 // When this button is clicked,
-                //  console.log('Inside Create Item From Design', frm.doc.name);
                  frappe.call({
         	         	"method": "create_item_from_design",
                  		"args": {
@@ -33,13 +32,38 @@ frappe.ui.form.on('Design', {
                  		},
                 		"callback": function(response) {
                 		    if(response.message) {
-                                frappe.show_alert({
-                                    message:__('Item Created'),
-                                    indicator:'green'
-                                }, 5);
-                                frm.set_value('item', response.message.item_code);
-                                frm.refresh_fields();
-                                frm.save();
+                		        frappe.show_alert({
+                                            message: __('Item Created'),
+                                            indicator: 'green'
+                                        }, 5);
+                                        frm.set_value('item', response.message.item_code);
+                                        frm.refresh_fields();
+                                        frm.save().then(function(){
+                                            // frappe.msgprint('Please wait, PDF generation has started.');
+                                            frappe.show_progress('Creating with Pdf..', 50, 100, 'Please wait');  
+                                            // After saving, call the fn_pdf_attachment method
+                                            const LA_LANGUAGES = ["de", "cs","fr", "en"];
+                                            frappe.call({
+                                                "method": "pdf_on_submit.api.fn_doc_pdf_source_to_target",
+                                                "args": {
+                                                    "im_source_doc_type": frm.doc.doctype,
+                                                    "im_source_doc_name": frm.doc.name,
+                                                    "im_languages": LA_LANGUAGES,
+                                                    // "im_print_format": null,
+                                                    "im_letter_head": "Data Sheet",
+                                                    "im_target_doc_type": "Item",
+                                                    "im_target_doc_name": response.message.item_code
+                                                },
+                                                "callback": function(pdfResponse){
+                                                    if(pdfResponse.message){
+                                                        // frappe.msgprint("The item is created and the PDF is attached successfully.")
+                                                        frappe.hide_progress()
+                                                        
+                                                    }
+                                                }
+                                        });
+                		    })
+                            
                 		      //  var delivery_note = response.message.parent;
                 		      //  frappe.set_route('delivery-note', delivery_note);
                 		    }else{                        
