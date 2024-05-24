@@ -6,10 +6,10 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process'; 
-dotenv.config();
+dotenv.config({path: '../.env'});
 
 
-const baseFolder = 'reports';
+const baseFolder = '../reports';
 
 const myHeaders = new Headers();
 myHeaders.append("Authorization", process.env.KEY)
@@ -118,9 +118,8 @@ async function processFilesInFolder(folderPath, baseFolder) {
         delete metaContentPut.owner;
         delete metaContentPut.modified;
         delete metaContentPut.modified_by;
-        delete metaContentPut.creation;
         delete metaContentPut.roles;
-
+        delete metaContentPut.creation;
         const encodedFilename = encodeURIComponent(file.replace(new RegExp(`\\${fileExtension}$`), ''));
 
         const requestOptions = {
