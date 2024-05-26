@@ -25,7 +25,6 @@ frappe.ui.form.on('Design', {
                                         frm.set_value('item', response.message.item_code);
                                         frm.refresh_fields();
                                         frm.save().then(function(){
-                                            // frappe.msgprint('Please wait, PDF generation has started.');
                                             frappe.show_progress('Creating with Pdf..', 50, 100, 'Please wait');  
                                             // After saving, call the fn_pdf_attachment method
                                             const LA_LANGUAGES = ["de", "cs","fr", "en"];
@@ -42,7 +41,6 @@ frappe.ui.form.on('Design', {
                                                 },
                                                 "callback": function(pdfResponse){
                                                     if(pdfResponse.message){
-                                                        // frappe.msgprint("The item is created and the PDF is attached successfully.")
                                                         frappe.hide_progress()
                                                         
                                                     }
