@@ -25,7 +25,7 @@ frappe.ui.form.on('Design', {
                                         frm.set_value('item', response.message.item_code);
                                         frm.refresh_fields();
                                         frm.save().then(function(){
-                                            frappe.show_progress('Creating with Pdf..', 50, 100, 'Please wait');  
+                                            frappe.show_progress(__('Creating with Pdf..'), 50, 100, __('Please wait'));  
                                             // After saving, call the fn_pdf_attachment method
                                             const LA_LANGUAGES = ["de", "cs","fr", "en"];
                                             frappe.call({
