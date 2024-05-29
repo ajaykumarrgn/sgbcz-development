@@ -97,6 +97,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true # Fetch all submodules recursively
+          token: ${{ secrets.TEST_REPO_KEY }} # Use PAT for accessing private submodules
 
       - name: Read Commit Hash
         id: read_commit_hash
