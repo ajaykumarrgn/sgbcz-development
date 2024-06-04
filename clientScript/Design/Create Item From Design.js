@@ -19,34 +19,48 @@ frappe.ui.form.on('Design', {
                 		"callback": function(response) {
                 		    if(response.message) {
                 		        frappe.show_alert({
-                                            message: __('Item Created'),
-                                            indicator: 'green'
+                                    message: __('Item Created'),
+                                    indicator: 'green'
                                         }, 5);
-                                        frm.set_value('item', response.message.item_code);
-                                        frm.refresh_fields();
-                                        frm.save().then(function(){
-                                            frappe.show_progress(__('Creating with Pdf..'), 50, 100, __('Please wait'));  
-                                            // After saving, call the fn_pdf_attachment method
-                                            const LA_LANGUAGES = ["de", "cs","fr", "en"];
-                                            frappe.call({
-                                                "method": "pdf_on_submit.api.fn_doc_pdf_source_to_target",
-                                                "args": {
-                                                    "im_source_doc_type": frm.doc.doctype,
-                                                    "im_source_doc_name": frm.doc.name,
-                                                    "im_languages": LA_LANGUAGES,
-                                                    // "im_print_format": null,
-                                                    "im_letter_head": "Data Sheet",
-                                                    "im_target_doc_type": "Item",
-                                                    "im_target_doc_name": response.message.item_code
-                                                },
-                                                "callback": function(pdfResponse){
-                                                    if(pdfResponse.message){
-                                                        frappe.hide_progress()
+                                    frm.set_value('item', response.message.item_code);
+                                    frm.refresh_fields();
+                                    frm.save().then(function(){
+                                        frappe.show_progress(__('Creating with Pdf..'), 50, 100, __('Please wait'));  
+                                        // After saving, call the fn_pdf_attachment method
+                                        const LA_LANGUAGES = ["de", "cs","fr", "en"];
+                                        //using the design title as filename
+                                        let l_title = frm.doc.title;
+
+                                        if (l_title) {
+                                           // Find the position of the first space
+                                            let l_space_index = l_title.indexOf(' ');
+                                            // Remove everything up to the first space
+                                            if (l_space_index !== -1) {
+                                                l_title = l_title.substring(l_space_index + 1);
+                                            }
+                                            // Replace slashes with underscores
+                                            l_title = l_title.replace(/\//g, '_');
+                                        }
+                                        frappe.call({
+                                            "method": "pdf_on_submit.api.fn_doc_pdf_source_to_target",
+                                            "args": {
+                                                "im_source_doc_type": frm.doc.doctype,
+                                                "im_source_doc_name": frm.doc.name,
+                                                "im_languages": LA_LANGUAGES,
+                                                // "im_print_format": null,
+                                                "im_letter_head": "Data Sheet",
+                                                "im_target_doc_type": "Item",
+                                                "im_target_doc_name": response.message.item_code,
+                                                "im_file_name": `Datasheet_${l_title}_${frm.doc.name}_{language}`
+                                            },
+                                            "callback": function(pdfResponse){
+                                                if(pdfResponse.message){
+                                                    frappe.hide_progress()
                                                         
-                                                    }
-                                                }
-                                        });
-                		    })
+                                                 }
+                                            }
+                                });
+                	    })
                             
                 		    }else{                        
                 		        frappe.show_alert({
