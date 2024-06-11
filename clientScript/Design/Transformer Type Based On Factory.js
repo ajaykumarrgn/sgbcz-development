@@ -32,7 +32,8 @@ frappe.ui.form.on('Design', {
         //Mapped factory with item group
         const ldTransformerMapping = {
             "SGBCZ": "DTTHZ2N",
-            "RGB": "RGB"
+            "RGB": "RGB",
+            "NEUMARK": "NEU"
         };
 
         //get the item group for the selected factory and
@@ -154,7 +155,7 @@ function fnShowButtonGroup(frm, iShowCreateItem, iShowCreateDesign, iShowViewIte
                                         frm.refresh_fields();
                                         frm.save().then(function(){
                                             // frappe.msgprint('Please wait, PDF generation has started.');
-                                            frappe.show_progress('Creating Data Sheet Pdf..', 50, 100, 'Please wait');  
+                                            frappe.show_progress(__('Creating Data Sheet Pdf..'), 50, 100, __('Please wait'));  
                                             // After saving, call the fn_pdf_attachment method
                                             const LA_LANGUAGES = ["de", "cs","fr", "en"];
                                             frappe.call({
@@ -163,8 +164,8 @@ function fnShowButtonGroup(frm, iShowCreateItem, iShowCreateDesign, iShowViewIte
                                                     "im_source_doc_type": frm.doc.doctype,
                                                     "im_source_doc_name": frm.doc.name,
                                                     "im_languages": LA_LANGUAGES,
-                                                    "im_print_format": null,
-                                                    "im_letter_head": null,
+                                                    // "im_print_format": null,
+                                                    "im_letter_head": "Data Sheet",
                                                     "im_target_doc_type": "Item",
                                                     "im_target_doc_name": response.message.item_code
                                                 },
