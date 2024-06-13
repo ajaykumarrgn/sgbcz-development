@@ -3,32 +3,36 @@ frappe.ui.form.on('Gitra Settings', {
         // Fetch items from the API
         fnfetchItemsFromAPI(frm);
 
-        //hide the xml, cost settings and ip protection tab if the transformer type is not DTTHZ2N
-       fnTabManipulation(frm)
+        //hide the xml, cost settings and ip protection tab 
+        //if the transformer type is not DTTHZ2N
+       fnTabManipulation(frm);
     },
 
     transformer_type(frm){
-        //hide the xml, cost settings and ip protection tab if the transformer type is not DTTHZ2N
-       fnTabManipulation(frm)
+        //hide the xml, cost settings and ip protection tab 
+        //if the transformer type is not DTTHZ2N
+       fnTabManipulation(frm);
    }
 });
 
+//this function is responsible for hidding XML, Cost and ip tab
 function fnTabManipulation(frm){
-    var lXmlTab = document.getElementById('gitra-settings-xml_tab-tab')
-    var lCostSettingsTab = document.getElementById('gitra-settings-cost_settings_tab-tab')
-    var lIpProtectionTab = document.getElementById('gitra-settings-ip_protection_tab-tab')
+    var lXmlTab = document.getElementById('gitra-settings-xml_tab-tab');
+    var lCostSettingsTab = document.getElementById('gitra-settings-cost_settings_tab-tab');
+    var lIpProtectionTab = document.getElementById('gitra-settings-ip_protection_tab-tab');
 
-     //hide the xml, cost settings and ip protection tab if the transformer type is not DTTHZ2N
+     //hide the xml, cost settings and ip protection tab 
+     //if the transformer type is not DTTHZ2N
    if(frm.doc.transformer_type != 'DTTHZ2N'){
       
-       lXmlTab.hidden = true          
-       lCostSettingsTab.hidden = true          
-       lIpProtectionTab.hidden = true
+       lXmlTab.hidden = true;         
+       lCostSettingsTab.hidden = true;          
+       lIpProtectionTab.hidden = true;
    }else{
        
-       lXmlTab.hidden = false
-       lCostSettingsTab.hidden = false         
-       lIpProtectionTab.hidden = false
+       lXmlTab.hidden = false;
+       lCostSettingsTab.hidden = false;         
+       lIpProtectionTab.hidden = false;
    }
    
 }
@@ -39,7 +43,7 @@ function fnfetchItemsFromAPI(frm) {
     frappe.call({
         "method": "get_item_template",
         "args": {
-            "i_item_groups": laItemGroups,
+            "i_item_groups": laItemGroups
         },
         "callback": function(response) {
             //console.log(response)

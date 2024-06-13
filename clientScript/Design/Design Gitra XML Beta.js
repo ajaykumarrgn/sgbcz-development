@@ -28,13 +28,15 @@ frappe.ui.form.on('Design', {
             //return lXmlString;
             return fnFormatXml(lXmlString);
 	    }
-        function fnFormatXml(iXml, iTab) { // tab = optional indent value, default is tab (\t)
+        function fnFormatXml(iXml, iTab) { 
+            // tab = optional indent value, default is tab (\t)
             var lFormatted = '', lIndent= '';
             iTab = iTab || '\t';
             iXml.split(/>\s*</).forEach(function(iNode) {
-                if (iNode.match( /^\/\w/ )) lIndent = lIndent.substring(iTab.length); // decrease indent by one 'tab'
+                // decrease indent by one 'tab'
+                if (iNode.match( /^\/\w/ )) lIndent = lIndent.substring(iTab.length); 
                     lFormatted += lIndent + '<' + iNode + '>\r\n';
-                if (iNode.match( /^<?\w[^>]*[^\/]$/ )) lIndent += iTab;              // increase indent
+                if (iNode.match( /^<?\w[^>]*[^\/]$/ )) lIndent += iTab; // increase indent
             });
             return lFormatted.substring(1, lFormatted.length-3);
         }
@@ -45,7 +47,8 @@ frappe.ui.form.on('Design', {
                 
                 var ldTappingNode = {spannung:''};
                 var lTappingStep = iTapping + '_step';
-                ldTappingNode.spannung =  frm.doc.hv_rated_voltage + iSign*i*frm.doc[lTappingStep]*frm.doc.hv_rated_voltage/100;
+                ldTappingNode.spannung =  frm.doc.hv_rated_voltage + 
+                    iSign*i*frm.doc[lTappingStep]*frm.doc.hv_rated_voltage/100;
                 iaTappingNodes.push(ldTappingNode);
             }
             return iaTappingNodes;
@@ -57,9 +60,12 @@ frappe.ui.form.on('Design', {
             var lDoctype = "Gitra Settings";
             // Initialize the model with doctype Gitra Settings
             frappe.model.with_doc(lDoctype, lDoctype, function() {
-                // Then from the model get the list. This will return all attributes of the model including child table    
+                // Then from the model get the list. 
+                //This will return all attributes of the model 
+                //including child table    
                 var laValues = frappe.model.get_list(lDoctype);
-                // Regular expression pattern to match variables in double curly braces
+                // Regular expression pattern to match variables 
+                //in double curly braces
                 var lPattern = /\{\{([\w.]+)\}\}/g;
             
                 // Resolve expressions and variables

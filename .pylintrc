@@ -1,0 +1,21 @@
+[MASTER]
+reports=no
+
+[MESSAGES CONTROL]
+disable=C0103,E0602
+
+[BASIC]
+
+[FORMAT]
+
+# Regular expression for variable names - enforcing lowercase letters and underscores only
+variable-rgx=^(l|la|ld)_[a-z_]+$
+
+# Regular expression for function names - enforcing lowercase letters and underscores only
+function-rgx=^fn_[a-z_]+$
+
+# Regular expression for function argument names - enforcing "im_" or "i_" followed by lowercase letters and underscores only
+argument-rgx=^(im|i)_[a-z_]+$
+
+# Regular expression for constant names - enforcing the same naming convention as variables
+const-rgx=^(l|la|ld)_[a-z_]+$
