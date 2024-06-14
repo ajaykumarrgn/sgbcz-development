@@ -15,7 +15,9 @@ frappe.ui.form.on('Gitra Settings', {
    }
 });
 
-//this function is responsible for hidding XML, Cost and ip tab
+//XML, Cost Setting and Ip protection tab
+//is only for DTTHZ2N Transformer
+
 function fnTabManipulation(frm){
     var lXmlTab = document.getElementById('gitra-settings-xml_tab-tab');
     var lCostSettingsTab = document.getElementById('gitra-settings-cost_settings_tab-tab');
