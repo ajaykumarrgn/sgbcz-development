@@ -37,6 +37,9 @@ frappe.ui.form.on('Design', {
     refresh(frm) {   
         fnFetchTransformerType(frm);
         fnUpdateButtonGroup(frm);
+        if(frm.is_new()){
+            fnDirectMaterial(frm)
+        }
     },
 
     //when is_design checkbox is enabled
@@ -44,11 +47,13 @@ frappe.ui.form.on('Design', {
     is_design(frm) {
         // Update button whenever the checkbox is enabled
         fnUpdateButtonGroup(frm);
+        fnDirectMaterial(frm);
     },
 
     status(frm) {
         // Update button whenever the status field changes
         fnUpdateButtonGroup(frm);
+        fnDirectMaterial(frm);
     },
     
     // If the user removes the value in the item field,
@@ -119,19 +124,19 @@ function fnUpdateButtonGroup(frm) {
     // Determine which button to show based on status
     if (lStatus === 'Draft' && frm.doc.is_design === 1) {
         buttonLabel = 'Create Design';
-        buttonFunction = createDesign;
+        buttonFunction = fncreateDesign;
     } else if (lStatus === 'Draft' && frm.doc.is_design === 0) {
         buttonLabel = 'Create Item';
-        buttonFunction = createItem;
+        buttonFunction = fncreateItem;
     } else if (lStatus === 'Calculation Received' && !frm.doc.item) {
         buttonLabel = 'Create Item';
-        buttonFunction = createItem;
+        buttonFunction = fncreateItem;
     } else if (lStatus === 'Item Created' && frm.doc.item) {
         buttonLabel = 'View Item';
-        buttonFunction = viewItem;
+        buttonFunction = fnviewItem;
     } else if (lStatus === 'Item Created' && !frm.doc.item) {
         buttonLabel = 'Create Item';
-        buttonFunction = createItem;
+        buttonFunction = fncreateItem;
     }
 
     fnShowButtonGroup(frm, buttonLabel, buttonFunction);
@@ -142,6 +147,14 @@ function fnShowButtonGroup(frm, buttonLabel, buttonFunction) {
     // Clear all custom buttons
     frm.clear_custom_buttons();
     
+    if (buttonLabel && buttonFunction) {
+        frm.add_custom_button(__(buttonLabel), function() {
+            buttonFunction(frm);
+        });
+    }
+}
+
+function fnDirectMaterial(frm){
     // To create item without gitra calculation, direct material cost
     // is required, so on draft status with is_design checkbox disable
     // make the direct material cost field required and editable
@@ -152,67 +165,81 @@ function fnShowButtonGroup(frm, buttonLabel, buttonFunction) {
         frm.set_df_property('direct_material_cost', 'read_only', 1);
         frm.set_df_property('direct_material_cost', 'reqd', 0);
     }
-
-    if (buttonLabel && buttonFunction) {
-        frm.add_custom_button(__(buttonLabel), function() {
-            buttonFunction(frm);
-        });
-    }
 }
 
-function createItem(frm) {
+function fncreateItem(frm) {
     frappe.call({
         "method": "create_item_from_design",
         "args": {
-            "design": frm.doc.name
+            "design": frm.doc.name, 
         },
         "callback": function(response) {
-            if (response.message) {
+            if(response.message) {
                 frappe.show_alert({
                     message: __('Item Created'),
                     indicator: 'green'
                 }, 5);
                 frm.set_value('item', response.message.item_code);
                 frm.refresh_fields();
-                frm.save().then(function() {
-                    frappe.show_progress(__('Creating Data Sheet Pdf..'), 
-                    50, 100, __('Please wait'));  
-                    // After saving, call the fn_pdf_attachment method
-                    const LA_LANGUAGES = ["de", "cs", "fr", "en"];
-                    frappe.call({
-                        "method": "pdf_on_submit.api.fn_doc_pdf_source_to_target",
-                        "args": {
-                            "im_source_doc_type": frm.doc.doctype,
-                            "im_source_doc_name": frm.doc.name,
-                            "im_languages": LA_LANGUAGES,
-                            "im_letter_head": "Data Sheet",
-                            "im_target_doc_type": "Item",
-                            "im_target_doc_name": response.message.item_code
-                        },
-                        "callback": function(pdfResponse) {
-                            if (pdfResponse.message) {
-                                frappe.hide_progress();
-                                frm.set_value('status', 'Item Created');
-                                frm.save();
+                frm.save().then(function(){
+                    frappe.show_progress(__('Creating with Pdf..'), 50, 100, __('Please wait'));  
+                        // After saving, call the fn_pdf_attachment method
+                        const LA_LANGUAGES = ["de", "cs","fr", "en"];
+                                      
+                        // In the fn_pdf_attachment function, the filename is generated using the argument
+                        // im_file_name, which takes a string that includes a placeholder for language.
+                        // Example: 'Datasheet_${l_title}_${frm.doc.name}_{language}'
+                        // Here, {language} is the placeholder, ensuring the language appears at the end.
+
+                        // The design title will be used as the filename.
+                        let lTitle = frm.doc.title;
+
+                        if (lTitle) {
+                            // Find the position of the first space
+                            let lSpaceIndex = lTitle.indexOf(' ');
+                            // Remove everything up to the first space
+                            if (lSpaceIndex !== -1) {
+                                lTitle = lTitle.substring(lSpaceIndex + 1);
                             }
+                             // Replace slashes with underscores
+                            lTitle = lTitle.replace(/\//g, '_');
                         }
-                    });
-                });
-            } else {
-                frappe.show_alert({
-                    message: __('Error Creating Item'),
-                    indicator: 'red'
-                }, 5);
-            }
-        }
-    });
+                        frappe.call({
+                            "method": "pdf_on_submit.api.fn_doc_pdf_source_to_target",
+                            "args": {
+                                "im_source_doc_type": frm.doc.doctype,
+                                "im_source_doc_name": frm.doc.name,
+                                "im_languages": LA_LANGUAGES,
+                                // "im_print_format": null,
+                                "im_letter_head": "Data Sheet",
+                                "im_target_doc_type": "Item",
+                                "im_target_doc_name": response.message.item_code,
+                                 "im_file_name": `Datasheet_${lTitle}_${frm.doc.name}_{language}`
+                            },
+                            "callback": function(pdfResponse){
+                                if(pdfResponse.message){
+                                    frappe.hide_progress();
+                                    frm.set_value('status', 'Item Created');
+                                    frm.save();
+                                                        
+                               }
+                            }
+                        });
+                })
+                            
+                }else{                        
+                    frappe.show_alert({
+                        message:__('Error Creating Item'),
+                        indicator:'red'
+                    }, 5); }
+        }});   
 }
 
-function createDesign(frm) {
+function fncreateDesign(frm) {
     frm.set_value('status', 'Perform Calculation');
     frm.save();
 }
 
-function viewItem(frm) {
+function fnviewItem(frm) {
     frappe.set_route('item', frm.doc.item);
 }
