@@ -66,7 +66,7 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
 
 for l_doc_item in doc.items:
     
-    #get the print languages from gitra setting
+    #get the print languages from gitra settings
     l_print_language = frappe.db.get_value("Gitra Settings", None, "print_languages")
     # Remove the square brackets and quotes, then split the string by commas
     l_cleaned_language_string = l_print_language.strip('[]').replace('"', '').replace("'", "")
