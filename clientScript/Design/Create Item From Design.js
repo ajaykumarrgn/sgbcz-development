@@ -40,17 +40,17 @@ frappe.ui.form.on('Design', {
                                         // Here, {language} is the placeholder, ensuring the language appears at the end.
 
                                         // The design title will be used as the filename.
-                                        let l_title = frm.doc.title;
+                                        let lTitle = frm.doc.title;
 
-                                        if (l_title) {
+                                        if (lTitle) {
                                            // Find the position of the first space
-                                            let l_space_index = l_title.indexOf(' ');
+                                            let lSpaceIndex = lTitle.indexOf(' ');
                                             // Remove everything up to the first space
-                                            if (l_space_index !== -1) {
-                                                l_title = l_title.substring(l_space_index + 1);
+                                            if (lSpaceIndex !== -1) {
+                                                lTitle = lTitle.substring(lSpaceIndex + 1);
                                             }
                                             // Replace slashes with underscores
-                                            l_title = l_title.replace(/\//g, '_');
+                                            lTitle = lTitle.replace(/\//g, '_');
                                         }
                                         frappe.call({
                                             "method": "pdf_on_submit.api.fn_doc_pdf_source_to_target",
@@ -62,7 +62,7 @@ frappe.ui.form.on('Design', {
                                                 "im_letter_head": "Data Sheet",
                                                 "im_target_doc_type": "Item",
                                                 "im_target_doc_name": response.message.item_code,
-                                                "im_file_name": `Datasheet_${l_title}_${frm.doc.name}_{language}`
+                                                "im_file_name": `Datasheet_${lTitle}_${frm.doc.name}_{language}`
                                             },
                                             "callback": function(pdfResponse){
                                                 if(pdfResponse.message){
