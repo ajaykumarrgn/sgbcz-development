@@ -1,12 +1,11 @@
 def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
-
-    #get the separator from gitra settings
     l_separator = frappe.db.get_value("Gitra Settings",None, "separator")
    
     def fn_get_language_suffixes(im_languages, im_ext):
-        # Generate language-specific file extensions 
+        # Generate language-specific file extensions with both patterns
         return [l_separator + l_language + l_separator for l_language in im_languages] + \
-              [l_separator + l_language + im_ext for l_language in im_languages]
+              [l_separator + l_language + im_ext for l_language in im_languages] + \
+              [l_language +l_separator for l_language in im_languages]
       
     # Get the list of file IDs attached to the given item  
     la_fileids = frappe.get_all('File', fields=['name'],
@@ -22,9 +21,10 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
                                   filters={'name': ['IN', la_files]}, 
                                   fields=['file_name', 'file_url', 'folder', 'file_size', 'is_private', 'content_hash'])
   
-    # Frame the PDF extension for the customer print language 
+    # Frame the PDF extension for the customer print language with both patterns
     l_language_suffix_1 = l_separator + im_doc.language + l_separator
     l_language_suffix_2 = l_separator + im_doc.language + '.pdf'
+    l_language_suffix_3 = im_doc.language + l_separator
     
     # # Generate all possible language suffix patterns for filtering
     la_all_suffixes = fn_get_language_suffixes(im_languages, '.pdf')
@@ -32,7 +32,7 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
     # Filter the attached files in the given item based on the customer print language
     la_print_language_records = [l_record for l_record in la_file_list
                              if l_language_suffix_1 in l_record['file_name'] or
-                             l_language_suffix_2 in l_record['file_name']]
+                             l_language_suffix_2 in l_record['file_name'] or l_language_suffix_3 in l_record['file_name']]
                           
     
     # Filter the attached files without any of the language suffix patterns
@@ -66,7 +66,6 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
 
 for l_doc_item in doc.items:
     
-    #get the print languages from gitra settings
     l_print_language = frappe.db.get_value("Gitra Settings", None, "print_languages")
     # Remove the square brackets and quotes, then split the string by commas
     l_cleaned_language_string = l_print_language.strip('[]').replace('"', '').replace("'", "")
