@@ -1,8 +1,10 @@
 def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
+
+    #get the separator from gitra settings
     l_separator = frappe.db.get_value("Gitra Settings",None, "separator")
    
     def fn_get_language_suffixes(im_languages, im_ext):
-        # Generate language-specific file extensions with both patterns
+        # Generate language-specific file extensions 
         return [l_separator + l_language + l_separator for l_language in im_languages] + \
               [l_separator + l_language + im_ext for l_language in im_languages]
       
@@ -20,7 +22,7 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
                                   filters={'name': ['IN', la_files]}, 
                                   fields=['file_name', 'file_url', 'folder', 'file_size', 'is_private', 'content_hash'])
   
-    # Frame the PDF extension for the customer print language with both patterns
+    # Frame the PDF extension for the customer print language 
     l_language_suffix_1 = l_separator + im_doc.language + l_separator
     l_language_suffix_2 = l_separator + im_doc.language + '.pdf'
     
@@ -64,6 +66,7 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
 
 for l_doc_item in doc.items:
     
+    #get the print languages from gitra setting
     l_print_language = frappe.db.get_value("Gitra Settings", None, "print_languages")
     # Remove the square brackets and quotes, then split the string by commas
     l_cleaned_language_string = l_print_language.strip('[]').replace('"', '').replace("'", "")
