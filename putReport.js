@@ -5,15 +5,17 @@ import { getEndPointForDoctype } from "./functions.js"
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+import fetch from 'node-fetch';
 import { execSync } from 'child_process'; 
 dotenv.config();
 
 
 const baseFolder = 'reports';
 
-const myHeaders = new Headers();
-myHeaders.append("Authorization", process.env.KEY)
-myHeaders.append('Content-Type', 'application/json');
+const myHeaders = {
+  'Content-Type': 'application/json',
+  'Authorization': process.env.KEY,
+};
 
 const baseUrl = getEndPointForDoctype("Report")
 

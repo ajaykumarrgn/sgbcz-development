@@ -6,6 +6,8 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process'; 
+import fetch from 'node-fetch';
+
 dotenv.config();
 
 const baseFolder = 'serverScript';
