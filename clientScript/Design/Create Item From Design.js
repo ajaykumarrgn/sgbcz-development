@@ -37,7 +37,20 @@ frappe.ui.form.on('Design', {
 
                                         if(gitraResponse.message){
                                             // After saving, call the fn_pdf_attachment method
-                                            const LA_LANGUAGES = gitraResponse.message.print_languages
+                                            const ldDatasheetLanguages = gitraResponse.message.datasheet_languages;
+                    
+                                            // Initialize an empty array to store languages
+                                            var LA_LANGUAGES = [];
+                                            
+                                            //getting the datasheet languages from gitra settings
+                                
+                                            if (ldDatasheetLanguages) {
+                                              
+                                                ldDatasheetLanguages.forEach(function(laLanguage) {
+                                                   
+                                                    LA_LANGUAGES.push(laLanguage.language); 
+                                                });
+                                            }
 
                                             // In the fn_pdf_attachment function, the filename is generated using the argument
                                             // im_file_name, which takes a string that includes a placeholder for language.

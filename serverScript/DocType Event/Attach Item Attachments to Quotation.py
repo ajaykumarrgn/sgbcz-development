@@ -1,5 +1,5 @@
 def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
-    l_separator = frappe.db.get_value("Gitra Settings",None, "separator")
+    l_separator = frappe.db.get_value("Gitra Settings",None, "naming_separator")
    
     def fn_get_language_suffixes(im_languages, im_ext):
         # Generate language-specific file extensions with both patterns
@@ -66,10 +66,21 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
 
 for l_doc_item in doc.items:
     
-    l_print_language = frappe.db.get_value("Gitra Settings", None, "print_languages")
-    # Remove the square brackets and quotes, then split the string by commas
-    l_cleaned_language_string = l_print_language.strip('[]').replace('"', '').replace("'", "")
-    la_languages = [l_lang.strip() for l_lang in l_cleaned_language_string.split(',')]
+    #getting the datasheet languages from gitra settings
+    
+    ld_gitra_settings = frappe.get_doc("Gitra Settings")
+
+    # Accessing the table multiselect field directly
+    ld_datasheet_languages = ld_gitra_settings.get("datasheet_languages")
+    
+    # Initialize an empty list to store languages
+    la_languages = []
+    
+    if ld_datasheet_languages:
+        
+        for l_language_row in ld_datasheet_languages:
+           
+            la_languages.append(l_language_row.get('language'))
      
     # Get the item object
     ld_item = frappe.get_doc("Item", l_doc_item.item_code).as_dict()
