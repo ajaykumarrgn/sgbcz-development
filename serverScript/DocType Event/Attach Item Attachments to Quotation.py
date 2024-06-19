@@ -1,27 +1,20 @@
 def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
-    l_separator = frappe.db.get_value("Gitra Settings",None, "naming_separator")
+    l_separator = frappe.db.get_value("Gitra Settings","Gitra Settings", "naming_separator")
    
     def fn_get_language_suffixes(im_languages, im_ext):
-        # Generate language-specific file extensions with both patterns
+        # Generate language-specific file extensions 
+        #possibility- language come at start, middle or at end
         return [l_separator + l_language + l_separator for l_language in im_languages] + \
               [l_separator + l_language + im_ext for l_language in im_languages] + \
               [l_language +l_separator for l_language in im_languages]
       
     # Get the list of file IDs attached to the given item  
-    la_fileids = frappe.get_all('File', fields=['name'],
+    la_file_list = frappe.get_all('File', fields=['file_name', 'file_url', 'folder', 'file_size', 'is_private', 'content_hash'],
                                 filters={'attached_to_doctype': im_item.doctype,
                                          'attached_to_name': im_item.name},
                                 order_by='creation desc')
-    
-    # Extract file names from file IDs
-    la_files = [ld_fileid.name for ld_fileid in la_fileids]
-    
-    # Get the file_name, file_url, file_size, is_private, and content_hash for all the file ids in the la_fileids
-    la_file_list = frappe.get_all("File", 
-                                  filters={'name': ['IN', la_files]}, 
-                                  fields=['file_name', 'file_url', 'folder', 'file_size', 'is_private', 'content_hash'])
-  
-    # Frame the PDF extension for the customer print language with both patterns
+      
+    # Frame the PDF extension for the customer print language with all possibility
     l_language_suffix_1 = l_separator + im_doc.language + l_separator
     l_language_suffix_2 = l_separator + im_doc.language + '.pdf'
     l_language_suffix_3 = im_doc.language + l_separator
