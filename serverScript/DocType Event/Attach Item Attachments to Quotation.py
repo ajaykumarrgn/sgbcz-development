@@ -1,36 +1,53 @@
 def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
     l_separator = frappe.db.get_value("Gitra Settings","Gitra Settings", "naming_separator")
    
-    def fn_get_language_suffixes(im_languages, im_ext):
+    def fn_get_language_pattern(im_languages, im_ext):
         # Generate language-specific file extensions 
         #possibility- language come at start, middle or at end
-        return [l_separator + l_language + l_separator for l_language in im_languages] + \
-              [l_separator + l_language + im_ext for l_language in im_languages] + \
-              [l_language +l_separator for l_language in im_languages]
-      
-    # Get the list of file IDs attached to the given item  
+        return {
+            'start': [l_language + l_separator for l_language in im_languages],
+            'end': [l_separator + l_language + im_ext for l_language in im_languages],
+            'middle': [l_separator + l_language + l_separator for l_language in im_languages]
+        }
+        
+    # Get the attached files in the item  
     la_file_list = frappe.get_all('File', fields=['file_name', 'file_url', 'folder', 'file_size', 'is_private', 'content_hash'],
                                 filters={'attached_to_doctype': im_item.doctype,
                                          'attached_to_name': im_item.name},
                                 order_by='creation desc')
-      
-    # Frame the PDF extension for the customer print language with all possibility
-    l_language_suffix_1 = l_separator + im_doc.language + l_separator
-    l_language_suffix_2 = l_separator + im_doc.language + '.pdf'
-    l_language_suffix_3 = im_doc.language + l_separator
+
+    # get the possible pattern with customer language
+    la_customer_language_patterns = fn_get_language_pattern([im_doc.language], '.pdf')
+
+    #get the possible pattern for all the datasheet language
+    la_all_patterns = fn_get_language_pattern(im_languages, '.pdf')
+
+     
+    #Check if the file name matches any of the patterns. Based on the key in the pattern,
+    #it performs the search using Python's startswith, endswith, and 'in' for middle matching.
+
+    #Args:
+        #file_name : The name of the file to check.
+        #patterns : The patterns for matching the file name.
+
+    #Returns:
+        #bool: True if any pattern matches the file name, False otherwise.
     
-    # # Generate all possible language suffix patterns for filtering
-    la_all_suffixes = fn_get_language_suffixes(im_languages, '.pdf')
+    
+    def fn_matches_any_pattern(file_name, patterns):
+        # Check if the file name matches any of the patterns
+        return (any(file_name.startswith(pattern) for pattern in patterns['start']) or
+                any(file_name.endswith(pattern) for pattern in patterns['end']) or
+                any(pattern in file_name for pattern in patterns['middle']))
+    
     
     # Filter the attached files in the given item based on the customer print language
     la_print_language_records = [l_record for l_record in la_file_list
-                             if l_language_suffix_1 in l_record['file_name'] or
-                             l_language_suffix_2 in l_record['file_name'] or l_language_suffix_3 in l_record['file_name']]
-                          
+                          if fn_matches_any_pattern(l_record['file_name'], la_customer_language_patterns)]
     
     # Filter the attached files without any of the language suffix patterns
     la_other_records = [l_record for l_record in la_file_list 
-                        if not any(l_suffix in l_record['file_name'] for l_suffix in la_all_suffixes)]
+                        if not fn_matches_any_pattern(l_record['file_name'], la_all_patterns)]
     
     la_filtered_files = []
     la_filtered_files.extend(la_other_records)
@@ -57,26 +74,30 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
         except frappe.DuplicateEntryError:
             ld_duplicate = frappe.get_doc("File", lo_fileQuotation.duplicate_entry)
 
-for l_doc_item in doc.items:
-    
-    #getting the datasheet languages from gitra settings
-    
-    ld_gitra_settings = frappe.get_doc("Gitra Settings")
 
-    # Accessing the table multiselect field directly
-    ld_datasheet_languages = ld_gitra_settings.get("datasheet_languages")
+#begin of execute
+la_languages = []
     
-    # Initialize an empty list to store languages
-    la_languages = []
+#getting the datasheet languages from gitra settings
     
-    if ld_datasheet_languages:
+ld_gitra_settings = frappe.get_doc("Gitra Settings")
+
+# Accessing the table multiselect field directly
+ld_datasheet_languages = ld_gitra_settings.get("datasheet_languages")
+    
+# Initialize an empty list to store languages
+if not ld_datasheet_languages:
+    
+    frappe.msgprint("Datasheet Language Not found, proceeding with English Language")
+    la_languages = ['en'] 
         
-        for l_language_row in ld_datasheet_languages:
-           
-            la_languages.append(l_language_row.get('language'))
-     
+else:
+    la_languages = [l_language.language for l_language in ld_datasheet_languages]
+    
+for l_doc_item in doc.items:
+
     # Get the item object
     ld_item = frappe.get_doc("Item", l_doc_item.item_code).as_dict()
-    
+        
     # Call the function to copy files to quotation
     fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
