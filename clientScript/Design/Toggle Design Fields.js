@@ -55,7 +55,7 @@ frappe.ui.form.on('Design', {
                 // Hide power_lv, uk_lv, uk_hv_lv, and vector_html fields if lv_2 is not present
                 if (['power_lv', 'uk_lv', 'uk_hv_lv', 'vector_html'].includes(field.fieldname)) {
                     frm.set_df_property(field.fieldname, 'hidden', true);
-                    frm.set_value(field.fieldname, null);
+                    
                 } else {
                     frm.set_df_property(field.fieldname, 'options', frappe.render(template, data));
                 }
@@ -68,6 +68,8 @@ frappe.ui.form.on('Design', {
         } else {
             frm.set_df_property('vector_group', 'hidden', true); // Hide vector_group if lv_2 is present
         }
+        
+        
     },
     
     
@@ -184,6 +186,10 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
                 frappe.throw(__("Enter the ") + label2 + (" value") );
                 return;
             } 
+            if (parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
+                frappe.throw(__(label2 + " should be lesser than " + label1));
+                return;
+            }
             frm.set_value(field1, lSplit[0]);
             frm.set_value(field2, lSplit[1]);
             if (field) {frm.set_value(field, null);}
@@ -194,6 +200,7 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
             frm.set_value(field2, null);
         } 
     }
+    
     //This function is used to clear the dependent field values based on LV2 field
     function lfnClearDependencies(frm, iValue, field, dependentFields, labels){
         
