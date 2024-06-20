@@ -483,7 +483,8 @@ def get_result(filters):
                                                filters={
                                                    "against_sales_order": ("IN", i_sales_order_list),
                                                    'pos': ("IN", pos),
-                                                   'docstatus': 1, },
+                                                   'docstatus': 1, 
+                                                   },
                                                distinct=True,
                                                order_by='customer_name'
                                                )
