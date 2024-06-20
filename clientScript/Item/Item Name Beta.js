@@ -24,9 +24,10 @@ cur_frm.cscript.custom_validate = function(doc) {
                 break;
             }
         // fill the item attribute only if it has a value
-        if(lIndex>=0 && iDoc.attributes[lIndex].attribute_value!==0){
-            lItemName   =  lItemName + '/' + (iDoc.attributes[lIndex].attribute_value).toString().replace(/\./g, ",");
+        if (lIndex >= 0 && iDoc.attributes[lIndex]?.attribute_value !== undefined && iDoc.attributes[lIndex].attribute_value !== 0) {
+            lItemName = lItemName + '/' + iDoc.attributes[lIndex].attribute_value.toString().replace(/\./g, ",");
         }
+
         return lItemName;
     }
     // Only for new documents
