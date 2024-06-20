@@ -193,32 +193,45 @@ function fncreateItem(frm) {
                         "callback":function(gitraResponse){
                             
                             if(gitraResponse.message){
+                                
                                 // After saving, call the fn_pdf_attachment method
-                                const LA_LANGUAGES = gitraResponse.message.print_languages
-                                //using the design title as filename
-                                let l_title = frm.doc.title;
-    
-                                if (l_title) {
+                                const ldDatasheetLanguages = gitraResponse.message.datasheet_languages;
+                    
+                                // Using map to extract language codes into laLanguages array
+                                const laLanguages = ldDatasheetLanguages.map(function(laLanguage) {
+                                    return laLanguage.language;
+                                });
+                                
+
+                                // In the fn_pdf_attachment function, the filename is generated using the argument
+                                // im_file_name, which takes a string that includes a placeholder for language.
+                                // Example: 'Datasheet_${l_title}_${frm.doc.name}_{language}'
+                                // Here, {language} is the placeholder, ensuring the language appears at the end.
+                                            
+                                // The design title will be used as the filename.
+                                let lTitle = frm.doc.title;
+
+                                if (lTitle) {
                                     // Find the position of the first space
-                                    let l_space_index = l_title.indexOf(' ');
+                                    let lSpaceIndex = lTitle.indexOf(' ');
                                     // Remove everything up to the first space
-                                    if (l_space_index !== -1) {
-                                        l_title = l_title.substring(l_space_index + 1);
+                                    if (lSpaceIndex !== -1) {
+                                        lTitle = lTitle.substring(lSpaceIndex + 1);
                                     }
-                                    // Replace slashes with underscores
-                                    l_title = l_title.replace(/\//g, gitraResponse.message.separator);
+                                    // Replace slashes with gitra separator
+                                    lTitle = lTitle.replace(/\//g, gitraResponse.message.naming_separator);
                                 }
                                 frappe.call({
                                     "method": "pdf_on_submit.api.fn_doc_pdf_source_to_target",
                                     "args": {
                                         "im_source_doc_type": frm.doc.doctype,
                                         "im_source_doc_name": frm.doc.name,
-                                        "im_languages": LA_LANGUAGES,
+                                        "im_languages": laLanguages,
                                         // "im_print_format": null,
                                         "im_letter_head": "Data Sheet",
                                         "im_target_doc_type": "Item",
                                         "im_target_doc_name": response.message.item_code,
-                                        "im_file_name": `Datasheet_${l_title}_${frm.doc.name}_{language}`
+                                        "im_file_name": `Datasheet_${lTitle}_${frm.doc.name}_{language}`
                                     },
                                     "callback": function(pdfResponse){
                                         if(pdfResponse.message){
