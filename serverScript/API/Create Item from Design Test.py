@@ -174,9 +174,6 @@ for ld_attribute in la_template_attributes:
     # Here you would continue processing with l_docvalue as needed
     # For example, saving l_docvalue back to the document or further calculations
 
-    # Optionally, if you need to print or display the value
-    frappe.msgprint(str(ld_attribute.attribute) + '  ' + str(l_docvalue))
-
             
     # Convert the value to a string and replace '.' with ','
     # l_docvalue = str(l_docvalue)
