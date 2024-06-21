@@ -6,15 +6,14 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process'; 
-import fetch from "node-fetch";
-dotenv.config();
+dotenv.config({path: '../.env'});
 
-const baseFolder = 'clientScript';
+const baseFolder = '../clientScript';
 
-const headers = {
-  'Content-Type': 'application/json',
-  'Authorization': process.env.KEY,
-};
+const myHeaders = new Headers();
+myHeaders.append("Authorization", process.env.KEY)
+myHeaders.append('Content-Type', 'application/json');
+
 const baseUrl = getEndPointForDoctype("Client Script")
 
 
@@ -43,7 +42,7 @@ function isFileNew(filePath) {
 function createNewResource( requestBody) {
   const requestOptions = {
       method: 'POST',
-      headers: headers,
+      headers: myHeaders,
       body: JSON.stringify(requestBody),
       redirect: 'follow',
   };
@@ -116,7 +115,7 @@ function processFilesInFolder(folderPath, parentFolder = null) {
               // Use PUT for changed files or new files
               const requestOptions = {
                 method: 'PUT',
-                headers: headers,
+                headers: myHeaders,
                 body: JSON.stringify({
                   filename: postFilename,
                   script: fileContent,

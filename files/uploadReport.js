@@ -1,48 +1,21 @@
-//configure header, baseurl
-
-import { getEndPointForDoctype } from "./functions.js"
-
+import { getEndPointForDoctype } from "./functions.js";
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import fetch from 'node-fetch';
-import { execSync } from 'child_process'; 
-dotenv.config();
 
+dotenv.config({path: '../.env'});
 
-const baseFolder = 'reports';
+const baseFolder = '../reports';
 
 const myHeaders = {
   'Content-Type': 'application/json',
   'Authorization': process.env.KEY,
 };
 
-const baseUrl = getEndPointForDoctype("Report")
+const baseUrl = getEndPointForDoctype("Report");
 
 const createdReports = new Set();
 const errorFile = new Set();
-
-function isFileModified(filePath) {
-  try {
-    // Use Git to check if the file is modified
-    const status = execSync(`git status --porcelain "${filePath}"`, { encoding: 'utf-8' }).trim();
-    return status !== '';
-  } catch (error) {
-    console.error(`Error checking Git status for file ${filePath}: ${error}`);
-    return false;
-  }
-}
-
-function isFileNew(filePath) {
-  try {
-    // Check if the file exists on the filesystem but is not yet committed
-    const isUncommitted = !execSync(`git log --format=%H -- "${filePath}"`, { encoding: 'utf-8' }).trim();
-    return isUncommitted;
-  } catch (error) {
-    console.error(`Error checking Git status for file ${filePath}: ${error}`);
-    return false;
-  }
-}
 
 function readContent(filePath) {
   try {
@@ -56,12 +29,11 @@ function readContent(filePath) {
   return null;
 }
 
-async function createNewReport(folderPath, jsContent, pyContent, sqlContent, metaContent) {
+function createNewReport(folderPath, jsContent, pyContent, sqlContent, metaContent) {
   const folderName = path.basename(folderPath);
 
   if (!createdReports.has(folderName)) {
     // Make a POST request to create a new report
-    
     const requestOptions = {
       method: 'POST',
       headers: myHeaders,
@@ -76,8 +48,8 @@ async function createNewReport(folderPath, jsContent, pyContent, sqlContent, met
     };
 
     const url = baseUrl;
-    
-   await fetch(url, requestOptions)
+
+    fetch(url, requestOptions)
       .then(response => {
         if (!response.ok) {
           if (response.status === 409) {
@@ -89,7 +61,7 @@ async function createNewReport(folderPath, jsContent, pyContent, sqlContent, met
           console.log(`New report created: ${folderName}`);
           createdReports.add(folderName); // Mark the report as created
         }
-      }) 
+      })
       .catch(error => {
         console.error(`Error creating new report ${folderName}: ${error}`);
       });
@@ -98,7 +70,7 @@ async function createNewReport(folderPath, jsContent, pyContent, sqlContent, met
   }
 }
 
-async function processFilesInFolder(folderPath, baseFolder) {
+function processFilesInFolder(folderPath, baseFolder) {
   try {
     const files = fs.readdirSync(folderPath);
 
@@ -110,19 +82,8 @@ async function processFilesInFolder(folderPath, baseFolder) {
 
       if (stats.isDirectory()) {
         processFilesInFolder(filePath, baseFolder);
-      } else if ((isFileNew(filePath) || isFileModified(filePath)) && fileExtension !== '.meta' && !errorFile.has(file.replace(new RegExp(`\\${fileExtension}$`), ''))) {
+      } else if (fileExtension !== '.meta' && !errorFile.has(file.replace(new RegExp(`\\${fileExtension}$`), ''))) {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
-        const metaFilePathPut = path.join(baseFolder, folderName, `${folderName}.meta`);
-        const metaContentPutString = fs.readFileSync(metaFilePathPut, 'utf-8');
-        const metaContentPut = JSON.parse(metaContentPutString);
-
-        delete metaContentPut.name;
-        delete metaContentPut.owner;
-        delete metaContentPut.modified;
-        delete metaContentPut.modified_by;
-        delete metaContentPut.creation;
-        delete metaContentPut.roles;
-
         const encodedFilename = encodeURIComponent(file.replace(new RegExp(`\\${fileExtension}$`), ''));
 
         const requestOptions = {
@@ -131,14 +92,13 @@ async function processFilesInFolder(folderPath, baseFolder) {
           body: JSON.stringify({
             filename: encodedFilename,
             [fileExtension === '.js' ? 'javascript' : (fileExtension === '.py' ? 'report_script' : 'query')]: fileContent,
-            ...metaContentPut,
           }),
           redirect: 'follow',
         };
 
-        const url = `${baseUrl}/${encodedFilename}`
+        const url = `${baseUrl}/${encodedFilename}`;
 
-      await fetch(url, requestOptions)
+        fetch(url, requestOptions)
           .then(response => {
             if (!response.ok) {
               if (response.status === 404) {
@@ -151,7 +111,7 @@ async function processFilesInFolder(folderPath, baseFolder) {
                 const jsContent = readContent(jsFilePath);
                 const pyContent = readContent(pyFilePath);
                 const sqlContent = readContent(sqlFilePath);
-                
+
                 createNewReport(folderPath, jsContent, pyContent, sqlContent, metaContent, folderName);
                 errorFile.add(file.replace(new RegExp(`\\${fileExtension}$`), ''));
               } else {
