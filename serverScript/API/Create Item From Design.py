@@ -141,13 +141,21 @@ else:
 #Add paralle coil information
 #Consider 2nd record of TGtWickelzettelSystem
 #if TGtSpule is an array and if the count is 2 then it is a parallel design.
-json_data = json.loads(design.gitra_json_downstream)
-TGtSpule = json_data['sgb']['TGtWickelzettel']['TGtWickelzettelSystemeListe']['TGtWickelzettelSystem'][1]['TGtWicklungenListe']['TGtWicklung']['TGtSpulenListe']['TGtSpule']
-if len(TGtSpule) == 2:
-    #item_new.append("attributes", get_attribute('Parallel coil', 'P'))
-    item_new.append("attributes", get_attribute('Parallel coil', 'YES'))
-else:
-    item_new.append("attributes", get_attribute('Parallel coil', 'NO'))
+if design.gitra_json_downstream:
+    json_data = json.loads(design.gitra_json_downstream)
+    TGtSpule = json_data['sgb']['TGtWickelzettel']['TGtWickelzettelSystemeListe']['TGtWickelzettelSystem'][1]['TGtWicklungenListe']['TGtWicklung']['TGtSpulenListe']['TGtSpule']
+    if len(TGtSpule) == 2:
+        item_new.append("attributes", get_attribute('Parallel coil', 'YES'))
+    else:
+        item_new.append("attributes", get_attribute('Parallel coil', 'NO'))
+# json_data = json.loads(design.gitra_json_downstream)
+# TGtSpule = json_data['sgb']['TGtWickelzettel']['TGtWickelzettelSystemeListe']['TGtWickelzettelSystem'][1]['TGtWicklungenListe']['TGtWicklung']['TGtSpulenListe']['TGtSpule']
+# if len(TGtSpule) == 2:
+
+#     #item_new.append("attributes", get_attribute('Parallel coil', 'P'))
+#     item_new.append("attributes", get_attribute('Parallel coil', 'YES'))
+# else:
+#     item_new.append("attributes", get_attribute('Parallel coil', 'NO'))
 
 # Electrostatic Screen is always set to No for Design items
 item_new.append("attributes", get_attribute('Electrostatic screen', 'NO'))

@@ -39,12 +39,17 @@ frappe.ui.form.on('Design', {
     hv_rated_voltage(frm) {
         frm.events.validate_and_display_error(frm, 'HV Rated Voltage', 'hv_rated_voltage');
     },
-
+    hv1(frm) {
+        frm.events.validate_and_display_error(frm, 'HV1', 'hv1');
+    },
     impedance(frm) {
         frm.events.validate_and_display_error(frm, 'Impedance', 'impedance');
     },
 
     lv_rated_voltage(frm) {
         frm.events.validate_and_display_error(frm, 'LV Rated Voltage', 'lv_rated_voltage');
+    },
+    lv1(frm) {
+        frm.events.validate_and_display_error(frm, 'LV1', 'lv1');
     },
 });

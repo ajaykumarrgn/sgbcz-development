@@ -1,67 +1,155 @@
 frappe.ui.form.on('Design', {
     onload: function(frm) {
-        // Setting default values on both factory and transformer type.
-        frm.set_value('factory', 'SGBCZ');
-        frm.set_value('transformer_type', 'DTTHZ2N');
-        frm.trigger('toggle_fields');
-    },
-
-    refresh: function(frm) {
+        if (frm.is_new()) {
+            frm.set_value('factory', 'SGBCZ');
+            frm.set_value('transformer_type', 'DTTHZ2N');
+            frm.fields_dict['lv_rated_voltage'].df.label = 'LV Value(V)';
+        }
         frm.trigger('toggle_fields');
     },
     
-    // When the value of 'transformer_type' field changes
-    transformer_type: function(frm) {
+    factory: function(frm) {
+        reset_values(frm);
+        
+        switch (frm.doc.factory) {
+            case 'SGBCZ':
+                frm.set_df_property('lv_rated_voltage', 'reqd', true);
+               
+                //frm.set_value('transformer_type', 'DTTHZ2N');
+                break;
+            case 'RGB':
+            case 'NEU':
+                frm.set_df_property('lv_rated_voltage', 'reqd', false);
+                frm.set_value('transformer_type', frm.doc.factory === 'RGB' ? 'DTTH2N' : 'DOTML');
+                break;
+        }
+        
+        frm.trigger('toggle_fields');
+        frm.trigger('update_insulation_class_options');
+    },
+    
+    refresh: function(frm) {
+        frm.trigger('update_insulation_class_options');
         frm.trigger('toggle_fields');
     },
-    //Toggling the fields based on the transformer type
+
+    update_insulation_class_options: function(frm) {
+        let options = [];
+        switch (frm.doc.factory) {
+            case 'RGB':
+                options = ['F', 'H'];
+                break;
+            case 'NEU':
+                options = ['A', 'B', 'C', 'F', 'H'];
+                break;
+        }
+        frm.set_df_property('insulation_class', 'options', options);
+    },
+    
     toggle_fields: function(frm) {
-        const fields_to_toggle = [
-            'type_lv', 'vector_html', 'lv_html',
-            'power_lv', 'uk_lv',
-            'insulation_class', 'winding_material', 
-            'cooling', 'type_cooling', 'uk_hv_lv'
+        const fields = [
+            'vector_html', 'power_lv', 'uk_lv', 'uk_hv_lv', 'lv_html',
+            'insulation_class', 'winding_material', 'cooling_method', 'type_cooling',
+            'impedance', 'lv_rated_voltage', 'bushing_hv', 'cooling_method',
+            'type_cooling', 'temperature_rise', 'temperature_rise_oil',
+            'temperature_rise_winding', 'climatic_class', 'environmental_class',
+            'temperature_rise_datasheet', 'temperature_rise_gitra'
         ];
 
-        //If the transformer type is DTTHZ2N, the above mention toggle fields is not visible 
-        //Show all the fields to the other transformers except DTTHZ2N 
-        if (frm.doc.transformer_type === 'DTTHZ2N') {
-            fields_to_toggle.forEach(field => {
-                frm.toggle_display(field, false);
-            });
-            frm.set_df_property('vector_group', 'hidden', false);
-            frm.set_df_property('lv_rated_voltage', 'hidden', false);
-        } else if (frm.doc.transformer_type === 'DTTH2N') {
-            fields_to_toggle.forEach(field => {
-                frm.toggle_display(field, true);
-            });
-            //frm.set_df_property('vector_html', 'hidden', true);
-            frm.set_df_property('lv_rated_voltage', 'hidden', true);
-            frm.set_df_property('impedance', 'hidden', true);
-            frm.set_df_property('uk_hv_lv', 'hidden', true);
-        } else {
-            // If other types are possible, add additional logic here
-            fields_to_toggle.forEach(field => {
-                frm.toggle_display(field, true);
-            });
-            frm.set_df_property('vector_group', 'hidden', false);
+        fields.forEach(field => frm.toggle_display(field, false));
+
+        let showFields = [];
+        switch (frm.doc.factory) {
+            case 'SGBCZ':
+                showFields = ['vector_group', 'impedance', 'lv_rated_voltage',
+                              'temperature_rise', 'climatic_class', 'environmental_class',
+                              'temperature_rise_datasheet', 'temperature_rise_gitra'];
+                break;
+            case 'RGB':
+                showFields = fields.filter(field => !['lv_rated_voltage', 'bushing_hv',
+                                                      'cooling_method', 'type_cooling',
+                                                      'uk_hv_lv', 'temperature_rise_oil',
+                                                      'temperature_rise_winding',
+                                                      'temperature_rise_datasheet',
+                                                      'temperature_rise_gitra'].includes(field));
+                showFields.push('temperature_rise');
+                break;
+            case 'NEU':
+                showFields = fields.filter(field => !['lv_rated_voltage', 'uk_lv',
+                                                      'impedance', 'temperature_rise',
+                                                      'climatic_class', 'environmental_class',
+                                                      'temperature_rise_datasheet',
+                                                      'temperature_rise_gitra'].includes(field));
+                showFields.push('temperature_rise_oil', 'temperature_rise_winding');
+                break;
+        }
+
+        showFields.forEach(field => frm.toggle_display(field, true));
+
+        if (frm.doc.factory === 'RGB' && frm.doc.lv_2) {
+            frm.toggle_display('uk_hv_lv', false);
+            frm.toggle_display('impedance', false);
         }
     },
-    thdi: function(frm) {
-    let is_valid = frm.doc.factory === 'SGBCZ' ? [5, 20].includes(frm.doc.thdi) : (frm.doc.thdi >= 5 && frm.doc.thdi <= 99);
-    let error_message = frm.doc.factory === 'SGBCZ' ? __('Enter the THDi Value 5 or 20') : __('Enter the THDi Value between 5 and 99');
-
-    if (!is_valid) {
-        if (!frm.thdi_error_shown) {
-            frappe.msgprint(error_message);
-            frm.thdi_error_shown = true;
-        }
-        frm.set_value('thdi', '');
-    } else {
-        frm.thdi_error_shown = false;
-    }
-}
-
-
     
+    is_design: function(frm) {
+        if (frm.doc.is_design) {
+            frm.set_value('thdi', '');
+        }
+    },
+
+    thdi: function(frm) {
+        let thdiValue = Number(frm.doc.thdi);
+        if (!frm.doc.thdi) return;
+
+        if (frm.doc.is_design) {
+            if (![5, 20].includes(thdiValue)) {
+                frappe.throw('Enter the THDi Value as 5 or 20');
+            }
+        } else {
+            if (thdiValue < 5 || thdiValue > 99) {
+                frappe.throw('Enter a THDi value between 5 and 99');
+            }
+        }
+    },
+
+    validate: function(frm) {
+        if (frm.doc.factory === 'SGBCZ' && !frm.doc.lv_rated_voltage) {
+            frappe.msgprint('LV Rated Voltage is mandatory for SGBCZ');
+            frappe.validated = false; 
+            return;
+        }
+        if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
+            frappe.msgprint('Please enter both Rating LV1 and Rating LV2 for RGB');
+            frappe.validated = false;
+            return;
+        } else if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && (!frm.doc.uk_lv1 || !frm.doc.uk_lv2)) {
+            frappe.msgprint('Please enter both UK LV1 and UK LV2 for RGB');
+            frappe.validated = false;
+            return;
+        }
+        
+        if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
+            frappe.msgprint('Please enter both Rating LV1 and Rating LV2 for RGB');
+            frappe.validated = false;
+            return;
+        } else if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && (!frm.doc.ukhv_lv1 || !frm.doc.ukhv_lv2)) {
+            frappe.msgprint('Please enter both UK HV LV1 and UK HV LV2');
+            frappe.validated = false;
+            return;
+        } 
+
+        frappe.validated = true; // If all validations pass
+    }
 });
+
+function reset_values(frm) {
+    frm.set_value('lv_rated_voltage', '');
+    frm.set_value('highest_operation_voltage_hv', '');
+    frm.set_value('ac_phase_hv', '');
+    frm.set_value('li_phase_hv', '');
+    let hvHtmlInput = $(frm.fields_dict.hv_html.wrapper).find('input');
+    hvHtmlInput.val('');
+    let lvHtmlInput = $(frm.fields_dict.lv_html.wrapper).find('input');
+    lvHtmlInput.val('');
+}

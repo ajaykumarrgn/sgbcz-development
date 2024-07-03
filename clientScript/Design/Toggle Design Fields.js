@@ -14,6 +14,8 @@ frappe.ui.form.on('Design', {
             }
         }
         
+        
+        
         // If any field is invalid, mark form as not validated
         if (!isValid) {
             frappe.validated = false;
@@ -26,17 +28,51 @@ frappe.ui.form.on('Design', {
         
         //When any changes made in the HTML field 
         $(document).on('change', '.attribute-input', function () {
-            // Get the input element triggering the change event
-            let inputElement = this;
-            // Extract the fieldname associated with the HTML field
-            let HTMLField = inputElement.getAttribute('data-fieldname');
-            // Retrieve the value of the HTML field
-            let value = inputElement.value;
-            
-            //This function is used to passing the value from the HTML field to Doctype field when changes are made
+    // Get the input element triggering the change event
+    let inputElement = this;
+    // Extract the fieldname associated with the HTML field
+    let HTMLField = inputElement.getAttribute('data-fieldname');
+    // Retrieve the value of the HTML field
+    let value = inputElement.value;
+    
+    // Check if the fieldname is either 'lv_html', 'hv_html', or 'power_lv'
+    if (HTMLField === 'lv_html' || HTMLField === 'hv_html'|| HTMLField === 'uk_lv'|| HTMLField === 'uk_hv_lv') {
+        // Regular expression to match only numbers and slashes
+        let regex = /^[0-9/]*$/;
+
+        // Validate the input value
+        if (regex.test(value)) {
+            // If valid, pass the value from the HTML field to the Doctype field
             fnTransposeHtmlToDocField(frm, value, HTMLField, document);
+        } else {
+            // If invalid, show an error message
+            frappe.msgprint('Please enter numbers and slashes only.');
+            // Clear the input field
+            inputElement.value = '';
+        }
+    } else if (HTMLField === 'power_lv') {
+        // Regular expression to match format "number/number"
+        let regex = /^[0-9]+\/[0-9]+$/;
+        
+        // Validate the input value
+        if (regex.test(value)) {
+            // Split the value into two parts
+            let parts = value.split('/');
+            let power_lv1 = parseInt(parts[0].trim());
+            let power_lv2 = parseInt(parts[1].trim());
+            let rating = parseFloat(frm.doc.rating) || 0;
             
-        });
+            // Check if lv1 + lv2 equals the rating
+            if (power_lv1 + power_lv2 !== rating) {
+                frappe.msgprint('Sum of Rating LV1 and Rating LV2 should equal the Rating.');
+                inputElement.value = ''; // Clear the input field
+            } else {
+                // If valid, pass the value from the HTML field to the Doctype field
+                fnTransposeHtmlToDocField(frm, value, HTMLField, document);
+            }
+        }
+    }
+});
     },
     
     render_templates: function(frm) {
@@ -51,6 +87,24 @@ frappe.ui.form.on('Design', {
                 // Show all fields when LV2 is present
                 frm.set_df_property(field.fieldname, 'hidden', false);
                 frm.set_df_property(field.fieldname, 'options', frappe.render(template, data));
+
+                if (frm.doc.factory == "RGB") {
+                    // Show power_lv and uk_lv, hide uk_hv_lv
+                    if (field.fieldname === 'power_lv' || field.fieldname === 'uk_lv') {
+                        frm.set_df_property(field.fieldname, 'hidden', false);
+                        
+                    } else if (field.fieldname === 'uk_hv_lv') {
+                        frm.set_df_property(field.fieldname, 'hidden', true);
+                    }
+                } else if (frm.doc.factory == "NEU") {
+                    // Show power_lv and uk_hv_lv, hide uk_lv
+                    if (field.fieldname === 'power_lv' || field.fieldname === 'uk_hv_lv') {
+                        frm.set_df_property(field.fieldname, 'hidden', false);
+                        
+                    } else if (field.fieldname === 'uk_lv') {
+                        frm.set_df_property(field.fieldname, 'hidden', true);
+                    }
+                }
             } else {
                 // Hide power_lv, uk_lv, uk_hv_lv, and vector_html fields if lv_2 is not present
                 if (['power_lv', 'uk_lv', 'uk_hv_lv', 'vector_html'].includes(field.fieldname)) {
@@ -65,8 +119,10 @@ frappe.ui.form.on('Design', {
         //Check if the Vector group is set to visible or not based on the LV2
         if (!frm.doc.lv_2) {
           frm.set_df_property('vector_group', 'hidden', false); // Show vector_group
+          frm.set_df_property('impedance', 'hidden', false);
         } else {
             frm.set_df_property('vector_group', 'hidden', true); // Hide vector_group if lv_2 is present
+            frm.set_df_property('impedance', 'hidden', true);
         }
         
         
@@ -182,10 +238,14 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
        // If there are not two values in the HTML field without a slash, it directly sets the value into the HV Rated Voltage field.
 
         if (lSplit.length > 1) {
-            if (lSplit[1].trim() === '') {
-                frappe.throw(__("Enter the ") + label2 + (" value") );
+            if (lSplit[0].trim() === '') {
+                frappe.msgprint('Enter the ' + label1 + ' value before the slash.');
                 return;
             } 
+            if (lSplit[1].trim() === '') {
+                frappe.msgprint('Enter the ' + label2 + ' value after the slash.');
+                return;
+            }  
             if (parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
                 frappe.throw(__(label2 + " should be lesser than " + label1));
                 return;
@@ -256,12 +316,20 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
 
 //This function is to validate the HTML field values with slash
 function isValidHtmlField(value) {
-    if (!value) return true; 
+    if (!value) return true; // If value is falsy (null, undefined, empty string), consider it valid
+    
     let parts = value.split('/');
-    if (parts.length === 1) return true; 
-    return parts.length === 2 && parts.every(part => part.trim() !== ''); 
+    
+    // Check if there's only one part (no slash), it's considered valid
+    if (parts.length === 1) return true;
+    
+    // Check if there are exactly two parts and both are not empty (trimmed)
+    if (parts.length === 2 && parts.every(part => part.trim() !== '')) {
+        return true;
+    } else {
+        return false;
+    }
 }
-
 //This function is used to define the inner html element for both fieldtype such as Data and Select
 function fnGetComboTemplate(){
     
@@ -299,7 +367,7 @@ function fnGetComboTemplate(){
         <div class="frappe-control input-max-width" data-fieldtype="Select" data-fieldname="{{field.fieldname}}_2">
             <div class="form-group">
                 <div class="clearfix">
-                    <label class="control-label" style="padding-right: 0px;">{{field.label}} 2</label>
+                    <label class="control-label reqd" style="padding-right: 0px;">{{field.label}} 2</label>
                     <span class="help"></span>
                 </div>
                 <div class="control-input-wrapper">
@@ -352,7 +420,7 @@ function fnGetHtmlfields() {
     let fields = [
         { fieldname: 'hv_html', label: 'HV Value(V)', placeholder: 'HV1/HV2', type: 'data' },
         { fieldname: 'lv_html', label: 'LV Value(V)', placeholder: 'LV1/LV2', type: 'data' },
-        { fieldname: 'power_lv', label: 'Power LV', placeholder: 'Power LV1/Power LV2', type: 'data' },
+        { fieldname: 'power_lv', label: 'Rating LV', placeholder: 'Rating LV1/Rating LV2', type: 'data' },
         { fieldname: 'uk_lv', label: 'UK LV', placeholder: 'UK LV1/UK LV2', type: 'data' },
         { fieldname: 'uk_hv_lv', label: 'UK HV-LV', placeholder: 'UK HV LV1/UK HV LV2', type: 'data' },
         { fieldname: 'vector_html', label: 'Vector Group', type: 'combo' },
