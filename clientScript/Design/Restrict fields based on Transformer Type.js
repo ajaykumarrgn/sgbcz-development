@@ -4,6 +4,10 @@ frappe.ui.form.on('Design', {
             frm.set_value('factory', 'SGBCZ');
             frm.set_value('transformer_type', 'DTTHZ2N');
             frm.fields_dict['lv_rated_voltage'].df.label = 'LV Value(V)';
+           if (frm.doc.factory === 'SGBCZ') {
+                frm.set_df_property('lv_rated_voltage', 'reqd', true);
+            }
+
         }
         frm.trigger('toggle_fields');
     },
@@ -15,7 +19,7 @@ frappe.ui.form.on('Design', {
             case 'SGBCZ':
                 frm.set_df_property('lv_rated_voltage', 'reqd', true);
                
-                //frm.set_value('transformer_type', 'DTTHZ2N');
+                frm.set_value('transformer_type', 'DTTHZ2N');
                 break;
             case 'RGB':
             case 'NEU':
@@ -94,7 +98,7 @@ frappe.ui.form.on('Design', {
     
     is_design: function(frm) {
         if (frm.doc.is_design) {
-            frm.set_value('thdi', '');
+            frm.set_value('thdi', '5');
         }
     },
 
@@ -104,6 +108,7 @@ frappe.ui.form.on('Design', {
 
         if (frm.doc.is_design) {
             if (![5, 20].includes(thdiValue)) {
+                  
                 frappe.throw('Enter the THDi Value as 5 or 20');
             }
         } else {
@@ -115,7 +120,7 @@ frappe.ui.form.on('Design', {
 
     validate: function(frm) {
         if (frm.doc.factory === 'SGBCZ' && !frm.doc.lv_rated_voltage) {
-            frappe.msgprint('LV Rated Voltage is mandatory for SGBCZ');
+            frappe.msgprint('LV Value is mandatory');
             frappe.validated = false; 
             return;
         }

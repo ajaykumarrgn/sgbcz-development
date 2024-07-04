@@ -246,10 +246,16 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
                 frappe.msgprint('Enter the ' + label2 + ' value after the slash.');
                 return;
             }  
-            if (parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
+            // if (parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
+            //     frappe.throw(__(label2 + " should be lesser than " + label1));
+            //     return;
+            // }
+            if (iHtmlField !== 'power_lv' && parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
+                console.log("Test", lSplit);
                 frappe.throw(__(label2 + " should be lesser than " + label1));
                 return;
             }
+
             frm.set_value(field1, lSplit[0]);
             frm.set_value(field2, lSplit[1]);
             if (field) {frm.set_value(field, null);}
@@ -276,14 +282,14 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
     //Triggering the values based on the HTML fields
     switch (iHtmlField) {
         case 'hv_html':
-            lfnSplitnSet(frm, iValue, 'hv_rated_voltage', 'hv1', 'hv2', 'HV 1', 'HV 2')
+            lfnSplitnSet(frm, iValue, 'hv_rated_voltage', 'hv1', 'hv2', 'HV1', 'HV2')
             break;
         case 'lv_html':
-            lfnSplitnSet(frm, iValue, 'lv_rated_voltage', 'lv1', 'lv_2', 'LV 1', 'LV 2')
+            lfnSplitnSet(frm, iValue, 'lv_rated_voltage', 'lv1', 'lv_2', 'LV1', 'LV2')
             
             break;
         case 'power_lv':
-            lfnClearDependencies(frm, iValue, 'lv_2', ['power_lv1', 'power_lv2', 'power_lv'], ['Power LV1', 'Power LV2'])
+            lfnClearDependencies(frm, iValue, 'lv_2', ['power_lv1', 'power_lv2', 'power_lv'], ['Rating LV1', 'Rating LV2'])
 
             break;
         case 'uk_lv':
@@ -421,8 +427,8 @@ function fnGetHtmlfields() {
         { fieldname: 'hv_html', label: 'HV Value(V)', placeholder: 'HV1/HV2', type: 'data' },
         { fieldname: 'lv_html', label: 'LV Value(V)', placeholder: 'LV1/LV2', type: 'data' },
         { fieldname: 'power_lv', label: 'Rating LV', placeholder: 'Rating LV1/Rating LV2', type: 'data' },
-        { fieldname: 'uk_lv', label: 'UK LV', placeholder: 'UK LV1/UK LV2', type: 'data' },
-        { fieldname: 'uk_hv_lv', label: 'UK HV-LV', placeholder: 'UK HV LV1/UK HV LV2', type: 'data' },
+        { fieldname: 'uk_lv', label: 'Uk (%)', placeholder: 'UK LV1/UK LV2', type: 'data' },
+        { fieldname: 'uk_hv_lv', label: 'Uk (%)', placeholder: 'UK HV LV1/UK HV LV2', type: 'data' },
         { fieldname: 'vector_html', label: 'Vector Group', type: 'combo' },
     ];
     return fields;

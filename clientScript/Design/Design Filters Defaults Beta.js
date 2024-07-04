@@ -51,5 +51,6 @@ frappe.ui.form.on('Design', {
     },
     lv1(frm) {
         frm.events.validate_and_display_error(frm, 'LV1', 'lv1');
-    },
+    }, 
+    //Testing in localhost
 });

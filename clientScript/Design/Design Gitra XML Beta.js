@@ -54,7 +54,7 @@ frappe.ui.form.on('Design', {
         
         //only provide gitra intragration for DTTHZ2N transformer
         
-        if(frm.doc.factory === 'SGBCZ' && frm.doc.transformer_type === 'DTTHZ2N'){
+        if(frm.doc.factory === 'SGBCZ' && frm.doc.transformer_type === 'DTTHZ2N' && frm.doc.is_design ){
             var lDoctype = "Gitra Settings";
             // Initialize the model with doctype Gitra Settings
             frappe.model.with_doc(lDoctype, lDoctype, function() {
@@ -66,10 +66,18 @@ frappe.ui.form.on('Design', {
                 // Resolve expressions and variables
                 var lXml = laValues[0].gitra_xml.replace(lPattern, function(match, iVariable) {
                     var lValue = '';
-                    if(iVariable==='frm.doc.k4_factor'){
-                        var lk4 = frm.doc.k4_factor == "Yes" ? '6395' : '6396';
-                        lValue = lk4;
-                    } else {
+                    //Commented this block for using the THDi directly instead of k4_factor
+                    // if(iVariable==='frm.doc.k4_factor'){
+                    //     var lk4 = frm.doc.k4_factor == "Yes" ? '6395' : '6396';
+                    //     lValue = lk4;
+                    // } else {
+                    //     lValue = eval(iVariable);
+                    // }
+                    if(iVariable==='frm.doc.thdi') {
+                        var lThdi = frm.doc.thdi == "20" ? '6395' : '6396';
+                        lValue = lThdi;
+                    }
+                    else {
                         lValue = eval(iVariable);
                     }
                     return lValue || '';
