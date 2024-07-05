@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-dotenv.config();
+dotenv.config({path: '../.env'});
 
 const myHeaders = new Headers();
 myHeaders.append("Authorization", process.env.KEY)
@@ -18,7 +18,7 @@ const current_path = process.cwd();
 
 // Function to create the "clientScript" folder if it doesn't exist
 function ensureClientScriptFolderExists() {
-  const clientScriptFolderPath = path.join(current_path, 'clientScript');
+  const clientScriptFolderPath = path.join(current_path, '..', 'clientScript');
   if (!fs.existsSync(clientScriptFolderPath)) {
     fs.mkdirSync(clientScriptFolderPath, { recursive: true });
     console.log('Created "clientScript" folder.');
@@ -41,7 +41,7 @@ fetch(`${baseUrl}?fields=["*"]&filters={\"enabled\":1}&limit_page_length=0`, req
     if (data && data.data && Array.isArray(data.data)) {
       data.data.forEach(documentDetails => {
         const folderName = documentDetails.dt;
-        const folderPath = path.join(current_path, 'clientScript', folderName);
+        const folderPath = path.join(current_path,'..', 'clientScript', folderName);
         const metaFileName = path.join(folderPath, `${documentDetails.name}.meta`);
         const scriptFileName = path.join(folderPath, `${documentDetails.name}.js`);
 

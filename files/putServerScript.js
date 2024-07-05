@@ -6,16 +6,16 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process'; 
-dotenv.config();
+dotenv.config({path: '../.env'});
 
-const baseFolder = 'clientScript';
+const baseFolder = '../serverScript';
 
-const myHeaders = new Headers();
-myHeaders.append("Authorization", process.env.KEY)
-myHeaders.append('Content-Type', 'application/json');
+const headers = {
+  'Content-Type': 'application/json',
+  'Authorization': process.env.KEY,
+};
 
-const baseUrl = getEndPointForDoctype("Client Script")
-
+const baseUrl = getEndPointForDoctype("Server Script")
 
 function isFileChanged(filePath) {
   try {
@@ -42,7 +42,7 @@ function isFileNew(filePath) {
 function createNewResource( requestBody) {
   const requestOptions = {
       method: 'POST',
-      headers: myHeaders,
+      headers,
       body: JSON.stringify(requestBody),
       redirect: 'follow',
   };
@@ -80,9 +80,9 @@ function processFilesInFolder(folderPath, parentFolder = null) {
         const currentFolder = parentFolder ? `${parentFolder}/${file}` : file;
         processFilesInFolder(filePath, currentFolder); // Recursively process subdirectories
       } else {
-        if (file.endsWith('.js')) { // Process only JavaScript files
+        if (file.endsWith('.py')) { // Process only JavaScript files
           const fileContent = fs.readFileSync(filePath, 'utf-8');
-          const metaFilePath = path.join(folderPath, `${file.replace(/\.js$/, '')}.meta`);
+          const metaFilePath = path.join(folderPath, `${file.replace(/\.py$/, '')}.meta`);
 
           if (fs.existsSync(metaFilePath)) {
             let metaContent = fs.readFileSync(metaFilePath, 'utf-8');
@@ -93,7 +93,7 @@ function processFilesInFolder(folderPath, parentFolder = null) {
               metaContent = {}; // Provide a default empty object
             } else {
               try {
-                metaContent = JSON.parse(metaContent); // Parse the JSON content of .meta file
+                metaContent = JSON.parse(metaContent) // Parse the JSON content of .meta file
                 delete metaContent.name;
                 delete metaContent.owner;
                 delete metaContent.modified;
@@ -107,50 +107,48 @@ function processFilesInFolder(folderPath, parentFolder = null) {
               }
             }
 
-            const encodedFilename = encodeURIComponent(file.replace(/\.js$/, ''));
-            const postFilename = file.replace(/\.js$/, '');
+            const encodedFilename = encodeURIComponent(file.replace(/\.py$/, ''));
+            const postFilename = file.replace(/\.py$/, '');
             const folderName = parentFolder ? parentFolder : '';
 
             if (isFileNew(filePath) || isFileChanged(filePath)) {
               // Use PUT for changed files or new files
               const requestOptions = {
                 method: 'PUT',
-                headers: myHeaders,
+                headers,
                 body: JSON.stringify({
-                  filename: postFilename,
+                  name: postFilename,
                   script: fileContent,
-                  ...metaContent,
-                 
+                  // ...metaContent,
+                  script_type: folderName,
+                  disabled: 0
                 }),
                 redirect: 'follow',
               };
-              
+
               const url = `${baseUrl}/${encodedFilename}`;
 
               fetch(url, requestOptions)
                 .then(response => {
                   if (!response.ok) {
                     if (response.status === 404) {
-                      // If the file doesn't exist, create a new resource
+                      // If the file doesn't exist, create a new resource using POST
                       createNewResource( {
-                          name: postFilename,
-                          script: fileContent,
-                          ...metaContent,
-                          dt: folderName,
-                          enabled: 1
-                      });
-                  } else {
+                        name: postFilename,
+                        script: fileContent,
+                        ...metaContent,
+                        script_type: folderName,
+                        disabled: 0
+                    });
+                    } else {
                       throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                  } else {
+                    console.log(`Updated script: ${file}`);
                   }
-                  }
-                  return response.json();
-                })
-                .then(result => {
-                  console.log(`Processing changed file: ${file}`);
-                 
                 })
                 .catch(error => {
-                  console.error(`Error processing changed file ${file}:`, error);
+                  console.error(`Error processing file ${file}:`, error);
                 });
             }
           } else {
