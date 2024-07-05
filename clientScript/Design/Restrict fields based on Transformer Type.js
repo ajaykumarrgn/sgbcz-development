@@ -6,6 +6,7 @@ frappe.ui.form.on('Design', {
             frm.fields_dict['lv_rated_voltage'].df.label = 'LV Value(V)';
            if (frm.doc.factory === 'SGBCZ') {
                 frm.set_df_property('lv_rated_voltage', 'reqd', true);
+                frm.fields_dict['lv_rated_voltage'].$input.attr('placeholder', 'LV');
             }
 
         }
@@ -99,6 +100,14 @@ frappe.ui.form.on('Design', {
     is_design: function(frm) {
         if (frm.doc.is_design) {
             frm.set_value('thdi', '5');
+            frm.toggle_display('hv_html', false); // Hide hv_html field
+            frm.toggle_display('hv_rated_voltage', true); // Display hv_rated_voltage field
+            frm.set_df_property('hv_rated_voltage', 'reqd', true);
+            frm.fields_dict['hv_rated_voltage'].set_label('HV Value(V)');
+            frm.fields_dict['hv_rated_voltage'].$input.attr('placeholder', 'HV');
+        } else {
+            frm.toggle_display('hv_html', true); // Display hv_html field
+            frm.toggle_display('hv_rated_voltage', false); // Hide hv_rated_voltage field
         }
     },
 

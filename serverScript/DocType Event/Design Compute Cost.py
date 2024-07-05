@@ -2,7 +2,17 @@
 # Returns the first record matching the condition
 # similar to array.find of javascript or READ TABLE of ABAP
 def find_dict_with_keys(doc, dict_array):
-    predicate = lambda x: int(x.get('rating')) >= int(doc.get('rating')) and int(x.get('hv', 0)) >= int(doc.get('hv_rated_voltage'))
+    # Include this line for Gitra calculation using hv_rated_voltage or hv1 if available
+    # Handle the case where hv_rated_voltage might not be present
+    hv_field='hv_rated_voltage'
+    if not doc.hv_rated_voltage:
+        hv_field = 'hv1'
+        
+
+    # lHv = doc.get('hv_rated_voltage') or doc.get('hv1')
+    
+    #predicate = lambda x: int(x.get('rating')) >= int(doc.get('rating')) and int(x.get('hv', 0)) >= int(doc.get('hv_rated_voltage'))
+    predicate = lambda x: int(x.get('rating', 0)) >= int(doc.get('rating', 0)) and int(x.get('hv', 0)) >= int(doc.get(hv_field))
     for d in dict_array:
         if predicate(d):
             return d
