@@ -67,12 +67,12 @@ function fnFetchTransformerType(frm) {
         lXmlDataTab.hidden = false;
     }
     
-    const ldTransformerMapping = {
+    const ldTRANSFORMERMAPPING = {
         "SGBCZ": "DTTHZ2N",
         "RGB": "RGB",
         "NEU": "NEU"
     };
-    const lGetItemGroup = ldTransformerMapping[frm.doc.factory];
+    const lGetItemGroup = ldTRANSFORMERMAPPING[frm.doc.factory];
 
     frappe.call({
         method: "get_item_variant_based_on_factory",
@@ -86,35 +86,35 @@ function fnFetchTransformerType(frm) {
 }
 
 function fnUpdateButtonGroup(frm) {
-    const lStatus = frm.doc.status;
-    let buttonLabel = '';
-    let buttonFunction = null;
+    const STATUS = frm.doc.status;
+    let iButtonLabel = '';
+    let iButtonFunction = null;
 
-    if (lStatus === 'Draft' && frm.doc.is_design === 1) {
-        buttonLabel = 'Create Design';
-        buttonFunction = fncreateDesign;
-    } else if (lStatus === 'Draft' && frm.doc.is_design === 0) {
-        buttonLabel = 'Create Item';
-        buttonFunction = fncreateItem;
-    } else if (lStatus === 'Calculation Received' && !frm.doc.item) {
-        buttonLabel = 'Create Item';
-        buttonFunction = fncreateItem;
-    } else if (lStatus === 'Item Created' && frm.doc.item) {
-        buttonLabel = 'View Item';
-        buttonFunction = fnviewItem;
-    } else if (lStatus === 'Item Created' && !frm.doc.item) {
-        buttonLabel = 'Create Item';
-        buttonFunction = fncreateItem;
+    if (STATUS === 'Draft' && frm.doc.is_design === 1) {
+        iButtonLabel = 'Create Design';
+        iButtonFunction = fncreateDesign;
+    } else if (STATUS === 'Draft' && frm.doc.is_design === 0) {
+        iButtonLabel = 'Create Item';
+        iButtonFunction = fncreateItem;
+    } else if (STATUS === 'Calculation Received' && !frm.doc.item) {
+        iButtonLabel = 'Create Item';
+        iButtonFunction = fncreateItem;
+    } else if (STATUS === 'Item Created' && frm.doc.item) {
+        iButtonLabel = 'View Item';
+        iButtonFunction = fnviewItem;
+    } else if (STATUS === 'Item Created' && !frm.doc.item) {
+        iButtonLabel = 'Create Item';
+        iButtonFunction = fncreateItem;
     }
 
-    fnShowButtonGroup(frm, buttonLabel, buttonFunction);
+    fnShowButtonGroup(frm, iButtonLabel, iButtonFunction);
 }
 
-function fnShowButtonGroup(frm, buttonLabel, buttonFunction) {
+function fnShowButtonGroup(frm, iButtonLabel, iButtonFunction) {
     frm.clear_custom_buttons();
-    if (buttonLabel && buttonFunction) {
-        frm.add_custom_button(__(buttonLabel), function() {
-            buttonFunction(frm);
+    if (iButtonLabel && iButtonFunction) {
+        frm.add_custom_button(__(iButtonLabel), function() {
+            iButtonFunction(frm);
         });
     }
 }
@@ -147,8 +147,8 @@ function fncreateItem(frm) {
                             args: { doctype: "Gitra Settings" },
                             callback: function(gitraResponse) {
                                 if (gitraResponse.message) {
-                                    const ldDatasheetLanguages = gitraResponse.message.datasheet_languages;
-                                    const laLanguages = ldDatasheetLanguages.map(lang => lang.language);
+                                    const ldDATASHEETLANGUAGES = gitraResponse.message.datasheet_languages;
+                                    const laLANGUAGES = ldDATASHEETLANGUAGES.map(lang => lang.language);
                                     let lTitle = frm.doc.title;
                                     if (lTitle) {
                                         let lSpaceIndex = lTitle.indexOf(' ');
@@ -162,7 +162,7 @@ function fncreateItem(frm) {
                                         args: {
                                             im_source_doc_type: frm.doc.doctype,
                                             im_source_doc_name: frm.doc.name,
-                                            im_languages: laLanguages,
+                                            im_languages: laLANGUAGES,
                                             im_letter_head: "Data Sheet",
                                             im_target_doc_type: "Item",
                                             im_target_doc_name: response.message.item_code,

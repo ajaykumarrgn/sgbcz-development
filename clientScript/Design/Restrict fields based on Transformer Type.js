@@ -1,20 +1,30 @@
 frappe.ui.form.on('Design', {
     onload: function(frm) {
         if (frm.is_new()) {
+            //Set the default factory as "SGBCZ" and trafo type as "DTTHZ2N"
+            //when the design form is new
             frm.set_value('factory', 'SGBCZ');
             frm.set_value('transformer_type', 'DTTHZ2N');
+            //In the SGBCZ factory used only one LV value 
+            //so the i have renamed the LV rated Voltage into LV value
             frm.fields_dict['lv_rated_voltage'].df.label = 'LV Value(V)';
-           if (frm.doc.factory === 'SGBCZ') {
+            //If factory is SGBCZ,set the LV rated voltage as a mandatory field
+            //not for other Trafo.
+            //Other Trafo sometimes have the LV1 and LV2 is a mandatory
+            //so that Lv rated Voltage not mandatory for other factories
+            //Set the LV placeholder when the single LV value is need.
+            if (frm.doc.factory === 'SGBCZ') {
                 frm.set_df_property('lv_rated_voltage', 'reqd', true);
                 frm.fields_dict['lv_rated_voltage'].$input.attr('placeholder', 'LV');
             }
 
         }
-        frm.trigger('toggle_fields');
+        //Triggering the toggle fields based on the factory by here.
+        frm.trigger('fnToggleFields');
     },
-    
+    //When factory is changed , fields also changed for that dependent request.
     factory: function(frm) {
-        reset_values(frm);
+        fnResetValues(frm);
         
         switch (frm.doc.factory) {
             case 'SGBCZ':
@@ -25,78 +35,90 @@ frappe.ui.form.on('Design', {
             case 'RGB':
             case 'NEU':
                 frm.set_df_property('lv_rated_voltage', 'reqd', false);
-                frm.set_value('transformer_type', frm.doc.factory === 'RGB' ? 'DTTH2N' : 'DOTML');
+                frm.set_value('transformer_type', 
+                            frm.doc.factory === 'RGB' ? 'DTTH2N' : 'DOTML');
                 break;
         }
         
-        frm.trigger('toggle_fields');
-        frm.trigger('update_insulation_class_options');
+        frm.trigger('fnToggleFields');
+        frm.trigger('fnUpdateInsulationClass');
     },
     
     refresh: function(frm) {
-        frm.trigger('update_insulation_class_options');
-        frm.trigger('toggle_fields');
+        frm.trigger('fnUpdateInsulationClass');
+        frm.trigger('fnToggleFields');
     },
-
-    update_insulation_class_options: function(frm) {
-        let options = [];
+    //Set the options for the insulation class is varying for the factory
+    fnUpdateInsulationClass: function(frm) {
+        let laOptions = [];
         switch (frm.doc.factory) {
             case 'RGB':
-                options = ['F', 'H'];
+                laOptions = ['F', 'H'];
                 break;
             case 'NEU':
-                options = ['A', 'B', 'C', 'F', 'H'];
+                laOptions = ['A', 'B', 'C', 'F', 'H'];
                 break;
         }
-        frm.set_df_property('insulation_class', 'options', options);
+        frm.set_df_property('insulation_class', 'options', laOptions);
     },
-    
-    toggle_fields: function(frm) {
-        const fields = [
+    //This function used to hide and show fields 
+    //based on the factory by controlling here.
+    fnToggleFields: function(frm) {
+        const FIELDS = [
             'vector_html', 'power_lv', 'uk_lv', 'uk_hv_lv', 'lv_html',
-            'insulation_class', 'winding_material', 'cooling_method', 'type_cooling',
+            'insulation_class', 'winding_material', 'cooling_method',
+             'type_cooling',
             'impedance', 'lv_rated_voltage', 'bushing_hv', 'cooling_method',
             'type_cooling', 'temperature_rise', 'temperature_rise_oil',
-            'temperature_rise_winding', 'climatic_class', 'environmental_class',
+            'temperature_rise_winding', 'climatic_class', 
+            'environmental_class',
             'temperature_rise_datasheet', 'temperature_rise_gitra'
         ];
 
-        fields.forEach(field => frm.toggle_display(field, false));
+        FIELDS.forEach(field => frm.toggle_display(field, false));
 
-        let showFields = [];
+        let laShowFields = [];
         switch (frm.doc.factory) {
             case 'SGBCZ':
-                showFields = ['vector_group', 'impedance', 'lv_rated_voltage',
-                              'temperature_rise', 'climatic_class', 'environmental_class',
-                              'temperature_rise_datasheet', 'temperature_rise_gitra'];
+                laShowFields = ['vector_group', 'impedance', 
+                                'lv_rated_voltage',
+                                'temperature_rise', 'climatic_class', 
+                                'environmental_class',
+                                'temperature_rise_datasheet',
+                                'temperature_rise_gitra'];
                 break;
             case 'RGB':
-                showFields = fields.filter(field => !['lv_rated_voltage', 'bushing_hv',
-                                                      'cooling_method', 'type_cooling',
-                                                      'uk_hv_lv', 'temperature_rise_oil',
-                                                      'temperature_rise_winding',
-                                                      'temperature_rise_datasheet',
-                                                      'temperature_rise_gitra'].includes(field));
-                showFields.push('temperature_rise');
+                laShowFields = FIELDS.filter(field => ![
+                            'lv_rated_voltage', 'bushing_hv',
+                            'cooling_method', 'type_cooling',
+                            'uk_hv_lv', 'temperature_rise_oil',
+                            'temperature_rise_winding',
+                            'temperature_rise_datasheet',
+                            'temperature_rise_gitra'].includes(field));
+                laShowFields.push('temperature_rise');
                 break;
             case 'NEU':
-                showFields = fields.filter(field => !['lv_rated_voltage', 'uk_lv',
-                                                      'impedance', 'temperature_rise',
-                                                      'climatic_class', 'environmental_class',
-                                                      'temperature_rise_datasheet',
-                                                      'temperature_rise_gitra'].includes(field));
-                showFields.push('temperature_rise_oil', 'temperature_rise_winding');
+                laShowFields = FIELDS.filter(field => ![
+                            'lv_rated_voltage', 'uk_lv',
+                            'impedance', 'temperature_rise',
+                            'climatic_class', 'environmental_class',
+                            'temperature_rise_datasheet',
+                            'temperature_rise_gitra'].includes(field));
+                laShowFields.push('temperature_rise_oil', 
+                                  'temperature_rise_winding');
                 break;
         }
 
-        showFields.forEach(field => frm.toggle_display(field, true));
+        laShowFields.forEach(field => frm.toggle_display(field, true));
 
         if (frm.doc.factory === 'RGB' && frm.doc.lv_2) {
             frm.toggle_display('uk_hv_lv', false);
             frm.toggle_display('impedance', false);
         }
     },
-    
+    //Set the deafult value for the THDi is 5 when designing the transformer
+    //When calculation needed by Gitra ,
+    //only need HV rated voltage not HV1 and HV2
     is_design: function(frm) {
         if (frm.doc.is_design) {
             frm.set_value('thdi', '5');
@@ -111,6 +133,10 @@ frappe.ui.form.on('Design', {
         }
     },
 
+    //When designing the transformer need to follow some condition
+    //such as THDi is either 5 or 20
+    //Otherwise it accepts from 5 to 99,
+    //it exceeds this value arise the error message
     thdi: function(frm) {
         let thdiValue = Number(frm.doc.thdi);
         if (!frm.doc.thdi) return;
@@ -127,6 +153,8 @@ frappe.ui.form.on('Design', {
         }
     },
 
+    //When the factory is changed, dependent fields also
+    //want to be show or hide based on the factory
     validate: function(frm) {
         if (frm.doc.factory === 'SGBCZ' && !frm.doc.lv_rated_voltage) {
             frappe.msgprint('LV Value is mandatory');
@@ -157,7 +185,9 @@ frappe.ui.form.on('Design', {
     }
 });
 
-function reset_values(frm) {
+//When changing the HTMl field , cleared the below field value
+//as well as html input value
+function fnResetValues(frm) {
     frm.set_value('lv_rated_voltage', '');
     frm.set_value('highest_operation_voltage_hv', '');
     frm.set_value('ac_phase_hv', '');
