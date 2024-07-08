@@ -4,12 +4,13 @@
 # Silicon-free is not Visible: (Issue# : ISS-2024-00018)
 # Some columns are not visible when using the saved column. It does not accept spaces after the <br> tag. (Issue# : ISS-2024-00020)
 # Remove the duplicate records in the Sales Table report based on Payment Terms(Issue# : ISS-2024-00045)
+#"Order Value" and "Price GTS"should be displayed in EUR in Sales Table when CZK currency is selected in Sales Order.(Issue# : ISS-2024-00081)
 
 # Change Request
 # Transfer Note section from Sales order to Delivery Schedule (Task#: TASK-2024-00221)
 # Transfer Reservation field from Sales order to Delivery Schedule (Task#: TASK-2024-00155)
 # Improve the sales table report performance (Task#: TASK-2024-00216)
-# wrong accessories displayed  -relay issue# ISS-2024-00061 
+# wrong accessories displayed  -relay issue# ISS-2024-00061
 
 def get_columns(filters):
     la_columns = []
@@ -218,7 +219,7 @@ def reorder_columns_for_user_preference(ima_columns, imd_user_session_default):
     la_reordered_columns = []
     # convert the column preference stored as string to Json array
     la_report_columns=json.loads(imd_user_session_default.report_columns)
-    
+
     # Reorder the output column based on the user preference
     # iterate user preference columns
     for l_report_column in la_report_columns:
@@ -227,7 +228,7 @@ def reorder_columns_for_user_preference(ima_columns, imd_user_session_default):
             #  If found append
             if ld_column['label'] == l_report_column:
                 la_reordered_columns.append(ld_column)
-        
+
     return la_reordered_columns
 
 
@@ -356,7 +357,8 @@ def get_result(filters):
                 "`tabSales Order Item`.rdg_number",
                 "`tabSales Order Item`.item_group",
                 "`tabSales Order Item`.sap_reference",
-                "`tabSales Order Item`.rate",
+                #"`tabSales Order Item`.rate", #<<Commented for the issue of displaying order value and price gts in EUR (ISS-2024-00081)
+                "`tabSales Order Item`.base_rate", #<<Added the below line to get the EUR currency for the sales order item (ISS-2024-00081)
                 "`tabSales Order Item`.sensor_name",
                 "`tabSales Order Item`.engineering_required",
                 "`tabSales Order Item`.accessories_specification",  # <<TASK-2024-00307
@@ -418,7 +420,7 @@ def get_result(filters):
             filters=ld_attributes_filter,
             order_by='parent')
 
-        # Uncomenting for ISS-2024-00061. Order_by is not working for accessories  
+        # Uncomenting for ISS-2024-00061. Order_by is not working for accessories
         # specification. Sorting this for safer side
         la_item_attributes_sorted = sorted(
             la_item_attributes, key=lambda x: x['parent'])
@@ -844,7 +846,7 @@ def get_result(filters):
         l_order_value = 0
         l_order_values = []
         for ld_item in ld_items_rev_sorted:
-        
+
             # >>ISS-2024-00045
 
             if ld_item_current['name'] == ld_item['name'] and ld_item_current['pos'] == ld_item['pos']:
@@ -857,7 +859,8 @@ def get_result(filters):
             # <<ISS-2024-00045
 
             # Order value of a transformer is computed per set of transformer including its accessories and services
-            l_order_value = l_order_value + ld_item.rate
+            #l_order_value = l_order_value + ld_item.rate #<<Commented for the issue of displaying order value and price gts in EUR (ISS-2024-00081)
+            l_order_value = l_order_value + ld_item.base_rate #<<Added the below line to get the EUR currency for the sales order item (ISS-2024-00081)
 
             # Little complex logic converted to simple one
             # Transformer set price is computed as transformer base price + 1 set of all accessories and services
@@ -886,9 +889,11 @@ def get_result(filters):
             for ld_setid in range(0, int(ld_item.qty)):
                 if ld_setid < len(l_order_values):
                     l_order_values[ld_setid] = l_order_values[ld_setid] + \
-                        ld_item.rate
+                        ld_item.base_rate #<<Added the below line to get the EUR currency for the sales order item (ISS-2024-00081)
+                        #ld_item.rate #<<Commented for the issue of displaying order value and price gts in EUR (ISS-2024-00081)
                 else:
-                    l_order_values.append(ld_item.rate)
+                    #l_order_values.append(ld_item.rate) #<<Commented for the issue of displaying order value and price gts in EUR (ISS-2024-00081)
+                    l_order_values.append(ld_item.base_rate) #<<Added the below line to get the EUR currency for the sales order item (ISS-2024-00081)
 
     #       Only get the Main items. Ignore accessories and services
             if (ld_item.pos % 10 == 0):
@@ -910,7 +915,8 @@ def get_result(filters):
                 po_item_row['sap_reference'] = ld_item.sap_reference
                 po_item_row['id_number'] = ld_item.id_number
                 po_item_row['item_group'] = ld_item.item_group
-                po_item_row['price_gts'] = ld_item.rate
+                #po_item_row['price_gts'] = ld_item.rate #<<Commented for the issue of displaying order value and price gts in EUR (ISS-2024-00081)
+                po_item_row['price_gts'] = ld_item.base_rate #<<Added the below line to get the EUR currency for the sales order item (ISS-2024-00081)
                 po_item_row['engineering_required'] = '' if ld_item.engineering_required == "No" else str(
                     ld_item.engineering_required)
                 # po_item_row['silicon_free'] = (ld_item.silicon_free if ld_item.silicon_free else '')
