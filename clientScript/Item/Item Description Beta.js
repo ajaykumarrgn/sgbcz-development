@@ -1,6 +1,7 @@
 // Change References
 // Formation of Enclosure Item Description:(Issue# : ISS-2024-00004)
 //Get Item description form the Item Template to Item Creation description
+//Item description taken from Template item to Item Creation with different Trafo Type
 //>> ISS-2024-00004
 frappe.ui.form.on("Item", {
   validate: function (frm) {

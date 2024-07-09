@@ -1,6 +1,6 @@
 //In Earlier, we have the formation of the Design name as Rating/HV/LV/Impedance/Li Phase
 //Now ,sometimes HV1 and HV2 or LV1 and Lv2 are present, so that change the formation
-//as Rating/HV1/HV2/LV/Impedance/Li Phase or Rating/HV/LV1/LV2/Impedance/Li Phase
+//as Rating/HV1/HV2/LV/Impedance/Li Phase or Rating/HV/LV1/LV2/Impedance/Li Phase.
 cur_frm.cscript.custom_validate = function (doc) {
   function fnGetCleanString(iFloat, isHV) {
     if (iFloat === null || iFloat === undefined) {

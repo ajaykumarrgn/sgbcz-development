@@ -108,7 +108,9 @@ frappe.ui.form.on("Design", {
       frm.refresh_fields();
     });
   },
-
+  onload(frm) {
+    frm.set_value('lpa', 0)
+  },
   refresh(frm) {
     if (frm.is_new()) {
       // Call get_standard_losses function on refresh if form is new

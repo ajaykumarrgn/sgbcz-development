@@ -1,4 +1,4 @@
-//In earlier, Validate the ranges for the HV and LV only
+//In earlier, Validate the ranges for the HV and LV only,
 //Now also validate the HV1 and LV1 ranges
 frappe.ui.form.on('Design', {
     refresh(frm) {

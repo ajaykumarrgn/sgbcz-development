@@ -1,6 +1,8 @@
 # Find the the array with
 # Returns the first record matching the condition
 # similar to array.find of javascript or READ TABLE of ABAP
+# In earlier, HV Rated VOltage only used for Gitra Calculation
+# But use either HV rated Voltage or HV1
 def fn_find_dict_with_keys(doc, i_dict_array):
     # Include this line for Gitra calculation using hv_rated_voltage or hv1 if available
     # Handle the case where hv_rated_voltage might not be present
@@ -12,7 +14,7 @@ def fn_find_dict_with_keys(doc, i_dict_array):
     # lHv = doc.get('hv_rated_voltage') or doc.get('hv1')
     
     #predicate = lambda x: int(x.get('rating')) >= int(doc.get('rating')) and int(x.get('hv', 0)) >= int(doc.get('hv_rated_voltage'))
-    l_predicate = lambda x: int(x.get('rating', 0)) >= int(doc.get('rating', 0)) and int(x.get('hv', 0)) >= int(doc.get(l_predicatehv_field))
+    l_predicate = lambda x: int(x.get('rating', 0)) >= int(doc.get('rating', 0)) and int(x.get('hv', 0)) >= int(doc.get(l_hv_field))
     for i_d in i_dict_array:
         if l_predicate(i_d):
             return i_d

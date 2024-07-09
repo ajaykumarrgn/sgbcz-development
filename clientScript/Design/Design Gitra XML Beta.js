@@ -1,5 +1,5 @@
 //In earlier, we have set the value 5 or 20 for the Gitra Calculation
-//By using the K4 factor
+//By using the K4 factor.
 //But now we have directly set that the value into the field THDi
 frappe.ui.form.on("Design", {
   validate(frm) {

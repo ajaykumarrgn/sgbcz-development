@@ -1,3 +1,4 @@
+//Restrict the fields based on the factory and Trafo type
 frappe.ui.form.on('Design', {
     onload: function(frm) {
         if (frm.is_new()) {

@@ -1,4 +1,5 @@
-//Setting the default dependent value for HV1 #(Story: US-2024-0044)
+//Setting the default dependent value for either HV Rated Voltage
+// or HV1  #(Story: US-2024-0044)
 frappe.ui.form.on("Design", {
   refresh(frm) {
     var lDoctype = "Gitra Settings";
