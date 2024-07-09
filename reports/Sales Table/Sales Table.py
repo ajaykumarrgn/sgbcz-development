@@ -362,10 +362,8 @@ def get_result(filters):
                 "`tabSales Order Item`.rdg_number",
                 "`tabSales Order Item`.item_group",
                 "`tabSales Order Item`.sap_reference",
-                #"`tabSales Order Item`.rate", #<<Commented for the issue of displaying
-                # order value and price gts in EUR (ISS-2024-00081)
-                "`tabSales Order Item`.base_rate", #<<Added the below line to get
-                #the EUR currency for the sales order item (ISS-2024-00081)
+                #"`tabSales Order Item`.rate", #<<Commented for the issue ISS-2024-00081
+                "`tabSales Order Item`.base_rate", #<<Added the line for ISS-2024-00081
                 "`tabSales Order Item`.sensor_name",
                 "`tabSales Order Item`.engineering_required",
                 "`tabSales Order Item`.accessories_specification",  # <<TASK-2024-00307
@@ -873,10 +871,8 @@ def get_result(filters):
 
             # Order value of a transformer is computed per set
             # of transformer including its accessories and services
-            #l_order_value = l_order_value + ld_item.rate #<<Commented for the issue of displaying order value
-            # and price gts in EUR (ISS-2024-00081)
-            l_order_value = l_order_value + ld_item.base_rate #<<Added the line to get the EUR currency
-                                                        #for the sales order item (ISS-2024-00081)
+            #l_order_value = l_order_value + ld_item.rate #<<Commented for the issue ISS-2024-00081
+            l_order_value = l_order_value + ld_item.base_rate #<<Added the line for ISS-2024-00081
 
             # Little complex logic converted to simple one
             # Transformer set price is computed as transformer base price + 1 set of all accessories and services
@@ -906,15 +902,11 @@ def get_result(filters):
             for ld_setid in range(0, int(ld_item.qty)):
                 if ld_setid < len(l_order_values):
                     l_order_values[ld_setid] = l_order_values[ld_setid] + \
-                        ld_item.base_rate #<<Added the line to get the EUR currency
-                        #for the sales order item (ISS-2024-00081)
-                        #ld_item.rate #<<Commented for the issue of displaying order value
-                        # and price gts in EUR (ISS-2024-00081)
+                        ld_item.base_rate #<<Added the line for ISS-2024-00081
+                        #ld_item.rate #<<Commented for the issue ISS-2024-00081
                 else:
-                    #l_order_values.append(ld_item.rate) #<<Commented for the issue of displaying
-                    # order value and price gts in EUR (ISS-2024-00081)
-                    l_order_values.append(ld_item.base_rate) #<<Added the below line to
-                    #get the EUR currency for the sales order item (ISS-2024-00081)
+                    #l_order_values.append(ld_item.rate) #<<Commented for the issue ISS-2024-00081
+                    l_order_values.append(ld_item.base_rate) #<<Added the line for ISS-2024-00081
 
     #       Only get the Main items. Ignore accessories and services
             if (ld_item.pos % 10 == 0):
@@ -936,10 +928,8 @@ def get_result(filters):
                 po_item_row['sap_reference'] = ld_item.sap_reference
                 po_item_row['id_number'] = ld_item.id_number
                 po_item_row['item_group'] = ld_item.item_group
-                #po_item_row['price_gts'] = ld_item.rate #<<Commented for the issue of
-                # displaying order value and price gts in EUR (ISS-2024-00081)
-                po_item_row['price_gts'] = ld_item.base_rate #<<Added the below line to
-                #get the EUR currency for the sales order item (ISS-2024-00081)
+                #po_item_row['price_gts']=ld_item.rate#<<Commented for the issue ISS-2024-00081
+                po_item_row['price_gts'] = ld_item.base_rate #<<Added the line for ISS-2024-00081
                 po_item_row['engineering_required'] = '' if ld_item.engineering_required == "No" else str(
                     ld_item.engineering_required)
                 # po_item_row['silicon_free'] = 
