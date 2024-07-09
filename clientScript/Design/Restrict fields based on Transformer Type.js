@@ -5,9 +5,11 @@ frappe.ui.form.on('Design', {
             //when the design form is new
             frm.set_value('factory', 'SGBCZ');
             frm.set_value('transformer_type', 'DTTHZ2N');
+
             //In the SGBCZ factory used only one LV value 
             //so the i have renamed the LV rated Voltage into LV value
             frm.fields_dict['lv_rated_voltage'].df.label = 'LV Value(V)';
+
             //If factory is SGBCZ,set the LV rated voltage as a mandatory field
             //not for other Trafo.
             //Other Trafo sometimes have the LV1 and LV2 is a mandatory
@@ -42,9 +44,11 @@ frappe.ui.form.on('Design', {
         
         frm.trigger('fnToggleFields');
         frm.trigger('fnUpdateInsulationClass');
+        frm.trigger('fnTappings');
     },
     
     refresh: function(frm) {
+        frm.trigger('fnTappings');
         frm.trigger('fnUpdateInsulationClass');
         frm.trigger('fnToggleFields');
     },
@@ -60,6 +64,21 @@ frappe.ui.form.on('Design', {
                 break;
         }
         frm.set_df_property('insulation_class', 'options', laOptions);
+    },
+    //Set the options for the Tappings is varying based on factory
+    fnTappings: function(frm) {
+        let laTappings = [];
+        switch (frm.doc.factory) {
+            case 'SGBCZ':
+                laTappings = ['2', '3'];
+                break;
+            case 'RGB':
+            case 'NEU':
+                 laTappings = ['2', '3', '4','5','6','7','8'];
+                
+        }
+        frm.set_df_property('tapping_plus', 'options', laTappings);
+        frm.set_df_property('tapping_minus', 'options', laTappings);
     },
     //This function used to hide and show fields 
     //based on the factory by controlling here.

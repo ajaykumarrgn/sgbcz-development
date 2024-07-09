@@ -1,3 +1,5 @@
+//In earlier, Validate the ranges for the HV and LV only
+//Now also validate the HV1 and LV1 ranges
 frappe.ui.form.on('Design', {
     refresh(frm) {
         if (frm.doc.status === 'Calculation Received') {
@@ -7,26 +9,26 @@ frappe.ui.form.on('Design', {
     },
 
     /*
-    * This function validates the min and max values of the given input
-    * the min and max values are defined in the Gitra settings for a field
+    * This function validates the min and max lValues of the given input
+    * the min and max lValues are defined in the Gitra settings for a field
     * @params frm 
     * @params attribute_label field as defined in the Gitra Settings
     * @params attribute_name field in the current design for validation
     */
     validate_attribute_range(frm, attribute_label, attribute_name) {
-        var doctype = "Gitra Settings";
-        frappe.model.with_doc(doctype, doctype, function() {
-            var values = frappe.model.get_list(doctype);
-            var attribute = values[0].attributes.find(value => value.parameter === attribute_label);
+        var lDoctype = "Gitra Settings";
+        frappe.model.with_doc(lDoctype, lDoctype, function() {
+            var lValues = frappe.model.get_list(lDoctype);
+            var lAttribute = lValues[0].attributes.find(value => value.parameter === attribute_label);
 
-            if (!attribute) {
+            if (!lAttribute) {
                 frappe.msgprint('Attribute not found in Gitra Settings.');
                 return;
             }
 
-            var value = parseFloat(frm.doc[attribute_name]);
+            var lValue = parseFloat(frm.doc[attribute_name]);
 
-            if (value < attribute.min || value > attribute.max) {
+            if (lValue < lAttribute.min || lValue > lAttribute.max) {
                 frappe.msgprint("Attribute Not in Range");
             }
         });
@@ -52,5 +54,5 @@ frappe.ui.form.on('Design', {
     lv1(frm) {
         frm.events.validate_and_display_error(frm, 'LV1', 'lv1');
     }, 
-    //Testing in localhost
+    
 });

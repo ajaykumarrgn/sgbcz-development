@@ -1,186 +1,248 @@
-//Settindg the default dependent value for HV1 #(Story: US-2024-0044)
-frappe.ui.form.on('Design', {
-    
-    refresh(frm) {
-        
-        var l_doctype = "Gitra Settings";
-        
-        // Fetch Gitra Settings document asynchronously
-        frappe.model.with_doc(l_doctype, l_doctype, function() {
-            // Get list of documents for Gitra Settings
-            var la_values = frappe.model.get_list(l_doctype);
+//Setting the default dependent value for HV1 #(Story: US-2024-0044)
+frappe.ui.form.on("Design", {
+  refresh(frm) {
+    var lDoctype = "Gitra Settings";
 
-            // Initialize LV settings
-            const la_lvUniqueArray = la_values[0].lv_voltage_setting.reduce((ld_accumulator, ld_current) => {
-                // Reduce function to filter unique LV voltage values
-                if (!ld_accumulator.includes(ld_current.um)) {
-                    ld_accumulator.push(ld_current.um);
-                }
-                return ld_accumulator;
-            }, []);
-            set_field_options("highest_operation_voltage_lv", la_lvUniqueArray);
-            frm.events.highest_operation_voltage_lv(frm);
-            frm.events.ac_phase_lv(frm);
+    // Fetch Gitra Settings document asynchronously
+    frappe.model.with_doc(lDoctype, lDoctype, function () {
+      // Get list of documents for Gitra Settings
+      var laValues = frappe.model.get_list(lDoctype);
 
-            // Initialize HV settings 
-            frm.events.set_hv_options(frm, 'voltage_to', 'hv_rated_voltage', 'um', 'highest_operation_voltage_hv', false);
-            frm.events.set_hv_options(frm, 'um', 'highest_operation_voltage_hv', 'ac_phase', 'ac_phase_hv', false);
-            frm.events.set_hv_options(frm, 'ac_phase', 'ac_phase_hv', 'li', 'li_phase_hv', false);
+      // Initialize LV settings
+      const laLvUniqueArray = laValues[0].lv_voltage_setting.reduce(
+        (iAccumulator, iCurrent) => {
+          // Reduce function to filter unique LV voltage values
+          if (!iAccumulator.includes(iCurrent.um)) {
+            iAccumulator.push(iCurrent.um);
+          }
+          return iAccumulator;
+        },
+        []
+      );
+      set_field_options("highest_operation_voltage_lv", laLvUniqueArray);
+      frm.events.highest_operation_voltage_lv(frm);
+      frm.events.ac_phase_lv(frm);
 
-            // Set defaults if new document
-            if (frm.is_new()) {
-                fn_set_lv_defaults(frm, la_values[0]);
-                fn_set_hv_defaults(frm, la_values[0]);
-            }
-            frm.refresh_fields();
-        });
-    },
+      // Initialize HV settings
+      frm.events.fnSetHvOptions(
+        frm,
+        "voltage_to",
+        "hv_rated_voltage",
+        "um",
+        "highest_operation_voltage_hv",
+        false
+      );
+      frm.events.fnSetHvOptions(
+        frm,
+        "um",
+        "highest_operation_voltage_hv",
+        "ac_phase",
+        "ac_phase_hv",
+        false
+      );
+      frm.events.fnSetHvOptions(
+        frm,
+        "ac_phase",
+        "ac_phase_hv",
+        "li",
+        "li_phase_hv",
+        false
+      );
 
-    // Function to set HV options based on selected criteria
-    set_hv_options(frm, on_settings_field, on_field, to_settings_field, to_field, on_change) {
-        // Local variable for the Gitra Settings doctype
-        var l_doctype = "Gitra Settings";
-        
-        // Fetch Gitra Settings document asynchronously
-        frappe.model.with_doc(l_doctype, l_doctype, function() {
-            // Get list of documents for Gitra Settings
-            var la_values = frappe.model.get_list(l_doctype);
-            var la_options = [];
+      // Set defaults if new document
+      if (frm.is_new()) {
+        fnSetLvDefaults(frm, laValues[0]);
+        fnSetHvDefaults(frm, laValues[0]);
+      }
+      frm.refresh_fields();
+    });
+  },
 
-            // Iterate through HV voltage settings
-            la_values[0].hv_voltage_setting.forEach(ld_hv_row => {
-                // Filter options based on specified criteria
-                if (ld_hv_row[on_settings_field] >= frm.doc[on_field]) {
-                    la_options.push(ld_hv_row[to_settings_field]);
-                }
-            });
+  // Function to set HV options based on selected criteria
+  fnSetHvOptions(
+    frm,
+    iOnSettingsField,
+    iOnField,
+    iToSettingsField,
+    iToField,
+    iOnChange
+  ) {
+    // Local variable for the Gitra Settings doctype
+    var lDoctype = "Gitra Settings";
 
-            // Set field options and handle change event
-            set_field_options(to_field, la_options);
-            if (on_change && la_options.length > 0) {
-                frm.set_value(to_field, la_options[0]);
-            }
-            frm.refresh_fields();
-        });
-    },
+    // Fetch Gitra Settings document asynchronously
+    frappe.model.with_doc(lDoctype, lDoctype, function () {
+      // Get list of documents for Gitra Settings
+      var laValues = frappe.model.get_list(lDoctype);
+      var laOptions = [];
 
-    // Function to set HV defaults based on selected field
-    set_hv_defaults(frm, hv_field) {
-        frm.events.set_hv_options(frm, 'voltage_to', hv_field, 'um', 'highest_operation_voltage_hv', true);
-        frm.events.set_hv_options(frm, 'um', 'highest_operation_voltage_hv', 'ac_phase', 'ac_phase_hv', true);
-        frm.events.set_hv_options(frm, 'ac_phase', 'ac_phase_hv', 'li', 'li_phase_hv', true);
-    },
+      // Iterate through HV voltage settings
+      laValues[0].hv_voltage_setting.forEach((ldHvRow) => {
+        // Filter options based on specified criteria
+        if (ldHvRow[iOnSettingsField] >= frm.doc[iOnField]) {
+          laOptions.push(ldHvRow[iToSettingsField]);
+        }
+      });
 
-    // Function to handle change in HV rated voltage field
-    hv_rated_voltage(frm) {
-        if (!frm.doc.hv_rated_voltage) return;
-        frm.events.set_hv_defaults(frm, 'hv_rated_voltage');
-    },
+      // Set field options and handle change event
+      set_field_options(iToField, laOptions);
+      if (iOnChange && laOptions.length > 0) {
+        frm.set_value(iToField, laOptions[0]);
+      }
+      frm.refresh_fields();
+    });
+  },
 
-    // Function to handle change in HV1 field
-    hv1(frm) {
-        if (!frm.doc.hv1) return;
-        frm.events.set_hv_defaults(frm, 'hv1');
-    },
+  // Function to set HV defaults based on selected field
+  fnSetHvDefaults(frm, iHvField) {
+    frm.events.fnSetHvOptions(
+      frm,
+      "voltage_to",
+      iHvField,
+      "um",
+      "highest_operation_voltage_hv",
+      true
+    );
+    frm.events.fnSetHvOptions(
+      frm,
+      "um",
+      "highest_operation_voltage_hv",
+      "ac_phase",
+      "ac_phase_hv",
+      true
+    );
+    frm.events.fnSetHvOptions(
+      frm,
+      "ac_phase",
+      "ac_phase_hv",
+      "li",
+      "li_phase_hv",
+      true
+    );
+  },
 
-    // Function to handle change in highest operation voltage HV field
-    highest_operation_voltage_hv(frm) {
-        if (!frm.doc.highest_operation_voltage_hv) return;
-        frm.events.set_hv_options(frm, 'um', 'highest_operation_voltage_hv', 'ac_phase', 'ac_phase_hv', true);
-    },
+  // Function to handle change in HV rated voltage field
+  hv_rated_voltage(frm) {
+    if (!frm.doc.hv_rated_voltage) return;
+    frm.events.fnSetHvDefaults(frm, "hv_rated_voltage");
+  },
 
-    // Function to handle change in AC phase HV field
-    ac_phase_hv(frm) {
-        if (!frm.doc.ac_phase_hv) return;
-        frm.events.set_hv_options(frm, 'ac_phase', 'ac_phase_hv', 'li', 'li_phase_hv', true);
-    },
+  // Function to handle change in HV1 field
+  hv1(frm) {
+    if (!frm.doc.hv1) return;
+    frm.events.fnSetHvDefaults(frm, "hv1");
+  },
 
-    // Function to handle change in highest operation voltage LV field
-    highest_operation_voltage_lv(frm) {
-        // Local variable for the Gitra Settings doctype
-        var l_doctype = "Gitra Settings";
-        
-        // Fetch Gitra Settings document asynchronously
-        frappe.model.with_doc(l_doctype, l_doctype, function() {
-            // Get list of documents for Gitra Settings
-            const la_values = frappe.model.get_list(l_doctype);
+  // Function to handle change in highest operation voltage HV field
+  highest_operation_voltage_hv(frm) {
+    if (!frm.doc.highest_operation_voltage_hv) return;
+    frm.events.fnSetHvOptions(
+      frm,
+      "um",
+      "highest_operation_voltage_hv",
+      "ac_phase",
+      "ac_phase_hv",
+      true
+    );
+  },
 
-            // Filter LV phase values based on selected criteria
-            // const la_uniqueArray = la_values[0].lv_voltage_setting.reduce((ld_accumulator, ld_current) => {
-            //     if (ld_current.um.toString() === frm.doc.highest_operation_voltage_lv.toString() && 
-                
-            //         !ld_accumulator.includes(ld_current.ac_phase)) {
-            //         ld_accumulator.push(ld_current.ac_phase);
-            //     }
-            //     return ld_accumulator;
-            // }, []);
-            const la_uniqueArray = la_values[0].lv_voltage_setting.reduce((ld_accumulator, ld_current) => {
-                if (ld_current.um && frm.doc.highest_operation_voltage_lv && 
-                    ld_current.um.toString() === frm.doc.highest_operation_voltage_lv.toString() && 
-                    !ld_accumulator.includes(ld_current.ac_phase)) {
-                    
-                    ld_accumulator.push(ld_current.ac_phase);
-                }
-                return ld_accumulator;
-            }, []);
-            set_field_options("ac_phase_lv", la_uniqueArray);
-        });
-    },
+  // Function to handle change in AC phase HV field
+  ac_phase_hv(frm) {
+    if (!frm.doc.ac_phase_hv) return;
+    frm.events.fnSetHvOptions(
+      frm,
+      "ac_phase",
+      "ac_phase_hv",
+      "li",
+      "li_phase_hv",
+      true
+    );
+  },
 
-    // Function to handle change in AC phase LV field
-    ac_phase_lv(frm) {
-        // Local variable for the Gitra Settings doctype
-        var l_doctype = "Gitra Settings";
-        
-        // Fetch Gitra Settings document asynchronously
-        frappe.model.with_doc(l_doctype, l_doctype, function() {
-            // Get list of documents for Gitra Settings
-            const la_values = frappe.model.get_list(l_doctype);
+  // Function to handle change in highest operation voltage LV field
+  highest_operation_voltage_lv(frm) {
+    // Local variable for the Gitra Settings doctype
+    var lDoctype = "Gitra Settings";
 
-            // Filter LV LI phase values based on selected criteria
-            // const la_uniqueArray = la_values[0].lv_voltage_setting.reduce((ld_accumulator, ld_current) => {
-            //     if (ld_current.um.toString() === frm.doc.highest_operation_voltage_lv.toString() && 
-            //         ld_current.ac_phase.toString() === frm.doc.ac_phase_lv.toString() &&
-            //         !ld_accumulator.includes(ld_current.li)) {
-            //         ld_accumulator.push(ld_current.li);
-            //     }
-            //     return ld_accumulator;
-            // }, []);
-            const la_uniqueArray = la_values[0].lv_voltage_setting.reduce((ld_accumulator, ld_current) => {
-                if (
-                    ld_current.um && frm.doc.highest_operation_voltage_lv && 
-                    ld_current.ac_phase && frm.doc.ac_phase_lv && 
-                    ld_current.um.toString() === frm.doc.highest_operation_voltage_lv.toString() && 
-                    ld_current.ac_phase.toString() === frm.doc.ac_phase_lv.toString() &&
-                    !ld_accumulator.includes(ld_current.li)
-                ) {
-                    ld_accumulator.push(ld_current.li);
-                }
-                return ld_accumulator;
-            }, []);
+    // Fetch Gitra Settings document asynchronously
+    frappe.model.with_doc(lDoctype, lDoctype, function () {
+      // Get list of documents for Gitra Settings
+      const laValues = frappe.model.get_list(lDoctype);
 
-            set_field_options("li_phase_lv", la_uniqueArray);
-        });
-    }
+      const laUniqueArray = laValues[0].lv_voltage_setting.reduce(
+        (iAccumulator, iCurrent) => {
+          if (
+            iCurrent.um &&
+            frm.doc.highest_operation_voltage_lv &&
+            iCurrent.um.toString() ===
+              frm.doc.highest_operation_voltage_lv.toString() &&
+            !iAccumulator.includes(iCurrent.ac_phase)
+          ) {
+            iAccumulator.push(iCurrent.ac_phase);
+          }
+          return iAccumulator;
+        },
+        []
+      );
+      set_field_options("ac_phase_lv", laUniqueArray);
+    });
+  },
+
+  // Function to handle change in AC phase LV field
+  ac_phase_lv(frm) {
+    // Local variable for the Gitra Settings doctype
+    var lDoctype = "Gitra Settings";
+
+    // Fetch Gitra Settings document asynchronously
+    frappe.model.with_doc(lDoctype, lDoctype, function () {
+      // Get list of documents for Gitra Settings
+      const laValues = frappe.model.get_list(lDoctype);
+
+      const laUniqueArray = laValues[0].lv_voltage_setting.reduce(
+        (iAccumulator, iCurrent) => {
+          if (
+            iCurrent.um &&
+            frm.doc.highest_operation_voltage_lv &&
+            iCurrent.ac_phase &&
+            frm.doc.ac_phase_lv &&
+            iCurrent.um.toString() ===
+              frm.doc.highest_operation_voltage_lv.toString() &&
+            iCurrent.ac_phase.toString() === frm.doc.ac_phase_lv.toString() &&
+            !iAccumulator.includes(iCurrent.li)
+          ) {
+            iAccumulator.push(iCurrent.li);
+          }
+          return iAccumulator;
+        },
+        []
+      );
+
+      set_field_options("li_phase_lv", laUniqueArray);
+    });
+  },
 });
 
 // Function to set LV defaults based on selected settings
-function fn_set_lv_defaults(frm, settings) {
-    var ld_lvDefaults = settings.lv_voltage_setting.find(ld_x => ld_x.is_default === 1);
-    if (ld_lvDefaults) {
-        frm.set_value('highest_operation_voltage_lv', ld_lvDefaults.um);
-        frm.set_value('ac_phase_lv', ld_lvDefaults.ac_phase);
-        frm.set_value('li_phase_lv', ld_lvDefaults.li);
-    }
+function fnSetLvDefaults(frm, iSettings) {
+  var ldLvDefaults = iSettings.lv_voltage_setting.find(
+    (ldX) => ldX.is_default === 1
+  );
+  if (ldLvDefaults) {
+    frm.set_value("highest_operation_voltage_lv", ldLvDefaults.um);
+    frm.set_value("ac_phase_lv", ldLvDefaults.ac_phase);
+    frm.set_value("li_phase_lv", ldLvDefaults.li);
+  }
 }
 
 // Function to set HV defaults based on selected settings
-function fn_set_hv_defaults(frm, settings) {
-    var ld_hvDefaults = settings.hv_voltage_setting.find(ld_x => ld_x.is_default === 1);
-    if (ld_hvDefaults) {
-        frm.set_value('hv_rated_voltage', ld_hvDefaults.voltage_to);
-        frm.set_value('highest_operation_voltage_hv', ld_hvDefaults.um);
-        frm.set_value('ac_phase_hv', ld_hvDefaults.ac_phase);
-        frm.set_value('li_phase_hv', ld_hvDefaults.li);
-    }
+function fnSetHvDefaults(frm, iSettings) {
+  var ldHvDefaults = iSettings.hv_voltage_setting.find(
+    (ldX) => ldX.is_default === 1
+  );
+  if (ldHvDefaults) {
+    frm.set_value("hv_rated_voltage", ldHvDefaults.voltage_to);
+    frm.set_value("highest_operation_voltage_hv", ldHvDefaults.um);
+    frm.set_value("ac_phase_hv", ldHvDefaults.ac_phase);
+    frm.set_value("li_phase_hv", ldHvDefaults.li);
+  }
 }
