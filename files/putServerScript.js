@@ -119,7 +119,7 @@ function processFilesInFolder(folderPath, parentFolder = null) {
                 body: JSON.stringify({
                   name: postFilename,
                   script: fileContent,
-                  ...metaContent,
+                  // ...metaContent,
                   script_type: folderName,
                   disabled: 0
                 }),
