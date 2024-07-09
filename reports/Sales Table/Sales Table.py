@@ -2,14 +2,18 @@
 # Performance Optimization:(Issue# : ISS-2024-00002)
 # Link more Control Units:(Issue# : ISS-2024-00012)
 # Silicon-free is not Visible: (Issue# : ISS-2024-00018)
-# Some columns are not visible when using the saved column. It does not accept spaces after the <br> tag. (Issue# : ISS-2024-00020)
-# Remove the duplicate records in the Sales Table report based on Payment Terms(Issue# : ISS-2024-00045)
+# Some columns are not visible when using the saved column.
+# It does not accept spaces after the <br> tag. (Issue# : ISS-2024-00020)
+# Remove the duplicate records in the Sales Table report
+# based on Payment Terms(Issue# : ISS-2024-00045)
+#"Order Value" and "Price GTS"should be displayed in EUR in Sales Table
+# when CZK currency is selected in Sales Order.(Issue# : ISS-2024-00081)
 
 # Change Request
 # Transfer Note section from Sales order to Delivery Schedule (Task#: TASK-2024-00221)
 # Transfer Reservation field from Sales order to Delivery Schedule (Task#: TASK-2024-00155)
 # Improve the sales table report performance (Task#: TASK-2024-00216)
-# wrong accessories displayed  -relay issue# ISS-2024-00061 
+# wrong accessories displayed  -relay issue# ISS-2024-00061
 
 def get_columns(filters):
     la_columns = []
@@ -218,7 +222,7 @@ def reorder_columns_for_user_preference(ima_columns, imd_user_session_default):
     la_reordered_columns = []
     # convert the column preference stored as string to Json array
     la_report_columns=json.loads(imd_user_session_default.report_columns)
-    
+
     # Reorder the output column based on the user preference
     # iterate user preference columns
     for l_report_column in la_report_columns:
@@ -227,7 +231,7 @@ def reorder_columns_for_user_preference(ima_columns, imd_user_session_default):
             #  If found append
             if ld_column['label'] == l_report_column:
                 la_reordered_columns.append(ld_column)
-        
+
     return la_reordered_columns
 
 
@@ -339,7 +343,8 @@ def get_result(filters):
                 "second_language",
                 "agent",
                 "owner",
-                # "comments", #<<commented this line in sales order for Note section (#TASK-2024-00221)
+                # "comments", #<<commented this line in sales order
+                # for Note section (#TASK-2024-00221)
                 "incoterms",
                 "prepayment_invoice",
                 "prepayment_status",
@@ -348,7 +353,8 @@ def get_result(filters):
                 "po_no",
                 "po_date",
                 "company_guarantee",
-                # "is_reservation", #<< Commented for the change request for moving reservation from sales order to delivery note (#TASK-2024-00155)
+                # "is_reservation", #<< Commented for the change request
+                # for moving reservation from sales order to delivery note (#TASK-2024-00155)
                 "`tabSales Order Item`.item_code",
                 "`tabSales Order Item`.qty",
                 "`tabSales Order Item`.pos",
@@ -356,7 +362,8 @@ def get_result(filters):
                 "`tabSales Order Item`.rdg_number",
                 "`tabSales Order Item`.item_group",
                 "`tabSales Order Item`.sap_reference",
-                "`tabSales Order Item`.rate",
+                #"`tabSales Order Item`.rate", #<<Commented for the issue ISS-2024-00081
+                "`tabSales Order Item`.base_rate", #<<Added the line for ISS-2024-00081
                 "`tabSales Order Item`.sensor_name",
                 "`tabSales Order Item`.engineering_required",
                 "`tabSales Order Item`.accessories_specification",  # <<TASK-2024-00307
@@ -418,7 +425,7 @@ def get_result(filters):
             filters=ld_attributes_filter,
             order_by='parent')
 
-        # Uncomenting for ISS-2024-00061. Order_by is not working for accessories  
+        # Uncomenting for ISS-2024-00061. Order_by is not working for accessories
         # specification. Sorting this for safer side
         la_item_attributes_sorted = sorted(
             la_item_attributes, key=lambda x: x['parent'])
@@ -476,7 +483,7 @@ def get_result(filters):
                                                        '`tabDelivery Schedule`.storage_fee',
                                                        '`tabDelivery Schedule`.gta_serial_number',
                                                        '`tabDelivery Schedule`.on_time_delivery',
-                                                       '`tabDelivery Schedule`.comments',  # <<TASK-2024-00221
+                                                       '`tabDelivery Schedule`.comments',# <<TASK-2024-00221
                                                        # >>TASK-2024-00155
                                                        '`tabDelivery Schedule`.is_reservation'),
                                                # <<TASK-2024-00155
@@ -636,9 +643,10 @@ def get_result(filters):
                 ld_schedule_line_row['planned_week'] = None
             ld_schedule_line_row['gta_serial_number'] = ld_schedule_line.gta_serial_number
             ld_schedule_line_row['on_time_delivery'] = ld_schedule_line.on_time_delivery
-            # Tests are generally performed for 1 transformer. The quantity is always lesser than parent
-            # The qty of tests are captured in the map_accessories function
-            # If the parent qty(schedule line count) is more than tests qty then do not include in the respective line
+            # Tests are generally performed for 1 transformer. The quantity is always 
+            # lesser than parent The qty of tests are captured in the map_accessories function
+            # If the parent qty(schedule line count) is more than tests qty then do not 
+            # include in the respective line
             if ld_schedule_line_row['test_lab'] != ' ' and int(ld_schedule_line_row['test_lab_qty']) < (index + 1):
                 ld_schedule_line_row['test_lab'] = ' '
 
@@ -654,7 +662,8 @@ def get_result(filters):
 #   Few accessories need prefix - refer to individual accessories section for the prefix logic
 
     def map_accessories(item, po_item_row, ima_items):
-        # ld_item_master = frappe.db.get_value('Item', item.item_code, ['item_group', 'accessories_specification'], as_dict=1)
+        # ld_item_master = frappe.db.get_value('Item', item.item_code,
+        # ['item_group', 'accessories_specification'], as_dict=1)
         ld_item_master = {"item_group": "",
                           "item_code": "",
                           "accessories_specification": ""}
@@ -688,7 +697,8 @@ def get_result(filters):
             po_item_row['cupal'] = accessories_specification
 
         # >>ISS-2024-00012
-        # In general, it should display a single control unit for the specific sales order; however, it currently displays two control units.
+        # In general, it should display a single control unit for the specific
+        # sales order; however, it currently displays two control units.
         # After the changes, it should correctly reflect the two control units for the specific sales order.
         elif ld_item_master["item_group"] == 'Control Unit':
             # >> Commented this lines for the CR :(#TASK-2024-00307)
@@ -702,7 +712,8 @@ def get_result(filters):
             # Check if the accessories_specification is not already in control_unit
             # if accessories_specification not in po_item_row['control_unit']:
             #     # Append a comma before adding the new accessories_specification
-            #     po_item_row['control_unit'] = (po_item_row['control_unit'] + ', ' if po_item_row['control_unit'] != ' ' else '') + accessories_specification
+            #     po_item_row['control_unit'] = (po_item_row['control_unit'] + ', '
+            # if po_item_row['control_unit'] != ' ' else '') + accessories_specification
             # <<TASK-2024-00307
         # << ISS-2024-00012
         # For service item like tests concatenate services into single line
@@ -720,8 +731,8 @@ def get_result(filters):
             po_item_row['others2'] = (
                 po_item_row['others2'] + ', ' if po_item_row['others2'] != ' ' else '') + item.item_code
 
-            # This step is required for Tests alone. Tests will generally have one quantity or less than the
-            # main transformer
+            # This step is required for Tests alone. Tests will generally have
+            # one quantity or less than the main transformer
             po_item_row['others2_qty'] = item.qty
 
         elif ld_item_master["item_group"] == 'Others':
@@ -802,7 +813,8 @@ def get_result(filters):
             'sales_order': ld_sales_order_header.name, 'customer': ld_sales_order_header.customer, 'incoterms': ld_sales_order_header.incoterms,
 
             'customer_group': ld_customer_data.customer_group, 'territory': ld_sales_order_header.territory,
-            # 'is_reservation': "Yes" if sales_order_header.is_reservation == 1 else " ", #<<Commented for the change request in sales order level (#TASK-2024-00155)
+            # 'is_reservation': "Yes" if sales_order_header.is_reservation == 1 else " ", #<<Commented for the
+            # change request in sales order level (#TASK-2024-00155)
             'documentation_language': ((ld_sales_order_header.documentation_language) if ld_sales_order_header.documentation_language else ""
                                        ) + (", " + ld_sales_order_header.second_language if ld_sales_order_header.second_language else ""),
 
@@ -811,7 +823,8 @@ def get_result(filters):
             # Fill the Sales Persons name on 18 Jul
             'sales_team': get_sales_team_text(sales_team),
             'agent': (ld_sales_order_header.agent if ld_sales_order_header.agent else ld_sales_order_header.owner),
-            # 'comments': sales_order_header.comments, #<< Commented this line for moving note section from here to delivery schedule(TASK-2024-00221)
+            # 'comments': sales_order_header.comments, #<< Commented this line for moving note section
+            # from here to delivery schedule(TASK-2024-00221)
             'prepayment_invoice': ld_sales_order_header.prepayment_invoice, 'prepayment_status': ld_sales_order_header.prepayment_status,
             'prepayment_invoice2': ld_sales_order_header.prepayment_invoice2, 'prepayment2_status': ld_sales_order_header.prepayment2_status,
             # If invoice portion is 100% then prepayment is Rejected
@@ -844,7 +857,7 @@ def get_result(filters):
         l_order_value = 0
         l_order_values = []
         for ld_item in ld_items_rev_sorted:
-        
+
             # >>ISS-2024-00045
 
             if ld_item_current['name'] == ld_item['name'] and ld_item_current['pos'] == ld_item['pos']:
@@ -856,14 +869,17 @@ def get_result(filters):
 
             # <<ISS-2024-00045
 
-            # Order value of a transformer is computed per set of transformer including its accessories and services
-            l_order_value = l_order_value + ld_item.rate
+            # Order value of a transformer is computed per set
+            # of transformer including its accessories and services
+            #l_order_value = l_order_value + ld_item.rate #<<Commented for the issue ISS-2024-00081
+            l_order_value = l_order_value + ld_item.base_rate #<<Added the line for ISS-2024-00081
 
             # Little complex logic converted to simple one
             # Transformer set price is computed as transformer base price + 1 set of all accessories and services
             # eg DTTHZ2N 2000/20/6/95 2 PC, Enclosure 2000/IP31/CM 2 PC and Temperature rise test 1 PC
             # then price of 1 set of transformer will be (DTTHZ2N 2000/20/6/95 1 PC + Enclosure 2000/IP31/CM 1 PC +
-            # Temperature rise test 1 PC) and  (DTTHZ2N 2000/20/6/95 1 PC + Enclosure 2000/IP31/CM 1 PC)
+            # Temperature rise test 1 PC) and
+            # (DTTHZ2N 2000/20/6/95 1 PC + Enclosure 2000/IP31/CM 1 PC)
             # as tempearature rise test is not considered for second transformer
 
             # Create an order value array for the quanity times the item
@@ -886,9 +902,11 @@ def get_result(filters):
             for ld_setid in range(0, int(ld_item.qty)):
                 if ld_setid < len(l_order_values):
                     l_order_values[ld_setid] = l_order_values[ld_setid] + \
-                        ld_item.rate
+                        ld_item.base_rate #<<Added the line for ISS-2024-00081
+                        #ld_item.rate #<<Commented for the issue ISS-2024-00081
                 else:
-                    l_order_values.append(ld_item.rate)
+                    #l_order_values.append(ld_item.rate) #<<Commented for the issue ISS-2024-00081
+                    l_order_values.append(ld_item.base_rate) #<<Added the line for ISS-2024-00081
 
     #       Only get the Main items. Ignore accessories and services
             if (ld_item.pos % 10 == 0):
@@ -910,10 +928,12 @@ def get_result(filters):
                 po_item_row['sap_reference'] = ld_item.sap_reference
                 po_item_row['id_number'] = ld_item.id_number
                 po_item_row['item_group'] = ld_item.item_group
-                po_item_row['price_gts'] = ld_item.rate
+                #po_item_row['price_gts']=ld_item.rate#<<Commented for the issue ISS-2024-00081
+                po_item_row['price_gts'] = ld_item.base_rate #<<Added the line for ISS-2024-00081
                 po_item_row['engineering_required'] = '' if ld_item.engineering_required == "No" else str(
                     ld_item.engineering_required)
-                # po_item_row['silicon_free'] = (ld_item.silicon_free if ld_item.silicon_free else '')
+                # po_item_row['silicon_free'] = 
+                    # (ld_item.silicon_free if ld_item.silicon_free else '')
                 po_item_row['silicon_free'] = '' if ld_item.silicon_free == "No" else str(
                     ld_item.silicon_free)
 
