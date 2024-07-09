@@ -95,18 +95,17 @@ function fnFetchTransformerType(frm) {
     }
     
     //Mapped the factory with its relevant item group
-    const ldTransformerMapping = {
+    const LD_TRANSFORMER_MAPPING = {
         "SGBCZ": "DTTHZ2N",
         "RGB": "RGB",
         "NEUMARK": "NEU"
     };
         
-    const lGetItemGroup = ldTransformerMapping[frm.doc.factory];
-    let lCurrentTransformerType = frm.doc.transformer_type;
+    const GET_ITEM_GROUP = LD_TRANSFORMER_MAPPING[frm.doc.factory];
 
     frappe.call({
         method: "get_item_variant_based_on_factory",
-        args: { "factory": lGetItemGroup },
+        args: { "factory": GET_ITEM_GROUP },
         callback: function(response) {
             if (response.message) {
                 set_field_options('transformer_type', response.message)
@@ -118,24 +117,24 @@ function fnFetchTransformerType(frm) {
 }
 
 function fnUpdateButtonGroup(frm) {
-    const lStatus = frm.doc.status;
+    const STATUS = frm.doc.status;
     let buttonLabel = '';
     let buttonFunction = null;
 
     // Determine which button to show based on status
-    if (lStatus === 'Draft' && frm.doc.is_design === 1) {
+    if (STATUS === 'Draft' && frm.doc.is_design === 1) {
         buttonLabel = 'Create Design';
         buttonFunction = fncreateDesign;
-    } else if (lStatus === 'Draft' && frm.doc.is_design === 0) {
+    } else if (STATUS === 'Draft' && frm.doc.is_design === 0) {
         buttonLabel = 'Create Item';
         buttonFunction = fncreateItem;
-    } else if (lStatus === 'Calculation Received' && !frm.doc.item) {
+    } else if (STATUS === 'Calculation Received' && !frm.doc.item) {
         buttonLabel = 'Create Item';
         buttonFunction = fncreateItem;
-    } else if (lStatus === 'Item Created' && frm.doc.item) {
+    } else if (STATUS === 'Item Created' && frm.doc.item) {
         buttonLabel = 'View Item';
         buttonFunction = fnviewItem;
-    } else if (lStatus === 'Item Created' && !frm.doc.item) {
+    } else if (STATUS === 'Item Created' && !frm.doc.item) {
         buttonLabel = 'Create Item';
         buttonFunction = fncreateItem;
     }
@@ -195,10 +194,10 @@ function fncreateItem(frm) {
                             if(gitraResponse.message){
                                 
                                 // After saving, call the fn_pdf_attachment method
-                                const ldDatasheetLanguages = gitraResponse.message.datasheet_languages;
+                                const LD_DATASHEET_LANGUAGES = gitraResponse.message.datasheet_languages;
                     
-                                // Using map to extract language codes into laLanguages array
-                                const laLanguages = ldDatasheetLanguages.map(function(laLanguage) {
+                                // Using map to extract language codes into LA_LANGUAGES array
+                                const LA_LANGUAGES = LD_DATASHEET_LANGUAGES.map(function(laLanguage) {
                                     return laLanguage.language;
                                 });
                                 
@@ -226,7 +225,7 @@ function fncreateItem(frm) {
                                     "args": {
                                         "im_source_doc_type": frm.doc.doctype,
                                         "im_source_doc_name": frm.doc.name,
-                                        "im_languages": laLanguages,
+                                        "im_languages": LA_LANGUAGES,
                                         // "im_print_format": null,
                                         "im_letter_head": "Data Sheet",
                                         "im_target_doc_type": "Item",
