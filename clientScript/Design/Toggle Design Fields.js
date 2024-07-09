@@ -1,63 +1,117 @@
 frappe.ui.form.on('Design', {
     validate(frm) {
         //Get all the HTML fields to validate 
-        let fieldsToValidate = fnGetHtmlfields();
-        let isValid = true;
+        let lFieldsToValidate = fnGetHtmlfields();
+        let lValid = true;
         
-        for (let field of fieldsToValidate) {
-            let value = frm.doc[field.fieldname];
+        for (let lField of lFieldsToValidate) {
+            let lValue = frm.doc[lField.fieldname];
             
             //Check if the html value does not have the value after setting the slash
-            if (!isValidHtmlField(value)) {
-                frappe.msgprint("Please Enter the value in {0}. Value after slash is missing.", [field.label])
-                isValid = false;
+            if (!fnValidHtmlField(lValue)) {
+                frappe.msgprint("Please Enter the value in {0}. Value after slash is missing.", [lField.label]);
+                lValid = false;
             }
         }
         
+        
+        
         // If any field is invalid, mark form as not validated
-        if (!isValid) {
+        if (!lValid) {
             frappe.validated = false;
         }
     },
      
     refresh: function(frm) {
         //Rendering the template when the form is refreshed
-        frm.events.render_templates(frm);
+        frm.events.fnRenderTemplates(frm);
         
         //When any changes made in the HTML field 
         $(document).on('change', '.attribute-input', function () {
-            // Get the input element triggering the change event
-            let inputElement = this;
-            // Extract the fieldname associated with the HTML field
-            let HTMLField = inputElement.getAttribute('data-fieldname');
-            // Retrieve the value of the HTML field
-            let value = inputElement.value;
+    // Get the input element triggering the change event
+    let laInputElement = this;
+    // Extract the fieldname associated with the HTML field
+    let laHTMLField = laInputElement.getAttribute('data-fieldname');
+    // Retrieve the value of the HTML field
+    let laValue = laInputElement.value;
+    
+    // Check if the fieldname is either 'lv_html', 'hv_html', or 'power_lv'
+    if (laHTMLField === 'lv_html' || laHTMLField === 'hv_html'|| laHTMLField === 'uk_lv'|| laHTMLField === 'uk_hv_lv') {
+        // Regular expression to match only numbers and slashes
+        let laRegex = /^[0-9/]*$/;
+
+        // Validate the input value
+        if (laRegex.test(laValue)) {
+            // If valid, pass the value from the HTML field to the Doctype field
+            fnTransposeHtmlToDocField(frm, laValue, laHTMLField, document);
+        } else {
+            // If invalid, show an error message
+            frappe.msgprint('Please enter numbers and slashes only.');
+            // Clear the input field
+            laInputElement.laValue = '';
+        }
+    } else if (laHTMLField === 'power_lv') {
+        // Regular expression to match format "number/number"
+        let laRegex = /^[0-9]+\/[0-9]+$/;
+        
+        // Validate the input value
+        if (laRegex.test(laValue)) {
+            // Split the value into two parts
+            let lParts = laValue.split('/');
+            let lPowerLv1 = parseInt(lParts[0].trim());
+            let lPowerLv2 = parseInt(lParts[1].trim());
+            let lRating = parseFloat(frm.doc.rating) || 0;
             
-            //This function is used to passing the value from the HTML field to Doctype field when changes are made
-            fnTransposeHtmlToDocField(frm, value, HTMLField, document);
-            
-        });
+            // Check if lv1 + lv2 equals the rating
+            if (lPowerLv1 + lPowerLv2 !== lRating) {
+                frappe.msgprint('Sum of Rating LV1 and Rating LV2 should equal the Rating.');
+                laInputElement.value = ''; // Clear the input field
+            } else {
+                // If valid, pass the value from the HTML field to the Doctype field
+                fnTransposeHtmlToDocField(frm, laValue, laHTMLField, document);
+            }
+        }
+    }
+});
     },
     
-    render_templates: function(frm) {
-        let fields = fnGetHtmlfields()
+    fnRenderTemplates: function(frm) {
+        let laFields = fnGetHtmlfields();
 
-        fields.forEach(function (field) {
-            let template = fnGetTemplate(frm, field);
-            let data = { frm: frm, field: field };
+        laFields.forEach(function (lField) {
+            let laTemplate = fnGetTemplate(frm, lField);
+            let ldData = { frm: frm, field: lField };
             
             //Check the LV2 is present, show all both HTML and Docfields otherwise hide the some dependent fields based on the LV2
             if (frm.doc.lv_2) {
                 // Show all fields when LV2 is present
-                frm.set_df_property(field.fieldname, 'hidden', false);
-                frm.set_df_property(field.fieldname, 'options', frappe.render(template, data));
+                frm.set_df_property(lField.fieldname, 'hidden', false);
+                frm.set_df_property(lField.fieldname, 'options', frappe.render(laTemplate, ldData));
+
+                if (frm.doc.factory == "RGB") {
+                    // Show power_lv and uk_lv, hide uk_hv_lv
+                    if (lField.fieldname === 'power_lv' || lField.fieldname === 'uk_lv') {
+                        frm.set_df_property(lField.fieldname, 'hidden', false);
+                        
+                    } else if (lField.fieldname === 'uk_hv_lv') {
+                        frm.set_df_property(lField.fieldname, 'hidden', true);
+                    }
+                } else if (frm.doc.factory == "NEU") {
+                    // Show power_lv and uk_hv_lv, hide uk_lv
+                    if (lField.fieldname === 'power_lv' || lField.fieldname === 'uk_hv_lv') {
+                        frm.set_df_property(lField.fieldname, 'hidden', false);
+                        
+                    } else if (lField.fieldname === 'uk_lv') {
+                        frm.set_df_property(lField.fieldname, 'hidden', true);
+                    }
+                }
             } else {
-                // Hide power_lv, uk_lv, uk_hv_lv, and vector_html fields if lv_2 is not present
-                if (['power_lv', 'uk_lv', 'uk_hv_lv', 'vector_html'].includes(field.fieldname)) {
-                    frm.set_df_property(field.fieldname, 'hidden', true);
+                // Hide power_lv, uk_lv, uk_hv_lv, and vector_html lFields if lv_2 is not present
+                if (['power_lv', 'uk_lv', 'uk_hv_lv', 'vector_html'].includes(lField.fieldname)) {
+                    frm.set_df_property(lField.fieldname, 'hidden', true);
                     
                 } else {
-                    frm.set_df_property(field.fieldname, 'options', frappe.render(template, data));
+                    frm.set_df_property(lField.fieldname, 'options', frappe.render(laTemplate, ldData));
                 }
             }
         });
@@ -65,8 +119,10 @@ frappe.ui.form.on('Design', {
         //Check if the Vector group is set to visible or not based on the LV2
         if (!frm.doc.lv_2) {
           frm.set_df_property('vector_group', 'hidden', false); // Show vector_group
+          frm.set_df_property('impedance', 'hidden', false);
         } else {
             frm.set_df_property('vector_group', 'hidden', true); // Hide vector_group if lv_2 is present
+            frm.set_df_property('impedance', 'hidden', true);
         }
         
         
@@ -74,19 +130,19 @@ frappe.ui.form.on('Design', {
     
     
     //Re render the html fields once doc fields are set with values
-    hv_rated_voltage(frm) { frm.events.render_templates(frm); },
-    hv1(frm) { frm.events.render_templates(frm); },
-    lv_rated_voltage(frm) { frm.events.render_templates(frm); },
-    lv1(frm) { frm.events.render_templates(frm); },
-    vector_group(frm) { frm.events.render_templates(frm); },
-    vector_group_lv1(frm) { frm.events.render_templates(frm); },
-    vector_group_lv2(frm) { frm.events.render_templates(frm); },
-    power_lv1(frm) { frm.events.render_templates(frm); },
-    uk_lv1(frm) { frm.events.render_templates(frm); },
-    ukhv_lv1(frm) { frm.events.render_templates(frm); },
+    hv_rated_voltage(frm) { frm.events.fnRenderTemplates(frm); },
+    hv1(frm) { frm.events.fnRenderTemplates(frm); },
+    lv_rated_voltage(frm) { frm.events.fnRenderTemplates(frm); },
+    lv1(frm) { frm.events.fnRenderTemplates(frm); },
+    vector_group(frm) { frm.events.fnRenderTemplates(frm); },
+    vector_group_lv1(frm) { frm.events.fnRenderTemplates(frm); },
+    vector_group_lv2(frm) { frm.events.fnRenderTemplates(frm); },
+    power_lv1(frm) { frm.events.fnRenderTemplates(frm); },
+    uk_lv1(frm) { frm.events.fnRenderTemplates(frm); },
+    ukhv_lv1(frm) { frm.events.fnRenderTemplates(frm); },
     
     lv_2(frm) { 
-        frm.events.render_templates(frm);
+        frm.events.fnRenderTemplates(frm);
         //If LV2 value is not there, Clear the all dependent field values.
         if (!frm.doc.lv_2) {
             frm.set_value('power_lv1', null);
@@ -106,14 +162,14 @@ frappe.ui.form.on('Design', {
     // },
     
     //The function is used to get the vector group options dynamically from the Docfield
-    fnGetSelectOptions: function(fieldname, frm) {
+    fnGetSelectOptions: function(iFieldname, frm) {
         // Fetch the options for the vector_group field dynamically
-        if (fieldname === 'vector_html') {
-            let options = [];
+        if (iFieldname === 'vector_html') {
+            let laOptions = [];
             if (frm.fields_dict.vector_group) {
-                options = frm.fields_dict.vector_group.df.options.split('\n');
+                laOptions = frm.fields_dict.vector_group.df.options.split('\n');
             }
-            return options;
+            return laOptions;
         }
         
     },
@@ -182,14 +238,24 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
        // If there are not two values in the HTML field without a slash, it directly sets the value into the HV Rated Voltage field.
 
         if (lSplit.length > 1) {
-            if (lSplit[1].trim() === '') {
-                frappe.throw(__("Enter the ") + label2 + (" value") );
+            if (lSplit[0].trim() === '') {
+                frappe.msgprint('Enter the ' + label1 + ' value before the slash.');
                 return;
             } 
-            if (parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
+            if (lSplit[1].trim() === '') {
+                frappe.msgprint('Enter the ' + label2 + ' value after the slash.');
+                return;
+            }  
+            // if (parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
+            //     frappe.throw(__(label2 + " should be lesser than " + label1));
+            //     return;
+            // }
+            if (iHtmlField !== 'power_lv' && parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
+                console.log("Test", lSplit);
                 frappe.throw(__(label2 + " should be lesser than " + label1));
                 return;
             }
+
             frm.set_value(field1, lSplit[0]);
             frm.set_value(field2, lSplit[1]);
             if (field) {frm.set_value(field, null);}
@@ -216,14 +282,14 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
     //Triggering the values based on the HTML fields
     switch (iHtmlField) {
         case 'hv_html':
-            lfnSplitnSet(frm, iValue, 'hv_rated_voltage', 'hv1', 'hv2', 'HV 1', 'HV 2')
+            lfnSplitnSet(frm, iValue, 'hv_rated_voltage', 'hv1', 'hv2', 'HV1', 'HV2')
             break;
         case 'lv_html':
-            lfnSplitnSet(frm, iValue, 'lv_rated_voltage', 'lv1', 'lv_2', 'LV 1', 'LV 2')
+            lfnSplitnSet(frm, iValue, 'lv_rated_voltage', 'lv1', 'lv_2', 'LV1', 'LV2')
             
             break;
         case 'power_lv':
-            lfnClearDependencies(frm, iValue, 'lv_2', ['power_lv1', 'power_lv2', 'power_lv'], ['Power LV1', 'Power LV2'])
+            lfnClearDependencies(frm, iValue, 'lv_2', ['power_lv1', 'power_lv2', 'power_lv'], ['Rating LV1', 'Rating LV2'])
 
             break;
         case 'uk_lv':
@@ -255,13 +321,21 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
 }
 
 //This function is to validate the HTML field values with slash
-function isValidHtmlField(value) {
-    if (!value) return true; 
-    let parts = value.split('/');
-    if (parts.length === 1) return true; 
-    return parts.length === 2 && parts.every(part => part.trim() !== ''); 
+function fnValidHtmlField(iValue) {
+    if (!iValue) return true; // If value is falsy (null, undefined, empty string), consider it valid
+    
+    let lParts = iValue.split('/');
+    
+    // Check if there's only one part (no slash), it's considered valid
+    if (lParts.length === 1) return true;
+    
+    // Check if there are exactly two parts and both are not empty (trimmed)
+    if (lParts.length === 2 && lParts.every(part => part.trim() !== '')) {
+        return true;
+    } else {
+        return false;
+    }
 }
-
 //This function is used to define the inner html element for both fieldtype such as Data and Select
 function fnGetComboTemplate(){
     
@@ -299,7 +373,7 @@ function fnGetComboTemplate(){
         <div class="frappe-control input-max-width" data-fieldtype="Select" data-fieldname="{{field.fieldname}}_2">
             <div class="form-group">
                 <div class="clearfix">
-                    <label class="control-label" style="padding-right: 0px;">{{field.label}} 2</label>
+                    <label class="control-label reqd" style="padding-right: 0px;">{{field.label}} 2</label>
                     <span class="help"></span>
                 </div>
                 <div class="control-input-wrapper">
@@ -349,14 +423,14 @@ function fnGetDataTemplate() {
 
 function fnGetHtmlfields() {
     // Define fields with their respective field names and labels
-    let fields = [
+    let laFields = [
         { fieldname: 'hv_html', label: 'HV Value(V)', placeholder: 'HV1/HV2', type: 'data' },
         { fieldname: 'lv_html', label: 'LV Value(V)', placeholder: 'LV1/LV2', type: 'data' },
-        { fieldname: 'power_lv', label: 'Power LV', placeholder: 'Power LV1/Power LV2', type: 'data' },
-        { fieldname: 'uk_lv', label: 'UK LV', placeholder: 'UK LV1/UK LV2', type: 'data' },
-        { fieldname: 'uk_hv_lv', label: 'UK HV-LV', placeholder: 'UK HV LV1/UK HV LV2', type: 'data' },
+        { fieldname: 'power_lv', label: 'Rating LV', placeholder: 'Rating LV1/Rating LV2', type: 'data' },
+        { fieldname: 'uk_lv', label: 'Uk (%)', placeholder: 'UK LV1/UK LV2', type: 'data' },
+        { fieldname: 'uk_hv_lv', label: 'Uk (%)', placeholder: 'UK HV LV1/UK HV LV2', type: 'data' },
         { fieldname: 'vector_html', label: 'Vector Group', type: 'combo' },
     ];
-    return fields;
+    return laFields;
 }
 

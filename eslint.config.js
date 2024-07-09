@@ -2,7 +2,7 @@ import { rules as customRules } from './eslint-plugin-custom-rules.js';
 
 export default [
   {
-    files: ['*/.js'],
+    files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'module',
@@ -27,7 +27,7 @@ export default [
     rules: {
       'max-len': ['error', { code: 80, ignorePattern: '\\b(frm|frappe|doc|__|console\\.log)\\b' }],
       'semi': ['error', 'always'],
-      'indent': ['error', 2],
+      'indent': ['off'],
       'camelcase': ['error', { properties: 'always' }],
       'custom-rules/variable-naming': 'error',
       'custom-rules/function-naming': 'error',
