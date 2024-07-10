@@ -12,6 +12,7 @@ frappe.ui.form.on("Design", {
            (!frm.doc.factory || !frm.doc.transformer_type)) {
                frm.set_value('factory', 'SGBCZ');
                frm.set_value('transformer_type', 'DTTHZ2N');
+               frm.set_value('is_design', 1);
                if(frm.doc.item){
                    frm.set_value('status', 'Item Created');
                }
