@@ -1,146 +1,152 @@
-//Restrict the fields based on the factory and Trafo type
 frappe.ui.form.on('Design', {
     onload: function(frm) {
         if (frm.is_new()) {
-            //Set the default factory as "SGBCZ" and trafo type as "DTTHZ2N"
+            // Set the default factory as "SGBCZ" and trafo type as "DTTHZ2N" 
             //when the design form is new
             frm.set_value('factory', 'SGBCZ');
             frm.set_value('transformer_type', 'DTTHZ2N');
 
-            //In the SGBCZ factory used only one LV value 
-            //so the i have renamed the LV rated Voltage into LV value
+            // In the SGBCZ factory used only one LV value 
+            // so I have renamed the LV rated Voltage into LV value
             frm.fields_dict['lv_rated_voltage'].df.label = 'LV Value(V)';
 
-            //If factory is SGBCZ,set the LV rated voltage as a mandatory field
-            //not for other Trafo.
-            //Other Trafo sometimes have the LV1 and LV2 is a mandatory
-            //so that Lv rated Voltage not mandatory for other factories
-            //Set the LV placeholder when the single LV value is need.
+            // If factory is SGBCZ, set the LV rated voltage 
+            //as a mandatory field
+            // not for other Trafo.
+            // Other Trafo sometimes have the LV1 and LV2 as mandatory
+            // so that Lv rated Voltage is not mandatory for other factories
+            // Set the LV placeholder when the single LV value is needed.
             if (frm.doc.factory === 'SGBCZ') {
                 frm.set_df_property('lv_rated_voltage', 'reqd', true);
                 frm.fields_dict['lv_rated_voltage'].$input.attr('placeholder', 'LV');
             }
 
+            // Triggering the toggle fields based on the factory by here.
+            frm.trigger('fnToggleFields');
         }
-        //Triggering the toggle fields based on the factory by here.
-        frm.trigger('fnToggleFields');
     },
-    //When factory is changed , fields also changed for that dependent request.
+    // When factory is changed, fields also changed for that dependent request.
     factory: function(frm) {
-        fnResetValues(frm);
-        
-        switch (frm.doc.factory) {
-            case 'SGBCZ':
-                frm.set_df_property('lv_rated_voltage', 'reqd', true);
-               
-                frm.set_value('transformer_type', 'DTTHZ2N');
-                break;
-            case 'RGB':
-            case 'NEU':
-                frm.set_df_property('lv_rated_voltage', 'reqd', false);
-                frm.set_value('transformer_type', 
-                            frm.doc.factory === 'RGB' ? 'DTTH2N' : 'DOTML');
-                break;
+        if (frm.is_new()) {
+            fnResetValues(frm);
+            
+            switch (frm.doc.factory) {
+                case 'SGBCZ':
+                    frm.set_df_property('lv_rated_voltage', 'reqd', true);
+                    frm.set_value('transformer_type', 'DTTHZ2N');
+                    break;
+                case 'RGB':
+                case 'NEU':
+                    frm.set_df_property('lv_rated_voltage', 'reqd', false);
+                    frm.set_value('transformer_type', 
+                                frm.doc.factory === 'RGB' ? 'DTTH2N' : 'DOTML');
+                    break;
+            }
+            
+            frm.trigger('fnToggleFields');
+            frm.trigger('fnUpdateInsulationClass');
+            frm.trigger('fnTappings');
         }
-        
-        frm.trigger('fnToggleFields');
-        frm.trigger('fnUpdateInsulationClass');
-        frm.trigger('fnTappings');
     },
     
     refresh: function(frm) {
-        frm.trigger('fnTappings');
-        frm.trigger('fnUpdateInsulationClass');
-        frm.trigger('fnToggleFields');
+        if (frm.is_new()) {
+            frm.trigger('fnTappings');
+            frm.trigger('fnUpdateInsulationClass');
+            frm.trigger('fnToggleFields');
+        }
     },
-    //Set the options for the insulation class is varying for the factory
+    // Set the options for the insulation class varying for the factory
     fnUpdateInsulationClass: function(frm) {
-        let laOptions = [];
-        switch (frm.doc.factory) {
-            case 'RGB':
-                laOptions = ['F', 'H'];
-                break;
-            case 'NEU':
-                laOptions = ['A', 'B', 'C', 'F', 'H'];
-                break;
+        if (frm.is_new()) {
+            let laOptions = [];
+            switch (frm.doc.factory) {
+                case 'RGB':
+                    laOptions = ['F', 'H'];
+                    break;
+                case 'NEU':
+                    laOptions = ['A', 'B', 'C', 'F', 'H'];
+                    break;
+            }
+            frm.set_df_property('insulation_class', 'options', laOptions);
         }
-        frm.set_df_property('insulation_class', 'options', laOptions);
     },
-    //Set the options for the Tappings is varying based on factory
+    // Set the options for the Tappings is varying based on factory
     fnTappings: function(frm) {
-        let laTappings = [];
-        switch (frm.doc.factory) {
-            case 'SGBCZ':
-                laTappings = ['2', '3'];
-                break;
-            case 'RGB':
-            case 'NEU':
-                 laTappings = ['2', '3', '4','5','6','7','8'];
-                
+        if (frm.is_new()) {
+            let laTappings = [];
+            switch (frm.doc.factory) {
+                case 'SGBCZ':
+                    laTappings = ['2', '3'];
+                    break;
+                case 'RGB':
+                case 'NEU':
+                    laTappings = ['2', '3', '4', '5', '6', '7', '8'];
+            }
+            frm.set_df_property('tapping_plus', 'options', laTappings);
+            frm.set_df_property('tapping_minus', 'options', laTappings);
         }
-        frm.set_df_property('tapping_plus', 'options', laTappings);
-        frm.set_df_property('tapping_minus', 'options', laTappings);
     },
-    //This function used to hide and show fields 
+    // This function is used to hide and show fields 
     //based on the factory by controlling here.
     fnToggleFields: function(frm) {
-        const FIELDS = [
-            'vector_html', 'power_lv', 'uk_lv', 'uk_hv_lv', 'lv_html',
-            'insulation_class', 'winding_material', 'cooling_method',
-             'type_cooling',
-            'impedance', 'lv_rated_voltage', 'bushing_hv', 'cooling_method',
-            'type_cooling', 'temperature_rise', 'temperature_rise_oil',
-            'temperature_rise_winding', 'climatic_class', 
-            'environmental_class',
-            'temperature_rise_datasheet', 'temperature_rise_gitra'
-        ];
+        if (frm.is_new()) {
+            const FIELDS = [
+                'vector_html', 'power_lv', 'uk_lv', 'uk_hv_lv', 'lv_html',
+                'insulation_class', 'winding_material', 'cooling_method',
+                'type_cooling', 'impedance', 'lv_rated_voltage', 'bushing_hv',
+                'cooling_method', 'type_cooling', 'temperature_rise',
+                'temperature_rise_oil', 'temperature_rise_winding',
+                'climatic_class', 'environmental_class',
+                'temperature_rise_datasheet', 'temperature_rise_gitra'
+            ];
 
-        FIELDS.forEach(field => frm.toggle_display(field, false));
+            FIELDS.forEach(field => frm.toggle_display(field, false));
 
-        let laShowFields = [];
-        switch (frm.doc.factory) {
-            case 'SGBCZ':
-                laShowFields = ['vector_group', 'impedance', 
-                                'lv_rated_voltage',
-                                'temperature_rise', 'climatic_class', 
+            let laShowFields = [];
+            switch (frm.doc.factory) {
+                case 'SGBCZ':
+                    laShowFields = ['vector_group', 'impedance', 
+                                    'lv_rated_voltage', 'temperature_rise',
+                                    'climatic_class', 'environmental_class',
+                                    'temperature_rise_datasheet',
+                                    'temperature_rise_gitra'];
+                    break;
+                case 'RGB':
+                    laShowFields = FIELDS.filter(field => ![
+                                'lv_rated_voltage', 'bushing_hv',
+                                'cooling_method', 'type_cooling',
+                                'uk_hv_lv', 'temperature_rise_oil',
+                                'temperature_rise_winding',
+                                'temperature_rise_datasheet',
+                                'temperature_rise_gitra'].includes(field));
+                    laShowFields.push('temperature_rise');
+                    break;
+                case 'NEU':
+                    laShowFields = FIELDS.filter(field => ![
+                                'lv_rated_voltage', 'uk_lv', 'impedance',
+                                'temperature_rise', 'climatic_class',
                                 'environmental_class',
                                 'temperature_rise_datasheet',
-                                'temperature_rise_gitra'];
-                break;
-            case 'RGB':
-                laShowFields = FIELDS.filter(field => ![
-                            'lv_rated_voltage', 'bushing_hv',
-                            'cooling_method', 'type_cooling',
-                            'uk_hv_lv', 'temperature_rise_oil',
-                            'temperature_rise_winding',
-                            'temperature_rise_datasheet',
-                            'temperature_rise_gitra'].includes(field));
-                laShowFields.push('temperature_rise');
-                break;
-            case 'NEU':
-                laShowFields = FIELDS.filter(field => ![
-                            'lv_rated_voltage', 'uk_lv',
-                            'impedance', 'temperature_rise',
-                            'climatic_class', 'environmental_class',
-                            'temperature_rise_datasheet',
-                            'temperature_rise_gitra'].includes(field));
-                laShowFields.push('temperature_rise_oil', 
-                                  'temperature_rise_winding');
-                break;
-        }
+                                'temperature_rise_gitra'].includes(field));
+                    laShowFields.push('temperature_rise_oil', 
+                                      'temperature_rise_winding');
+                    break;
+            }
 
-        laShowFields.forEach(field => frm.toggle_display(field, true));
+            laShowFields.forEach(field => frm.toggle_display(field, true));
 
-        if (frm.doc.factory === 'RGB' && frm.doc.lv_2) {
-            frm.toggle_display('uk_hv_lv', false);
-            frm.toggle_display('impedance', false);
+            if (frm.doc.factory === 'RGB' && frm.doc.lv_2) {
+                frm.toggle_display('uk_hv_lv', false);
+                frm.toggle_display('impedance', false);
+            }
         }
     },
-    //Set the deafult value for the THDi is 5 when designing the transformer
-    //When calculation needed by Gitra ,
-    //only need HV rated voltage not HV1 and HV2
+    // Set the default value for the THDi is 5 when designing the transformer
+    // When calculation is needed by Gitra, only need HV 
+    //rated voltage not HV1 and HV2
     is_design: function(frm) {
-        if (frm.doc.is_design) {
+        if (frm.is_new() && frm.doc.is_design) {
             frm.set_value('thdi', '5');
             frm.toggle_display('hv_html', false); // Hide hv_html field
             frm.toggle_display('hv_rated_voltage', true); // Display hv_rated_voltage field
@@ -153,67 +159,72 @@ frappe.ui.form.on('Design', {
         }
     },
 
-    //When designing the transformer need to follow some condition
-    //such as THDi is either 5 or 20
-    //Otherwise it accepts from 5 to 99,
-    //it exceeds this value arise the error message
+    // When designing the transformer need to follow some condition
+    // such as THDi is either 5 or 20
+    // Otherwise it accepts from 5 to 99,
+    // it exceeds this value arise the error message
     thdi: function(frm) {
-        let thdiValue = Number(frm.doc.thdi);
-        if (!frm.doc.thdi) return;
+        if (frm.is_new()) {
+            let thdiValue = Number(frm.doc.thdi);
+            if (!frm.doc.thdi) return;
 
-        if (frm.doc.is_design) {
-            if (![5, 20].includes(thdiValue)) {
-                  
-                frappe.throw('Enter the THDi Value as 5 or 20');
-            }
-        } else {
-            if (thdiValue < 5 || thdiValue > 99) {
-                frappe.throw('Enter a THDi value between 5 and 99');
+            if (frm.doc.is_design) {
+                if (![5, 20].includes(thdiValue)) {
+                    frappe.throw('Enter the THDi Value as 5 or 20');
+                }
+            } else {
+                if (thdiValue < 5 || thdiValue > 99) {
+                    frappe.throw('Enter a THDi value between 5 and 99');
+                }
             }
         }
     },
 
-    //When the factory is changed, dependent fields also
-    //want to be show or hide based on the factory
+    // When the factory is changed, dependent fields also
+    // want to be show or hide based on the factory
     validate: function(frm) {
-        if (frm.doc.factory === 'SGBCZ' && !frm.doc.lv_rated_voltage) {
-            frappe.msgprint('LV Value is mandatory');
-            frappe.validated = false; 
-            return;
-        }
-        if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
-            frappe.msgprint('Please enter both Rating LV1 and Rating LV2 for RGB');
-            frappe.validated = false;
-            return;
-        } else if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && (!frm.doc.uk_lv1 || !frm.doc.uk_lv2)) {
-            frappe.msgprint('Please enter both UK LV1 and UK LV2 for RGB');
-            frappe.validated = false;
-            return;
-        }
-        
-        if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
-            frappe.msgprint('Please enter both Rating LV1 and Rating LV2 for RGB');
-            frappe.validated = false;
-            return;
-        } else if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && (!frm.doc.ukhv_lv1 || !frm.doc.ukhv_lv2)) {
-            frappe.msgprint('Please enter both UK HV LV1 and UK HV LV2');
-            frappe.validated = false;
-            return;
-        } 
+        if (frm.is_new()) {
+            if (frm.doc.factory === 'SGBCZ' && !frm.doc.lv_rated_voltage) {
+                frappe.msgprint(__('LV Value is mandatory'));
+                frappe.validated = false; 
+                return;
+            }
+            if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
+                frappe.msgprint(__('Please enter both Rating LV1 and Rating LV2 for RGB'));
+                frappe.validated = false;
+                return;
+            } else if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && (!frm.doc.uk_lv1 || !frm.doc.uk_lv2)) {
+                frappe.msgprint(__('Please enter both UK LV1 and UK LV2 for RGB'));
+                frappe.validated = false;
+                return;
+            }
+            
+            if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
+                frappe.msgprint(__('Please enter both Rating LV1 and Rating LV2 for RGB'));
+                frappe.validated = false;
+                return;
+            } else if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && (!frm.doc.ukhv_lv1 || !frm.doc.ukhv_lv2)) {
+                frappe.msgprint(__('Please enter both UK HV LV1 and UK HV LV2'));
+                frappe.validated = false;
+                return;
+            }
 
-        frappe.validated = true; // If all validations pass
+            frappe.validated = true; // If all validations pass
+        }
     }
 });
 
-//When changing the HTMl field , cleared the below field value
-//as well as html input value
+// When changing the HTMl field, clear the below field value
+// as well as html input value
 function fnResetValues(frm) {
-    frm.set_value('lv_rated_voltage', '');
-    frm.set_value('highest_operation_voltage_hv', '');
-    frm.set_value('ac_phase_hv', '');
-    frm.set_value('li_phase_hv', '');
-    let hvHtmlInput = $(frm.fields_dict.hv_html.wrapper).find('input');
-    hvHtmlInput.val('');
-    let lvHtmlInput = $(frm.fields_dict.lv_html.wrapper).find('input');
-    lvHtmlInput.val('');
+    if (frm.is_new()) {
+        frm.set_value('lv_rated_voltage', '');
+        frm.set_value('highest_operation_voltage_hv', '');
+        frm.set_value('ac_phase_hv', '');
+        frm.set_value('li_phase_hv', '');
+        let hvHtmlInput = $(frm.fields_dict.hv_html.wrapper).find('input');
+        hvHtmlInput.val('');
+        let lvHtmlInput = $(frm.fields_dict.lv_html.wrapper).find('input');
+        lvHtmlInput.val('');
+    }
 }

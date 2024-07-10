@@ -1,160 +1,103 @@
-frappe.ui.form.on("Design", {
-  /*
-   * This function is to compute the custom losses
-   * @params frm
-   * @params losses_setting field as defined in the Gitra Settings
-   */
+frappe.ui.form.on('Design', {
   fnComputeCustomLosses(frm, iLossesSetting) {
-    // Sort Rating as integer as Rating is defined as Data in Rating Doctype
-    iLossesSetting.sort((a, b) => {
-      const lNumA = parseInt(a.rating, 10);
-      const lNumB = parseInt(b.rating, 10);
-
-      if (lNumA < lNumB) {
-        return -1;
-      }
-      if (lNumA > lNumB) {
-        return 1;
-      }
-      return 0;
-    });
-
-    const lRatingInt = parseInt(frm.doc.rating, 10);
-    const lIndex = iLossesSetting.findIndex(
-      (x) => parseInt(x.rating, 10) > lRatingInt
-    );
-    const lRatingLossesHigher = iLossesSetting[lIndex];
-    const iRatingLossesLower = iLossesSetting[lIndex - 1];
-
-    // Compute the custom losses
-    var ldCustomLosses = {
-      no_load_loss: Math.round(
-        iRatingLossesLower.no_load_loss +
-          ((lRatingInt - iRatingLossesLower.rating) *
-            (lRatingLossesHigher.no_load_loss -
-              iRatingLossesLower.no_load_loss)) /
-            (lRatingLossesHigher.rating - iRatingLossesLower.rating)
-      ),
-      load_loss: Math.round(
-        iRatingLossesLower.load_loss +
-          ((lRatingInt - iRatingLossesLower.rating) *
-            (lRatingLossesHigher.load_loss - iRatingLossesLower.load_loss)) /
-            (lRatingLossesHigher.rating - iRatingLossesLower.rating)
-      ),
-      rating: frm.doc.rating,
-      lwa: iRatingLossesLower.lwa,
-      lpa_distance: iRatingLossesLower.lpa_distance,
-      lpa: frm.doc.lpa,
-    };
-
-    return ldCustomLosses;
+      iLossesSetting.sort((a, b) => {
+          const lNumA = parseInt(a.rating, 10);
+          const lNumB = parseInt(b.rating, 10);
+          if (lNumA < lNumB) {
+              return -1;
+          }
+          if (lNumA > lNumB) {
+              return 1;
+          }
+          return 0;
+      });
+      
+      const lRatingInt = parseInt(frm.doc.rating, 10);
+      const lIndex = losses_setting.findIndex(x => parseInt(x.rating, 10) > lRatingInt);
+      
+      const lRatingLossesHigher = iLossesSetting[lIndex];
+      const lRatingLossesLower = iLossesSetting[lIndex - 1];
+      
+      const lArithmeticAverage = (frm.doc.rating - lRatingLossesLower.rating) /
+                                 (lRatingLossesHigher.rating - lRatingLossesLower.rating);
+      
+      var ldCustomLosses = {
+          no_load_loss: Math.round(lRatingLossesLower.no_load_loss +
+                                   lArithmeticAverage * (lRatingLossesHigher.no_load_loss - lRatingLossesLower.no_load_loss)),
+          load_loss: Math.round(lRatingLossesLower.load_loss +
+                                lArithmeticAverage * (lRatingLossesHigher.load_loss - lRatingLossesLower.load_loss)),
+          rating: frm.doc.rating,
+          lwa: lRatingLossesLower.lwa,
+          lpa_distance: lRatingLossesLower.lpa_distance,
+          lpa: lRatingLossesLower.lpa
+      };
+      
+      return ldCustomLosses;
   },
 
-  /*
-   * This function retrieves the standard losses from Gitra Settings or computes custom losses if not found
-   * @params frm
-   */
-  fnGetStandardLosses(
-    frm,
-    iRefreshAllFields,
-    iFieldForValidation,
-    iSettingsField
-  ) {
-    var lDoctype = "Gitra Settings";
-
-    // Initialize the model with doctype Gitra Settings
-    frappe.model.with_doc(lDoctype, lDoctype, function () {
-      const laValues = frappe.model.get_list(lDoctype);
-      var laRatingLosses = laValues[0].losses_setting.find(
-        (x) => x.rating === frm.doc.rating
-      );
-
-      if (!laRatingLosses) {
-        // Calculate custom_losses if rating_losses not found
-        const ldCustomLosses = frm.events.compute_ldCustomLosses(
-          frm,
-          laValues[0].iLossesSetting
-        );
-        laRatingLosses = ldCustomLosses;
-      }
-
-      if (iRefreshAllFields) {
-        frm.doc.no_load_loss_guarantee = laRatingLosses.no_load_loss;
-        frm.doc.load_loss_guarantee = laRatingLosses.load_loss;
-        frm.doc.lpa_distance = laRatingLosses.lpa_distance;
-        frm.doc.lwa = laRatingLosses.lwa;
-      }
-
-      // Check if settings_field value is greater than 0 before validation
-      if (
-        laRatingLosses[iSettingsField] > 0 &&
-        frm.doc[iFieldForValidation] > laRatingLosses[iSettingsField]
-      ) {
-        // Format string to Camel Case (Like This String)
-        var lFormattedField = iFieldForValidation
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, function (match) {
-            return match.toUpperCase();
-          });
-        const lMessageString =
-          "Value higher than (" +
-          laRatingLosses[iSettingsField] +
-          ") Not Allowed";
-        frappe.msgprint(lMessageString, lFormattedField);
-        // Restore back the field to the maximum value
-        frm.doc[iFieldForValidation] = laRatingLosses[iSettingsField];
-      }
-
-      frm.refresh_fields();
-    });
+  fnGetStandardLosses(frm, iRefreshAllFields, iFieldForValidation, iSettingsField) {
+      var ldDoctype = "Gitra Settings";
+      frappe.model.with_doc(ldDoctype, ldDoctype, function() {
+          const laValues = frappe.model.get_list(ldDoctype);
+          var lRatingLosses = laValues[0].losses_setting.find(x => x.rating === frm.doc.rating);
+             
+          if (!lRatingLosses) {
+              // Calculate custom losses if rating_losses not found
+              lRatingLosses = frm.events.fnComputeCustomLosses(frm, laValues[0].iLossesSetting);
+          }
+          
+          if (iRefreshAllFields) {
+              frm.doc.no_load_loss_guarantee = lRatingLosses.no_load_loss;
+              frm.doc.load_loss_guarantee = lRatingLosses.load_loss;
+              frm.doc.lpa_distance = lRatingLosses.lpa_distance;
+              frm.doc.lwa = lRatingLosses.lwa;
+          }
+          
+          frm.refresh_fields();
+      });
   },
-  onload(frm) {
-    frm.set_value('lpa', 0)
-  },
+  
   refresh(frm) {
-    if (frm.is_new()) {
-      // Call get_standard_losses function on refresh if form is new
-      frm.events.fnGetStandardLosses(frm, true);
-    }
-
-    frm.refresh_field("no_load_loss_guarantee");
-    frm.refresh_field("load_loss_guarantee");
-    frm.refresh_field("lpa_distance");
-    frm.refresh_field("lwa");
-    // Avoid refreshing 'lpa' field to prevent clearing its value
-    frm.refresh_field("lpa");
+      if (frm.is_new()) {
+          frm.events.fnGetStandardLosses(frm, true);
+      }
+      
+      frm.refresh_fields();
   },
-
+  
   rating(frm) {
-    // Call get_standard_losses function on rating field change
-    frm.events.fnGetStandardLosses(frm, true);
+      frm.events.fnGetStandardLosses(frm, true);
   },
-
+  
   no_load_loss_guarantee(frm) {
-    frm.events.fnGetStandardLosses(
-      frm,
-      false,
-      "no_load_loss_guarantee",
-      "no_load_loss"
-    );
+      frm.events.fnGetStandardLosses(frm, false, 'no_load_loss_guarantee', 'no_load_loss');
   },
-
+  
   load_loss_guarantee(frm) {
-    frm.events.fnGetStandardLosses(
-      frm,
-      false,
-      "load_loss_guarantee",
-      "load_loss"
-    );
+      frm.events.fnGetStandardLosses(frm, false, 'load_loss_guarantee', 'load_loss');
   },
-
+  
   lwa(frm) {
-    frm.events.fnGetStandardLosses(frm, false, "lwa", "lwa");
-  },
+      if (frm.doc.is_design) {
+          frm.events.fnGetStandardLosses(frm, false, 'lwa', 'lwa');
 
+          // Logic to set LPA to 0 if LWA is present
+          if (frm.doc.lwa && frm.doc.lwa !== 0) {
+              frm.set_value('lpa', 0);
+          }
+      }
+  },
+  
   lpa(frm) {
-    // Allow changing lpa value without clearing
-    frm.events.fnGetStandardLosses(frm, false, "lpa", "lpa");
-  },
-});
+      if (frm.doc.is_design) {
+          frm.events.fnGetStandardLosses(frm, false, 'lpa', 'lpa');
 
+          // Logic to set LWA to 0 if LPA is present
+          if (frm.doc.lpa && frm.doc.lpa !== 0) {
+              frm.set_value('lwa', 0);
+          }
+      }
+  },
+
+  
+});

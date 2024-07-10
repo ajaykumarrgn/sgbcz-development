@@ -1,58 +1,103 @@
-//In earlier, Validate the ranges for the HV and LV only,
-//Now also validate the HV1 and LV1 ranges
 frappe.ui.form.on('Design', {
-    refresh(frm) {
-        if (frm.doc.status === 'Calculation Received') {
-            frm.set_read_only();
-            frm.disable_save();
-        }
-    },
-
+    
     /*
-    * This function validates the min and max lValues of the given input
-    * the min and max lValues are defined in the Gitra settings for a field
-    * @params frm 
-    * @params attribute_label field as defined in the Gitra Settings
-    * @params attribute_name field in the current design for validation
+    * This function validates the min and max values of the given input
+    * The min and max values are defined in the Gitra settings for a field
+    * @params {Object} frm - The form object
+    * @params {string} attribute_label - The field label as defined in the Gitra Settings
+    * @params {string} attribute_name - The field name in the current design for validation
+    * @params {string} transformer_type - The type of transformer for which the range is validated
     */
-    validate_attribute_range(frm, attribute_label, attribute_name) {
-        var lDoctype = "Gitra Settings";
-        frappe.model.with_doc(lDoctype, lDoctype, function() {
-            var lValues = frappe.model.get_list(lDoctype);
-            var lAttribute = lValues[0].attributes.find(value => value.parameter === attribute_label);
+    fnValidateAttributeRange(frm, iAttribute_label, iAttribute_name, iTransformer_type) {
+        const DOCTYPE = "Gitra Settings";
 
-            if (!lAttribute) {
-                frappe.msgprint('Attribute not found in Gitra Settings.');
-                return;
-            }
+        frappe.model.with_doc(DOCTYPE, DOCTYPE, function() {
+            let ldDoc = frappe.get_doc(DOCTYPE, DOCTYPE);
+            let ldAttribute = ldDoc.attributes.find(attr => attr.parameter === iAttribute_label && attr.transformer_type === iTransformer_type);
+            
+            if (ldAttribute) {
+                
 
-            var lValue = parseFloat(frm.doc[attribute_name]);
+                // Ensure all values are numeric for accurate comparison
+                let AttributeName = parseFloat(frm.doc[iAttribute_name]);
+                let minValue = parseFloat(ldAttribute.min);
+                let maxValue = parseFloat(ldAttribute.max);
 
-            if (lValue < lAttribute.min || lValue > lAttribute.max) {
-                frappe.msgprint("Attribute Not in Range");
+                if (AttributeName < minValue || AttributeName > maxValue) {
+                    frappe.msgprint({
+                        title: __('Validation Error'),
+                        message: __('Attribute Not in Range' + ', Min: ' + minValue + ', Max: ' + maxValue),
+                        indicator: 'red'
+                    });
+                    frm.set_value(iAttribute_name, ''); 
+                    frappe.validated = false; // Prevent form submission
+                }
+            } else {
+                frappe.msgprint({
+                    title: __('Attribute Not Found'),
+                    message: __(iAttribute_label + ' for ' + iTransformer_type + ' is not found in Gitra Settings.'),
+                    indicator: 'orange'
+                });
             }
         });
     },
-
-    validate_and_display_error(frm, attribute_label, attribute_name) {
-        frm.events.validate_attribute_range(frm, attribute_label, attribute_name);
+    rating(frm){
+         frm.events.fnValidateAttributeRange(frm, 'Rating', 'rating', frm.doc.transformer_type);
     },
 
     hv_rated_voltage(frm) {
-        frm.events.validate_and_display_error(frm, 'HV Rated Voltage', 'hv_rated_voltage');
+       
+        frm.events.fnValidateAttributeRange(frm, 'HV Rated Voltage', 'hv_rated_voltage', frm.doc.transformer_type);
     },
     hv1(frm) {
-        frm.events.validate_and_display_error(frm, 'HV1', 'hv1');
+        
+        frm.events.fnValidateAttributeRange(frm, 'HV1', 'hv1',frm.doc.transformer_type);
     },
-    impedance(frm) {
-        frm.events.validate_and_display_error(frm, 'Impedance', 'impedance');
+    hv2(frm) {
+       
+        frm.events.fnValidateAttributeRange(frm, 'HV2', 'hv2',frm.doc.transformer_type);
+    },
+
+    uk(frm) {
+        
+        frm.events.fnValidateAttributeRange(frm, 'Uk (%)', 'impedance', frm.doc.transformer_type);
     },
 
     lv_rated_voltage(frm) {
-        frm.events.validate_and_display_error(frm, 'LV Rated Voltage', 'lv_rated_voltage');
+        
+        frm.events.fnValidateAttributeRange(frm, 'LV Rated Voltage', 'lv_rated_voltage', frm.doc.transformer_type);
     },
+     
     lv1(frm) {
-        frm.events.validate_and_display_error(frm, 'LV1', 'lv1');
-    }, 
-    
+        
+        frm.events.fnValidateAttributeRange(frm, 'LV1', 'lv1',frm.doc.transformer_type);
+    },
+    lv_2(frm) {
+        
+        frm.events.fnValidateAttributeRange(frm, 'LV2', 'lv_2',frm.doc.transformer_type);
+    },
+    power_lv1(frm) {
+        
+        frm.events.fnValidateAttributeRange(frm, 'Rating LV1', 'power_lv1',frm.doc.transformer_type);
+    },
+    power_lv2(frm) {
+         
+        frm.events.fnValidateAttributeRange(frm, 'Rating LV2', 'power_lv2',frm.doc.transformer_type);
+    },
+    uk_lv1(frm) {
+         
+        frm.events.fnValidateAttributeRange(frm, 'Uk LV1(%)', 'uk_lv1',frm.doc.transformer_type);
+    },
+    uk_lv2(frm) {
+         
+        frm.events.fnValidateAttributeRange(frm, 'Uk LV2(%)', 'uk_lv2',frm.doc.transformer_type);
+    },
+    ukhv_lv1(frm) {
+        
+        frm.events.fnValidateAttributeRange(frm, 'Uk HV LV 1 (%)', 'ukhv_lv1',frm.doc.transformer_type);
+    },
+    ukhv_lv2(frm) {
+         
+        frm.events.fnValidateAttributeRange(frm, 'Uk HV LV 2 (%)', 'ukhv_lv2',frm.doc.transformer_type);
+    }
 });

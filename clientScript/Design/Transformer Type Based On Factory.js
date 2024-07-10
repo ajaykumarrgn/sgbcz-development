@@ -34,11 +34,20 @@ frappe.ui.form.on('Design', {
         fnFetchTransformerType(frm);
     },
 
-    refresh(frm) {   
+    refresh(frm) { 
+        //design creation is only for sgbcz transformer to
+        //restrict it in other region by hidding the is_design checkbox
+           
+        if (frm.doc.factory != 'SGBCZ') {
+            // frm.set_value('is_design', 0);
+            frm.set_df_property('is_design', 'hidden', 1);
+        } else {
+             frm.set_df_property('is_design', 'hidden', 0);
+        }  
         fnFetchTransformerType(frm);
         fnUpdateButtonGroup(frm);
         if(frm.is_new()){
-            fnDirectMaterial(frm)
+            fnDirectMaterial(frm);
         }
     },
 
@@ -98,7 +107,7 @@ function fnFetchTransformerType(frm) {
     const LD_TRANSFORMER_MAPPING = {
         "SGBCZ": "DTTHZ2N",
         "RGB": "RGB",
-        "NEUMARK": "NEU"
+        "NEU": "NEU"
     };
         
     const GET_ITEM_GROUP = LD_TRANSFORMER_MAPPING[frm.doc.factory];
@@ -108,7 +117,7 @@ function fnFetchTransformerType(frm) {
         args: { "factory": GET_ITEM_GROUP },
         callback: function(response) {
             if (response.message) {
-                set_field_options('transformer_type', response.message)
+                set_field_options('transformer_type', response.message);
                
             }
         }
@@ -118,38 +127,38 @@ function fnFetchTransformerType(frm) {
 
 function fnUpdateButtonGroup(frm) {
     const STATUS = frm.doc.status;
-    let buttonLabel = '';
-    let buttonFunction = null;
+    let iButtonLabel = '';
+    let iButtonFunction = null;
 
     // Determine which button to show based on status
     if (STATUS === 'Draft' && frm.doc.is_design === 1) {
-        buttonLabel = 'Create Design';
-        buttonFunction = fncreateDesign;
+        iButtonLabel = 'Create Design';
+        iButtonFunction = fncreateDesign;
     } else if (STATUS === 'Draft' && frm.doc.is_design === 0) {
-        buttonLabel = 'Create Item';
-        buttonFunction = fncreateItem;
+        iButtonLabel = 'Create Item';
+        iButtonFunction = fncreateItem;
     } else if (STATUS === 'Calculation Received' && !frm.doc.item) {
-        buttonLabel = 'Create Item';
-        buttonFunction = fncreateItem;
+        iButtonLabel = 'Create Item';
+        iButtonFunction = fncreateItem;
     } else if (STATUS === 'Item Created' && frm.doc.item) {
-        buttonLabel = 'View Item';
-        buttonFunction = fnviewItem;
+        iButtonLabel = 'View Item';
+        iButtonFunction = fnviewItem;
     } else if (STATUS === 'Item Created' && !frm.doc.item) {
-        buttonLabel = 'Create Item';
-        buttonFunction = fncreateItem;
+        iButtonLabel = 'Create Item';
+        iButtonFunction = fncreateItem;
     }
 
-    fnShowButtonGroup(frm, buttonLabel, buttonFunction);
+    fnShowButtonGroup(frm, iButtonLabel, iButtonFunction);
 }
 
 // Function to show or hide specific button
-function fnShowButtonGroup(frm, buttonLabel, buttonFunction) {
+function fnShowButtonGroup(frm, iButtonLabel, iButtonFunction) {
     // Clear all custom buttons
     frm.clear_custom_buttons();
     
-    if (buttonLabel && buttonFunction) {
-        frm.add_custom_button(__(buttonLabel), function() {
-            buttonFunction(frm);
+    if (iButtonLabel && iButtonFunction) {
+        frm.add_custom_button(__(iButtonLabel), function() {
+            iButtonFunction(frm);
         });
     }
 }
@@ -202,10 +211,13 @@ function fncreateItem(frm) {
                                 });
                                 
 
-                                // In the fn_pdf_attachment function, the filename is generated using the argument
-                                // im_file_name, which takes a string that includes a placeholder for language.
+                                // In the fn_pdf_attachment function, the filename 
+                                //is generated using the argument
+                                // im_file_name, which takes a string that includes 
+                                //a placeholder for language.
                                 // Example: 'Datasheet_${l_title}_${frm.doc.name}_{language}'
-                                // Here, {language} is the placeholder, ensuring the language appears at the end.
+                                // Here, {language} is the placeholder, ensuring 
+                                //the language appears at the end.
                                             
                                 // The design title will be used as the filename.
                                 let lTitle = frm.doc.title;
@@ -234,7 +246,7 @@ function fncreateItem(frm) {
                                     },
                                     "callback": function(pdfResponse){
                                         if(pdfResponse.message){
-                                            frappe.hide_progress()
+                                            frappe.hide_progress();
                                             frm.set_value('status', 'Item Created');
                                             frm.save();
                                                             
@@ -243,9 +255,9 @@ function fncreateItem(frm) {
                                 });
                             }
                         }
-                    })
+                    });
 
-                })
+                });
                             
             }else{                        
                 frappe.show_alert({
