@@ -5,7 +5,6 @@ import { getEndPointForDoctype } from "./functions.js"
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import fetch from 'node-fetch';
 import { execSync } from 'child_process'; 
 dotenv.config({path: '../.env'});
 
