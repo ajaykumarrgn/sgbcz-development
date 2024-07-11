@@ -39,7 +39,7 @@ frappe.ui.form.on('Design', {
         
         // Check if the fieldname is either 'lv_html', 'hv_html', or 'power_lv'
         if (laHTMLField === 'lv_html' || laHTMLField === 'hv_html'|| 
-            laHTMLField === 'uk_lv'|| laHTMLField === 'uk_hv_lv') {
+            laHTMLField === 'uk_lv'|| laHTMLField === 'uk_hv_lv' || laHTMLField === 'power_lv') {
             // Regular expression to match only numbers and slashes
             let laRegex = /^[0-9/]*$/;
     
@@ -77,12 +77,7 @@ frappe.ui.form.on('Design', {
                     //HTML field to the Doctype field
                     fnTransposeHtmlToDocField(frm, laValue, laHTMLField, document);
                 }
-            } else {
-                frappe.msgprint('Please enter both values')
-                 laInputElement.value = '';
-            }
-        }
-        else if (laHTMLField === 'uk_lv' || laHTMLField === 'uk_hv_lv'){
+            } 
         }
         });
        

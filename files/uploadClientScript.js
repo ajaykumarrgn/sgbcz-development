@@ -73,6 +73,12 @@ function processFilesInFolder(folderPath, parentFolder = null) {
                         } else {
                             try {
                                 metaContent = JSON.parse(metaContent); // Parse the JSON content of .meta file
+                                delete metaContent.name;
+                                delete metaContent.owner;
+                                delete metaContent.modified;
+                                delete metaContent.modified_by;
+                                delete metaContent.roles;
+                                delete metaContent.creation;
                             } catch (error) {
                                 console.error(`Error parsing meta file ${metaFilePath}: ${error}`);
                                 console.log(`Skipping file ${file} due to invalid meta content`);
@@ -90,7 +96,7 @@ function processFilesInFolder(folderPath, parentFolder = null) {
                             body: JSON.stringify({
                                 filename: encodedFilename,
                                 script: fileContent,
-
+                                ...metaContent
                             }),
                             redirect: 'follow',
                         };

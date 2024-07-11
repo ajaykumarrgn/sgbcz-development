@@ -32,13 +32,14 @@ frappe.ui.form.on('Design', {
                     frm.set_value(iAttribute_name, ''); 
                     frappe.validated = false; // Prevent form submission
                 }
-            } else {
-                frappe.msgprint({
-                    title: __('Attribute Not Found'),
-                    message: __(iAttribute_label + ' for ' + iTransformer_type + ' is not found in Gitra Settings.'),
-                    indicator: 'orange'
-                });
-            }
+            } 
+            // else {
+            //     frappe.msgprint({
+            //         title: __('Attribute Not Found'),
+            //         message: __(iAttribute_label + ' for ' + iTransformer_type + ' is not found in Gitra Settings.'),
+            //         indicator: 'orange'
+            //     });
+            // }
         });
     },
     rating(frm){
