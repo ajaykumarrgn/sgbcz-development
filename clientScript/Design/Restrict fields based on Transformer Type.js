@@ -124,7 +124,7 @@ frappe.ui.form.on('Design', {
                     break;
                 case 'NEU':
                     laShowFields = FIELDS.filter(field => ![
-                                'lv_rated_voltage', 'uk_lv', 'impedance',
+                                'lv_rated_voltage', 'uk_lv',
                                 'temperature_rise', 'climatic_class',
                                 'environmental_class',
                                 'temperature_rise_datasheet',

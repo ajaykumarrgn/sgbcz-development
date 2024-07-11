@@ -10,12 +10,13 @@
  //enable is design
        
 
-frappe.ui.form.on('Design', {
+ frappe.ui.form.on('Design', {
     
     onload: function(frm) {
         if (!frm.is_new()) {
            
-            if (frm.doc.status === 'Calculation Received' || frm.doc.status === 'Item Created') {
+            if (frm.doc.status === 'Calculation Received' || 
+            frm.doc.status === 'Item Created') {
                
                 var lVectorGroup = parseInt(frm.doc.vector_group);
                 
@@ -29,13 +30,17 @@ frappe.ui.form.on('Design', {
                 if (!isNaN(lVectorGroup)) {
                     frm.set_value('vector_group', 'Dyn' + lVectorGroup);
                 }
+                frm.set_value('type_lv', 'Prepreg');
             }
 
            
-            if (frm.doc.status === 'Calculation Received' && (!frm.doc.factory || !frm.doc.transformer_type)) {
+            if (frm.doc.status === 'Calculation Received' && (!frm.doc.factory || 
+                !frm.doc.transformer_type || !frm.doc.is_design)) {
                 frm.set_value('factory', 'SGBCZ');
                 frm.set_value('transformer_type', 'DTTHZ2N');
-                frm.set_value('is_design', 1);
+                 frm.set_value('is_design', 1);
+                
+                frm.refresh_field('is_design');
                 if (frm.doc.item) {
                     frm.set_value('status', 'Item Created');
                 }
