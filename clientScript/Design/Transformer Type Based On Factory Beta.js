@@ -187,7 +187,7 @@ function fnDirectMaterial(frm){
 
 function fncreateItem(frm) {
  frappe.call({
-   method: "create_item_from_design_test",
+   method: "create_item_from_design_beta",
    args: { design: frm.doc.name },
    callback: function (response) {
      if (response.message) {
