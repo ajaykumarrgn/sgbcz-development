@@ -2,7 +2,6 @@ frappe.ui.form.on('Design', {
 	validate(frm) {
 	    function add_tappings_xml(frm, xml, tappingNodes){
 	       
-
             // Parse the XML template to JavaScript object
             let xmlDoc = new DOMParser().parseFromString(xml, 'text/xml');
             var nodeList = xmlDoc.getElementsByTagName('TGtExportEDSAuftragStellungenListe');

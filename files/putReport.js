@@ -11,9 +11,10 @@ dotenv.config({path: '../.env'});
 
 const baseFolder = '../reports';
 
-const myHeaders = new Headers();
-myHeaders.append("Authorization", process.env.KEY)
-myHeaders.append('Content-Type', 'application/json');
+const myHeaders = {
+  'Content-Type': 'application/json',
+  'Authorization': process.env.KEY,
+};
 
 const baseUrl = getEndPointForDoctype("Report")
 
