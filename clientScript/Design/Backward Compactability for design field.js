@@ -11,9 +11,10 @@
        
 
  frappe.ui.form.on('Design', {
-    
+   
     onload: function(frm) {
         if (!frm.is_new()) {
+             var lCanSave = 0 ;
            
             if (frm.doc.status === 'Calculation Received' || 
             frm.doc.status === 'Item Created') {
@@ -23,14 +24,20 @@
                 if (frm.doc.thdi == null && frm.doc.k4_factor) {
                     if (frm.doc.k4_factor === 'Yes') {
                         frm.set_value('thdi', 20);
+                        lCanSave = lCanSave + 1 ;
                     } else {
                         frm.set_value('thdi', 5);
+                         lCanSave = lCanSave + 1 ;
                     }
                 }
                 if (!isNaN(lVectorGroup)) {
                     frm.set_value('vector_group', 'Dyn' + lVectorGroup);
+                     lCanSave = lCanSave + 1 ;
                 }
+                if(!frm.doc.type_lv){
                 frm.set_value('type_lv', 'Prepreg');
+                 lCanSave = lCanSave + 1 ;
+                }
             }
 
            
@@ -44,9 +51,11 @@
                 if (frm.doc.item) {
                     frm.set_value('status', 'Item Created');
                 }
+                 lCanSave = lCanSave + 1 ;
             }
-
+            if(lCanSave > 0){
             frm.save();
+            }
         }
     }
     
