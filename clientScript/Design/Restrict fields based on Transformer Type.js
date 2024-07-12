@@ -28,6 +28,8 @@ frappe.ui.form.on('Design', {
     // When factory is changed, fields also changed for that dependent request.
     factory: function(frm) {
         if (frm.is_new()) {
+            frm.set_value('lv1', '');   
+            frm.set_value('lv_2', ''); 
             fnResetValues(frm);
             
             switch (frm.doc.factory) {
@@ -124,7 +126,7 @@ frappe.ui.form.on('Design', {
                     break;
                 case 'NEU':
                     laShowFields = FIELDS.filter(field => ![
-                                'lv_rated_voltage', 'uk_lv', 'impedance',
+                                'lv_rated_voltage', 'uk_lv',
                                 'temperature_rise', 'climatic_class',
                                 'environmental_class',
                                 'temperature_rise_datasheet',
