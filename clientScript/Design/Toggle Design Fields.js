@@ -302,6 +302,7 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
             
         case 'vector_html_1':
             frm.set_value('vector_group', iValue);
+            frm.set_value('vector_group_lv1', iValue);
            
             break;
             

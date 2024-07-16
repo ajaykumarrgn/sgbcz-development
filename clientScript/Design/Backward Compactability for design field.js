@@ -21,7 +21,7 @@
                
                 var lVectorGroup = parseInt(frm.doc.vector_group);
                 
-                if (frm.doc.thdi == null && frm.doc.k4_factor) {
+                if (frm.doc.thdi == 0 && frm.doc.k4_factor) {
                     if (frm.doc.k4_factor === 'Yes') {
                         frm.set_value('thdi', 20);
                         lCanSave = lCanSave + 1 ;

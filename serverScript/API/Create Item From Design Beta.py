@@ -78,8 +78,8 @@ def fn_get_parameter_mapping_def():
     la_param_map_def = lfn_add_param_map('Uk (%)', 'impedance', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Uk LV 1 (%)', 'uk_lv1', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Uk LV 2 (%)', 'uk_lv2', la_param_map_def)
-    la_param_map_def = lfn_add_param_map('Electrostatic Screen', '', la_param_map_def)
-    la_param_map_def = lfn_add_param_map('Parallel coil', '', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('Electrostatic screen', 'electrostatic_screen', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('Parallel coil', 'parallel_coil', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Cooling', 'cooling_method', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Type of Cooling Medium', 'type_cooling', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Bushings HV', 'bushing_hv', la_param_map_def)
@@ -119,12 +119,18 @@ la_parameter_map_def = fn_get_parameter_mapping_def()
 if design.transformer_type == 'DTTHZ2N':
     item_group = 'DTTHZ2N'
     variant_of = 'DTTHZ2N'
-elif design.transformer_type == 'DTTH2N':
+# elif design.transformer_type == 'DTTH2N':
+#     item_group = 'RGB'
+#     variant_of = 'DTTH2N'
+# elif design.transformer_type == 'DOTML':
+#     item_group = 'NEU'
+#     variant_of = 'DOTML'
+elif design.transformer_type in ['DTTH2N', 'DTTHK2NG', 'DTTHDG', 'DTTH2NG']:
     item_group = 'RGB'
-    variant_of = 'DTTH2N'
-elif design.transformer_type == 'DOTML':
+    variant_of = design.transformer_type
+elif design.transformer_type in ['DOTML', 'DMTML', 'DSTML', 'DOTDG']:
     item_group = 'NEU'
-    variant_of = 'DOTML'
+    variant_of = design.transformer_type
 else:
     frappe.response['message'] = 'Unsupported transformer type.'
     # frappe.throw('Unsupported transformer type.')
@@ -176,13 +182,21 @@ for ld_attribute in la_template_attributes:
                 ld_docvalue_temp = int(ld_docvalue_temp)
             ld_docvalue = ld_docvalue_temp
     else:
-        # If the attribute does not have numeric values,
+        # If the attribute does not have numeric values
         # keep the original value
         ld_docvalue = ld_docvalue_temp
 
     # Conditionally append attributes
     if ld_attribute.attribute == 'Electrostatic screen':
-        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'NO'))
+        if design.electrostatic_screen == 0:
+            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'NO'))
+        else:
+             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'YES'))
+    elif ld_attribute.attribute == 'Parallel coil':
+        if design.parallel_coil == 0:
+            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'NO'))
+        else:
+             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'YES'))
     elif ld_attribute.attribute == 'Special parameters':
         if design.specifics:
             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'YES'))
@@ -193,8 +207,21 @@ for ld_attribute in la_template_attributes:
             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 20))
         else:
             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 5))
+
+    #when lv2 is present set the zero foe vectar group and uk %
+    elif ld_attribute.attribute == 'Vector Group' or ld_attribute.attribute == 'Uk (%)':
+        if design.attributes and 'lv_2' in design.attributes:  # Check if design.attributes is not None and 'lv_2' is present
+            if ld_attribute.attribute == 'Vector Group':
+                attribute_value = 'DYN' + design.vector_group
+            else:  # ld_attribute.attribute == 'Uk (%)'
+                attribute_value = 0
+            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, attribute_value))
+        else:
+            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 0))
+
     # elif ld_attribute.attribute == 'Vector Group':
     #     item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ('DYN' + design.vector_group)))
+
     elif ld_attribute.attribute == 'HV (kV)':
         hv_in_kv_str = str(int(design.hv_rated_voltage) / 1000)
         if float(hv_in_kv_str) % 1 == 0:
