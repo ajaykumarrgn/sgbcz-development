@@ -83,6 +83,10 @@ def fn_get_parameter_mapping_def():
     la_param_map_def = lfn_add_param_map('Cooling', 'cooling_method', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Type of Cooling Medium', 'type_cooling', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Bushings HV', 'bushing_hv', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('Temperature Rise Winding (K)', 'temperature_rise_winding', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('Temperature rise Oil (k)', 'temperature_rise_oil', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('Uk HV LV 1 (%)', 'ukhv_lv1', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('Uk HV LV 2 (%)', 'ukhv_lv2', la_param_map_def)
 
     return la_param_map_def
 
