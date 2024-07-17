@@ -6,9 +6,10 @@
 // Designs created before adding the factory option.
 // If the status is 'Calculation Received', set:
 // Factory: 'SGBCZ'
- // Transformer Type: 'DTTHZ2N'
- //enable is design
-       
+// Transformer Type: 'DTTHZ2N'
+//enable is design
+// parallel coil is added on factory development
+// enable it if k4 factor is Yes 
 
  frappe.ui.form.on('Design', {
    
@@ -20,7 +21,7 @@
             frm.doc.status === 'Item Created') {
                
                 var lVectorGroup = parseInt(frm.doc.vector_group);
-                
+                //updating THDi field
                 if (frm.doc.thdi == 0 && frm.doc.k4_factor) {
                     if (frm.doc.k4_factor === 'Yes') {
                         frm.set_value('thdi', 20);
@@ -30,10 +31,17 @@
                          lCanSave = lCanSave + 1 ;
                     }
                 }
+                //updating parallel coil field
+                if(frm.doc.k4_factor === 'Yes'){
+                    frm.set_value('parallel_coil', 1);
+                    lCanSave = lCanSave + 1 ;
+                }
+                //updating vectar group field
                 if (!isNaN(lVectorGroup)) {
                     frm.set_value('vector_group', 'Dyn' + lVectorGroup);
                      lCanSave = lCanSave + 1 ;
                 }
+                //updating type of lv
                 if(!frm.doc.type_lv){
                 frm.set_value('type_lv', 'Prepreg');
                  lCanSave = lCanSave + 1 ;

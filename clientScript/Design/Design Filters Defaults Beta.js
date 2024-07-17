@@ -10,19 +10,19 @@ frappe.ui.form.on('Design', {
     */
     fnValidateAttributeRange(frm, iAttribute_label, iAttribute_name, iTransformer_type) {
         const DOCTYPE = "Gitra Settings";
-
+ 
         frappe.model.with_doc(DOCTYPE, DOCTYPE, function() {
             let ldDoc = frappe.get_doc(DOCTYPE, DOCTYPE);
             let ldAttribute = ldDoc.attributes.find(attr => attr.parameter === iAttribute_label && attr.transformer_type === iTransformer_type);
             
             if (ldAttribute) {
                 
-
+ 
                 // Ensure all values are numeric for accurate comparison
                 let AttributeName = parseFloat(frm.doc[iAttribute_name]);
                 let minValue = parseFloat(ldAttribute.min);
                 let maxValue = parseFloat(ldAttribute.max);
-
+ 
                 if (AttributeName < minValue || AttributeName > maxValue) {
                     frappe.msgprint({
                         title: __('Validation Error'),
@@ -45,7 +45,7 @@ frappe.ui.form.on('Design', {
     rating(frm){
          frm.events.fnValidateAttributeRange(frm, 'Rating', 'rating', frm.doc.transformer_type);
     },
-
+ 
     hv_rated_voltage(frm) {
        
         frm.events.fnValidateAttributeRange(frm, 'HV Rated Voltage', 'hv_rated_voltage', frm.doc.transformer_type);
@@ -58,12 +58,12 @@ frappe.ui.form.on('Design', {
        
         frm.events.fnValidateAttributeRange(frm, 'HV2', 'hv2',frm.doc.transformer_type);
     },
-
-    uk(frm) {
+ 
+    impedance(frm) {
         
-        frm.events.fnValidateAttributeRange(frm, 'Uk (%)', 'impedance', frm.doc.transformer_type);
+        frm.events.fnValidateAttributeRange(frm, 'Uk', 'impedance', frm.doc.transformer_type);
     },
-
+ 
     lv_rated_voltage(frm) {
         
         frm.events.fnValidateAttributeRange(frm, 'LV Rated Voltage', 'lv_rated_voltage', frm.doc.transformer_type);
@@ -87,18 +87,43 @@ frappe.ui.form.on('Design', {
     },
     uk_lv1(frm) {
          
-        frm.events.fnValidateAttributeRange(frm, 'Uk LV1(%)', 'uk_lv1',frm.doc.transformer_type);
+        frm.events.fnValidateAttributeRange(frm, 'Uk LV1', 'uk_lv1',frm.doc.transformer_type);
     },
     uk_lv2(frm) {
          
-        frm.events.fnValidateAttributeRange(frm, 'Uk LV2(%)', 'uk_lv2',frm.doc.transformer_type);
+        frm.events.fnValidateAttributeRange(frm, 'Uk LV2', 'uk_lv2',frm.doc.transformer_type);
     },
     ukhv_lv1(frm) {
         
-        frm.events.fnValidateAttributeRange(frm, 'Uk HV LV 1 (%)', 'ukhv_lv1',frm.doc.transformer_type);
+        frm.events.fnValidateAttributeRange(frm, 'Uk HV LV 1', 'ukhv_lv1',frm.doc.transformer_type);
     },
     ukhv_lv2(frm) {
          
-        frm.events.fnValidateAttributeRange(frm, 'Uk HV LV 2 (%)', 'ukhv_lv2',frm.doc.transformer_type);
+        frm.events.fnValidateAttributeRange(frm, 'Uk HV LV 2', 'ukhv_lv2',frm.doc.transformer_type);
+    },
+    // tapping_plus_step(frm) {
+    //     frm.events.fnValidateAttributeRange(frm, 'Tapping Plus Step', 'tapping_plus_step', frm.doc.transformer_type);
+    // },
+    
+    // tapping_minus_step(frm) {
+    //     frm.events.fnValidateAttributeRange(frm, 'Tapping Minus Step', 'tapping_minus_step',frm.doc.transformer_type);
+    // },
+    tapping_plus_step(frm) {
+        if (!frm.tapping_plus_step_validated) {
+            frm.events.fnValidateAttributeRange(frm, 'Tapping Plus Step', 'tapping_plus_step', frm.doc.transformer_type);
+            frm.tapping_plus_step_validated = true;
+        }
+    },
+ 
+    tapping_minus_step(frm) {
+        if (!frm.tapping_minus_step_validated) {
+            frm.events.fnValidateAttributeRange(frm, 'Tapping Minus Step', 'tapping_minus_step', frm.doc.transformer_type);
+            frm.tapping_minus_step_validated = true;
+        }
+    },
+ 
+    refresh(frm) {
+        frm.tapping_plus_step_validated = false;
+        frm.tapping_minus_step_validated = false;
     }
 });
