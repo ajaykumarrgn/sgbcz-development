@@ -36,6 +36,7 @@ frappe.ui.form.on("Design", {
             frm.set_df_property('is_design', 'hidden', 0);
        }
        fnFetchTransformerType(frm);
+       fnDirectMaterial(frm);
    },
 
 
@@ -165,17 +166,23 @@ function fnShowButtonGroup(frm, iButtonLabel, iButtonFunction) {
    
    if (iButtonLabel && iButtonFunction) {
        frm.add_custom_button(__(iButtonLabel), function() {
-           iButtonFunction(frm);
+        if(!frm.is_dirty()){
+          iButtonFunction(frm);
+          }else{
+            frm.get_field(iButtonLabel).df.disabled = true;
+            frm.refresh_field(iButtonLabel);
+          }
        });
    }
 }
 
 
 function fnDirectMaterial(frm){
-   // To create item without gitra calculation, direct material cost
-   // is required, so on draft status with is_design checkbox disable
-   // make the direct material cost field required and editable
-   if (frm.doc.status === 'Draft' && frm.doc.is_design === 0) {
+   // To create item without gitra calculation for SGBCZ, direct material cost
+   // is required, so on draft status with is_design checkbox disable make
+   // direct material cost mandatory
+   // and for all other factory make it disable
+   if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design && frm.doc.status === 'Draft') {
        frm.set_df_property('direct_material_cost', 'read_only', 0);
        frm.set_df_property('direct_material_cost', 'reqd', 1);
    } else {
