@@ -160,6 +160,7 @@ frappe.ui.form.on('Design', {
             // Display hv_rated_voltage field
             frm.toggle_display('hv_rated_voltage', true);
             frm.set_df_property('hv_rated_voltage', 'reqd', true);
+            frm.set_df_property('type_lv', 'hidden', true);
             frm.fields_dict['hv_rated_voltage'].set_label('HV Value(V)');
             frm.fields_dict['hv_rated_voltage'].$input.attr('placeholder', 'HV');
             frm.set_df_property('electrostatic_screen', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
@@ -171,6 +172,7 @@ frappe.ui.form.on('Design', {
             frm.toggle_display('hv_html', true);
             // Hide hv_rated_voltage field
             frm.toggle_display('hv_rated_voltage', false);
+            frm.set_df_property('type_lv', 'hidden', false);
             frm.set_df_property('electrostatic_screen', 'hidden', false);
             frm.set_df_property('parallel_coil', 'hidden', false);
         }
@@ -213,21 +215,25 @@ frappe.ui.form.on('Design', {
                 frappe.validated = false; 
                 return;
             }
-            if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
+            if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && 
+            (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
                 frappe.msgprint(__('Please enter both Rating LV1 and Rating LV2 for RGB'));
                 frappe.validated = false;
                 return;
-            } else if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && (!frm.doc.uk_lv1 || !frm.doc.uk_lv2)) {
+            } else if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && 
+            (!frm.doc.uk_lv1 || !frm.doc.uk_lv2)) {
                 frappe.msgprint(__('Please enter both UK LV1 and UK LV2 for RGB'));
                 frappe.validated = false;
                 return;
             }
             
-            if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
+            if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && 
+            (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
                 frappe.msgprint(__('Please enter both Rating LV1 and Rating LV2 for RGB'));
                 frappe.validated = false;
                 return;
-            } else if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && (!frm.doc.ukhv_lv1 || !frm.doc.ukhv_lv2)) {
+            } else if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && 
+            (!frm.doc.ukhv_lv1 || !frm.doc.ukhv_lv2)) {
                 frappe.msgprint(__('Please enter both UK HV LV1 and UK HV LV2'));
                 frappe.validated = false;
                 return;

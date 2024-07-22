@@ -135,7 +135,7 @@ frappe.ui.form.on('Design', {
           frm.set_df_property('vector_group', 'hidden', false); // Show vector_group
           frm.set_df_property('impedance', 'hidden', false);
         } else {
-            //frm.set_df_property('vector_group', 'hidden', true); // Hide vector_group if lv_2 is present
+            frm.set_df_property('vector_group', 'hidden', true); // Hide vector_group if lv_2 is present
             frm.set_df_property('impedance', 'hidden', true);
         }
         
