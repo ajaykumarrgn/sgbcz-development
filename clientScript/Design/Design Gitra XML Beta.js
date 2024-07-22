@@ -3,6 +3,11 @@
 //But now we have directly set that the value into the field THDi
 frappe.ui.form.on("Design", {
   validate(frm) {
+     if (
+      frm.doc.factory === "SGBCZ" &&
+      frm.doc.transformer_type === "DTTHZ2N" &&
+      frm.doc.is_design
+    ) { 
     function fnAddTappingsXml(frm, iXml, iaTappingNodes) {
       // Parse the XML template to JavaScript object
       let loXmlDoc = new DOMParser().parseFromString(iXml, "text/xml");
@@ -58,13 +63,6 @@ frappe.ui.form.on("Design", {
       return iaTappingNodes;
     }
 
-    //only provide gitra intragration for DTTHZ2N transformer
-
-    if (
-      frm.doc.factory === "SGBCZ" &&
-      frm.doc.transformer_type === "DTTHZ2N" &&
-      frm.doc.is_design
-    ) {
       var lDoctype = "Gitra Settings";
       // Initialize the model with doctype Gitra Settings
       frappe.model.with_doc(lDoctype, lDoctype, function () {
@@ -90,8 +88,14 @@ frappe.ui.form.on("Design", {
             if (iVariable === "frm.doc.thdi") {
               var lThdi = frm.doc.thdi == "20" ? "6395" : "6396";
               lValue = lThdi;
-            } else {
-              lValue = eval(iVariable);
+            }
+            else if (iVariable === "frm.doc.li_phase_lv") {
+                //here 0 is treated as falsy in xml
+                //so that it is converted to string here
+                lValue = String(frm.doc.li_phase_lv);
+            }
+            else {
+                lValue = eval(iVariable);
             }
             return lValue || "";
           }
@@ -109,11 +113,12 @@ frappe.ui.form.on("Design", {
           "tapping_plus",
           1
         );
-
+ 
         var lXmlString = fnAddTappingsXml(frm, lXml, laTappingNodes);
+       
         frm.doc.gitra_xml = lXmlString;
       });
-
+ 
       frm.refresh_fields();
     }
   },
