@@ -8,7 +8,6 @@ frappe.ui.form.on("Design", {
     frappe.model.with_doc(lDoctype, lDoctype, function () {
       // Get list of documents for Gitra Settings
       var laValues = frappe.model.get_list(lDoctype);
-
       // Initialize LV settings
       const laLvUniqueArray = laValues[0].lv_voltage_setting.reduce(
         (iAccumulator, iCurrent) => {
@@ -78,11 +77,13 @@ frappe.ui.form.on("Design", {
       var laOptions = [];
 
       // Iterate through HV voltage settings
-      laValues[0].hv_voltage_setting.forEach((ldHvRow) => {
+      laValues[0].hv_voltage_setting.forEach((ldHvRow) => {   
+        if(ldHvRow.transformer_type === frm.doc.transformer_type){ 
         // Filter options based on specified criteria
-        if (ldHvRow[iOnSettingsField] >= frm.doc[iOnField]) {
-          laOptions.push(ldHvRow[iToSettingsField]);
-        }
+          if (ldHvRow[iOnSettingsField] >= frm.doc[iOnField]) {
+            laOptions.push(ldHvRow[iToSettingsField]);
+          }
+      }
       });
 
       // Set field options and handle change event
@@ -178,6 +179,7 @@ frappe.ui.form.on("Design", {
             iCurrent.um.toString() ===
               frm.doc.highest_operation_voltage_lv.toString() &&
             !iAccumulator.includes(iCurrent.ac_phase)
+            && iCurrent.transformer_type === frm.doc.transformer_type
           ) {
             iAccumulator.push(iCurrent.ac_phase);
           }
@@ -210,6 +212,7 @@ frappe.ui.form.on("Design", {
               frm.doc.highest_operation_voltage_lv.toString() &&
             iCurrent.ac_phase.toString() === frm.doc.ac_phase_lv.toString() &&
             !iAccumulator.includes(iCurrent.li)
+            && iCurrent.transformer_type === frm.doc.transformer_type
           ) {
             iAccumulator.push(iCurrent.li);
           }
@@ -221,24 +224,38 @@ frappe.ui.form.on("Design", {
       set_field_options("li_phase_lv", laUniqueArray);
     });
   },
+  
+  factory(frm) {
+    var lDoctype = "Gitra Settings";
+
+    // Fetch Gitra Settings document asynchronously
+    frappe.model.with_doc(lDoctype, lDoctype, function () {
+        // Get list of documents for Gitra Settings
+        var laValues = frappe.model.get_list(lDoctype);
+        fnSetLvDefaults(frm, laValues[0]);
+        fnSetHvDefaults(frm, laValues[0]);
+    });
+}
 });
 
 // Function to set LV defaults based on selected settings
 function fnSetLvDefaults(frm, iSettings) {
   var ldLvDefaults = iSettings.lv_voltage_setting.find(
     (ldX) => ldX.is_default === 1
+    && ldX.transformer_type === frm.doc.transformer_type
   );
   if (ldLvDefaults) {
     frm.set_value("highest_operation_voltage_lv", ldLvDefaults.um);
     frm.set_value("ac_phase_lv", ldLvDefaults.ac_phase);
     frm.set_value("li_phase_lv", ldLvDefaults.li);
-  }
+  } 
 }
 
 // Function to set HV defaults based on selected settings
 function fnSetHvDefaults(frm, iSettings) {
   var ldHvDefaults = iSettings.hv_voltage_setting.find(
     (ldX) => ldX.is_default === 1
+    && ldX.transformer_type === frm.doc.transformer_type
   );
   if (ldHvDefaults) {
     frm.set_value("hv_rated_voltage", ldHvDefaults.voltage_to);

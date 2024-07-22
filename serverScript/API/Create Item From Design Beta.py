@@ -211,21 +211,29 @@ for ld_attribute in la_template_attributes:
             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 20))
         else:
             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 5))
-
-    #when lv2 is present set the zero foe vectar group and uk %
-    elif ld_attribute.attribute == 'Vector Group' or ld_attribute.attribute == 'Uk (%)':
-        if design.attributes and 'lv_2' in design.attributes:  # Check if design.attributes is not None and 'lv_2' is present
-            if ld_attribute.attribute == 'Vector Group':
-                attribute_value = 'DYN' + design.vector_group
-            else:  # ld_attribute.attribute == 'Uk (%)'
-                attribute_value = 0
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, attribute_value))
+            
+    elif ld_attribute.attribute == 'Vector Group':
+        if design.lv_2 == 0:
+            attribute_value = design.vector_group
+            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group', attribute_value))
         else:
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 0))
+            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group', 0))
+    elif ld_attribute.attribute == 'Vector Group LV 1':
+        if design.lv_2 != 0:
+            vector_group_lv1_value = design.vector_group_lv1
+            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group LV 1', vector_group_lv1_value))
+        else:
+            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group LV 1', 0))
+    elif ld_attribute.attribute == 'Vector Group LV 2':
+        if design.lv_2 != 0:
+            vector_group_lv2_value = design.vector_group_lv2
+            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group LV 2', vector_group_lv2_value))
+        else:
+            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group LV 2', 0))
 
     # elif ld_attribute.attribute == 'Vector Group':
     #     item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ('DYN' + design.vector_group)))
-
+    
     elif ld_attribute.attribute == 'HV (kV)':
         hv_in_kv_str = str(int(design.hv_rated_voltage) / 1000)
         if float(hv_in_kv_str) % 1 == 0:
@@ -246,7 +254,7 @@ for ld_attribute in la_template_attributes:
         else:
             append_attribute(ld_attribute.attribute, 0)
     else:
-        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ld_docvalue))
+        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ld_docvalue))  
 
 # Append other attributes
 item_new.item_technical_name = design.rating + ' [kVA]'
@@ -264,5 +272,9 @@ item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(de
 item_new.item_technical_name = item_new.item_technical_name + ', P(k) ' + str(design.load_loss_guarantee) + ' [W]'
 
 item_new.item_code = get_item_code_from_attributes(item_new).replace('.',',')
+
+# item_new.item_code = get_item_code_from_attributes(item_new).replace('//', '/0/')
+# item_new.item_code = get_item_code_from_attributes(item_new).replace('///', '/0/0/')
+
 item_new.insert()
 frappe.response['message'] = item_new

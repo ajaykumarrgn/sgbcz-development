@@ -164,12 +164,15 @@ frappe.ui.form.on('Design', {
             frm.fields_dict['hv_rated_voltage'].$input.attr('placeholder', 'HV');
             frm.set_df_property('electrostatic_screen', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
             frm.set_value('electrostatic_screen', 0)
+            frm.set_df_property('parallel_coil', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
+            
         } else {
             // Display hv_html field
             frm.toggle_display('hv_html', true);
             // Hide hv_rated_voltage field
             frm.toggle_display('hv_rated_voltage', false);
             frm.set_df_property('electrostatic_screen', 'hidden', false);
+            frm.set_df_property('parallel_coil', 'hidden', false);
         }
     },
     // When designing the transformer need to follow some condition
