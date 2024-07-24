@@ -1,5 +1,5 @@
 frappe.ui.form.on('Sales Order', {
-    onload: function(frm) {
+    onload(frm) {
         // Check if there are items in the Sales Order
         if (frm.is_new() && !frm.doc.custom_packaging && 
         !frm.doc.custom_warranty && frm.doc.items && 
@@ -38,9 +38,12 @@ frappe.ui.form.on('Sales Order', {
         }
     },
     
-    customer: function(frm) {
-        if (!frm.doc.custom_packaging && !frm.doc.custom_warranty) {
+    customer(frm) {
+        if (!frm.doc.items[0].item_code || !frm.doc.items[0].prevdoc_docname) {
             fetchPackagingAndWarranty(frm);
+        }else{
+            frappe.msgprint(__(`This Sales Order is created from Quotation ${frm.doc.items[0].prevdoc_docname}`));
+           
         }
     }
 });
