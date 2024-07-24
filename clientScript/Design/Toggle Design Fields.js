@@ -132,10 +132,12 @@ frappe.ui.form.on('Design', {
         
         //Check if the Vector group is set to visible or not based on the LV2
         if (!frm.doc.lv_2) {
-          frm.set_df_property('vector_group', 'hidden', false); // Show vector_group
+          // Show vector_group
+          frm.set_df_property('vector_group', 'hidden', false); 
           frm.set_df_property('impedance', 'hidden', false);
         } else {
-            //frm.set_df_property('vector_group', 'hidden', true); // Hide vector_group if lv_2 is present
+            // Hide vector_group if lv_2 is present
+            frm.set_df_property('vector_group', 'hidden', true); 
             frm.set_df_property('impedance', 'hidden', true);
         }
         
@@ -279,9 +281,9 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
             //     frappe.throw(__(label2 + " should be lesser than " + label1));
             //     return;
             // }
-            if (iHtmlField !== 'power_lv' && iHtmlField !== 'uk_lv' &&
-                parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
-                console.log("Test", lSplit);
+            if (iHtmlField !== 'power_lv' && iHtmlField !== 'uk_lv' && 
+            iHtmlField !== 'uk_hv_lv' && 
+            parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
                 frappe.throw(__(label2 + " should be lesser than " + label1));
                 return;
             }
@@ -314,18 +316,18 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
     //Triggering the values based on the HTML fields
     switch (iHtmlField) {
         case 'hv_html':
-            lfnSplitnSet(frm, iValue, 'hv_rated_voltage', 'hv1', 'hv2', 'HV1', 'HV2')
+            lfnSplitnSet(frm, iValue, 'hv_rated_voltage', 'hv1', 'hv2', 'HV1', 'HV2');
             break;
         case 'lv_html':
-            lfnSplitnSet(frm, iValue, 'lv_rated_voltage', 'lv1', 'lv_2', 'LV1', 'LV2')
+            lfnSplitnSet(frm, iValue, 'lv_rated_voltage', 'lv1', 'lv_2', 'LV1', 'LV2');
             
             break;
         case 'power_lv':
-            lfnClearDependencies(frm, iValue, 'lv_2', ['power_lv1', 'power_lv2', 'power_lv'], ['Rating LV1', 'Rating LV2'])
+            lfnClearDependencies(frm, iValue, 'lv_2', ['power_lv1', 'power_lv2', 'power_lv'], ['Rating LV1', 'Rating LV2']);
  
             break;
         case 'uk_lv':
-            lfnClearDependencies(frm, iValue, 'lv_2', ['uk_lv1', 'uk_lv2', 'uk_lv'], ['UK LV1', 'UK LV2'])
+            lfnClearDependencies(frm, iValue, 'lv_2', ['uk_lv1', 'uk_lv2', 'uk_lv'], ['UK LV1', 'UK LV2']);
  
             break;
         case 'uk_hv_lv':
@@ -347,7 +349,7 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
             }
             else {
                 
-                frappe.throw("Vector group 1 Value is missing")
+                frappe.throw("Vector group 1 Value is missing");
             }
             break;
     }
@@ -377,7 +379,7 @@ function fnValidHtmlField(iValue) {
 //element for both fieldtype such as Data and Select
 function fnGetComboTemplate(){
     
-    const lSelectTemplate = `<div class="row">
+    const lSELECT_TEMPLATE = `<div class="row">
     <div class="form-column col-sm-6">
         <div class="frappe-control input-max-width" data-fieldtype="Select" data-fieldname="{{ field.fieldname }}_1">
             <div class="form-group">
@@ -438,11 +440,11 @@ function fnGetComboTemplate(){
     </div>
 </div>
             `;
-    return lSelectTemplate;
+    return lSELECT_TEMPLATE;
 }
  
 function fnGetDataTemplate() {
-    const lTemplate = `<form>
+    const lTEMPLATE = `<form>
                 <div class="frappe-control input-max-width" data-fieldtype="Data" data-fieldname="{{field.fieldname}}">
                 <div class="form-group">
                     <div class="clearfix">
@@ -456,18 +458,47 @@ function fnGetDataTemplate() {
                     </div>
                 </div>
             </div></form>`;
-    return lTemplate;
+    return lTEMPLATE;
 }
  
 function fnGetHtmlfields() {
     // Define fields with their respective field names and labels
     let laFields = [
-        { fieldname: 'hv_html', label: 'HV Value(V)', placeholder: 'HV1/HV2', type: 'data' },
-        { fieldname: 'lv_html', label: 'LV Value(V)', placeholder: 'LV1/LV2', type: 'data' },
-        { fieldname: 'power_lv', label: 'Rating LV', placeholder: 'Rating LV1/Rating LV2', type: 'data' },
-        { fieldname: 'uk_lv', label: 'Uk (%)', placeholder: 'UK LV1/UK LV2', type: 'data' },
-        { fieldname: 'uk_hv_lv', label: 'Uk (%)', placeholder: 'UK HV LV1/UK HV LV2', type: 'data' },
-        { fieldname: 'vector_html', label: 'Vector Group', type: 'combo' },
+        { 
+            fieldname: 'hv_html', 
+            label: 'HV Value(V)', 
+            placeholder: 'HV1/HV2', 
+            type: 'data' 
+        },
+        {
+            fieldname: 'lv_html', 
+            label: 'LV Value(V)', 
+            placeholder: 'LV1/LV2', 
+            type: 'data' 
+        },
+        { 
+            fieldname: 'power_lv', 
+            label: 'Rating LV', 
+            placeholder: 'Rating LV1/Rating LV2', 
+            type: 'data' 
+        },
+        { 
+            fieldname: 'uk_lv', 
+            label: 'Uk (%)', 
+            placeholder: 'UK LV1/UK LV2', 
+            type: 'data' 
+        },
+        { 
+            fieldname: 'uk_hv_lv', 
+            label: 'Uk (%)', 
+            placeholder: 'UK HV LV1/UK HV LV2', 
+            type: 'data' 
+        },
+        { 
+            fieldname: 'vector_html', 
+            label: 'Vector Group', 
+            type: 'combo' 
+        },
     ];
     return laFields;
 }

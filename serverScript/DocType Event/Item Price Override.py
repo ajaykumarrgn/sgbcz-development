@@ -40,7 +40,7 @@ def compute_final_price(doc, price_list, item_price_doc):
     return item_price_doc
 
 #  Override price only if Override checkbox is enabled and the item is not a catalog item    
-if doc.override_price and not doc.is_catalog_item:
+if doc.override_price and not doc.is_catalog_item and not doc.has_variants:
     # Process only if material cost is entered
     if doc.material_cost:
         # Iterate all the customer price overrides

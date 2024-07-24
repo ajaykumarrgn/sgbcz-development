@@ -12,8 +12,10 @@ frappe.ui.form.on("Design", {
       const laLvUniqueArray = laValues[0].lv_voltage_setting.reduce(
         (iAccumulator, iCurrent) => {
           // Reduce function to filter unique LV voltage values
-          if (!iAccumulator.includes(iCurrent.um)) {
-            iAccumulator.push(iCurrent.um);
+          if(iCurrent.transformer_type === frm.doc.transformer_type){
+            if (!iAccumulator.includes(iCurrent.um)) {
+              iAccumulator.push(iCurrent.um);
+            } 
           }
           return iAccumulator;
         },
@@ -232,6 +234,19 @@ frappe.ui.form.on("Design", {
     frappe.model.with_doc(lDoctype, lDoctype, function () {
         // Get list of documents for Gitra Settings
         var laValues = frappe.model.get_list(lDoctype);
+        const laLvUniqueArray = laValues[0].lv_voltage_setting.reduce(
+        (iAccumulator, iCurrent) => {
+          // Reduce function to filter unique LV voltage values
+          if(iCurrent.transformer_type === frm.doc.transformer_type){
+          if (!iAccumulator.includes(iCurrent.um)) {
+            iAccumulator.push(iCurrent.um);
+          } 
+          }
+          return iAccumulator;
+        },
+        []
+      );
+        set_field_options("highest_operation_voltage_lv", laLvUniqueArray);
         fnSetLvDefaults(frm, laValues[0]);
         fnSetHvDefaults(frm, laValues[0]);
     });
@@ -248,7 +263,11 @@ function fnSetLvDefaults(frm, iSettings) {
     frm.set_value("highest_operation_voltage_lv", ldLvDefaults.um);
     frm.set_value("ac_phase_lv", ldLvDefaults.ac_phase);
     frm.set_value("li_phase_lv", ldLvDefaults.li);
-  } 
+  }else{
+    frm.set_value("highest_operation_voltage_lv", '');
+    frm.set_value("ac_phase_lv", '');
+    frm.set_value("li_phase_lv", '');
+  }
 }
 
 // Function to set HV defaults based on selected settings
