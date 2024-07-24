@@ -25,13 +25,13 @@ frappe.ui.form.on('Sales Order', {
                             frm.set_value('custom_warranty', response.message.warranty);
                         } else {
                             // console.log("Error fetching the quotation.");
-                            fetchPackagingAndWarranty(frm);
+                            fnFetchPackagingAndWarranty(frm);
                             
                         }
                     }
                 });
             } else {
-                fetchPackagingAndWarranty(frm);
+                fnFetchPackagingAndWarranty(frm);
             }
         } else {
             return;
@@ -40,7 +40,7 @@ frappe.ui.form.on('Sales Order', {
     
     customer(frm) {
         if (!frm.doc.items[0].item_code || !frm.doc.items[0].prevdoc_docname) {
-            fetchPackagingAndWarranty(frm);
+            fnFetchPackagingAndWarranty(frm);
         }else{
             frappe.msgprint(__(`This Sales Order is created from Quotation ${frm.doc.items[0].prevdoc_docname}`));
            
@@ -49,7 +49,7 @@ frappe.ui.form.on('Sales Order', {
 });
 
 // Reusable function to fetch packaging and warranty
-function fetchPackagingAndWarranty(frm) {
+function fnFetchPackagingAndWarranty(frm) {
    
     frappe.call({
         method: "frappe.client.get",
