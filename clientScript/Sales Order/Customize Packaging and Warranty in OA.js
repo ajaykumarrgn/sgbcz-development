@@ -19,10 +19,10 @@ frappe.ui.form.on('Sales Order', {
                         doctype: "Quotation",
                         name: lFirstItem.prevdoc_docname
                     },
-                    callback: function(quotationResponse) {
+                    callback: function(response) {
                         if (response.message) {
-                            frm.set_value('custom_packaging', quotationResponse.message.ll_packaging);
-                            frm.set_value('custom_warranty', quotationResponse.message.warranty);
+                            frm.set_value('custom_packaging', response.message.ll_packaging);
+                            frm.set_value('custom_warranty', response.message.warranty);
                         } else {
                             // console.log("Error fetching the quotation.");
                             fetchPackagingAndWarranty(frm);
@@ -47,16 +47,17 @@ frappe.ui.form.on('Sales Order', {
 
 // Reusable function to fetch packaging and warranty
 function fetchPackagingAndWarranty(frm) {
+   
     frappe.call({
         method: "frappe.client.get",
         args: {
             doctype: "Customer",
             name: frm.doc.customer
         },
-        callback: function(customerResponse) {
+        callback: function(response) {
             if (response.message) {
-                frm.set_value('custom_packaging', customerResponse.message.packaging);
-                frm.set_value('custom_warranty', customerResponse.message.warranty);
+                frm.set_value('custom_packaging', response.message.packaging);
+                frm.set_value('custom_warranty', response.message.warranty);
             } else {
                 // Fetching from quotation preset
                 frappe.call({
@@ -64,10 +65,10 @@ function fetchPackagingAndWarranty(frm) {
                     args: {
                         doctype: "Quotation Presets",
                     },
-                    callback: function(presetResponse) {
+                    callback: function(response) {
                         if (response.message) {
-                            frm.set_value('custom_packaging', presetResponse.message.packaging);
-                            frm.set_value('custom_warranty', presetResponse.message.default_validity);
+                            frm.set_value('custom_packaging', response.message.packaging);
+                            frm.set_value('custom_warranty', response.message.default_validity);
                         } else {
                             frappe.msg(__("No packaging and warranty at quotation preset."));
                         }
