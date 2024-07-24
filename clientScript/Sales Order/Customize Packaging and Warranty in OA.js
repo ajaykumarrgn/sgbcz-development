@@ -1,7 +1,7 @@
 frappe.ui.form.on('Sales Order', {
     onload: function(frm) {
         // Check if there are items in the Sales Order
-        if (frm.is_new() &&!frm.doc.custom_packaging && 
+        if (frm.is_new() && !frm.doc.custom_packaging && 
         !frm.doc.custom_warranty && frm.doc.items && 
         frm.doc.items.length > 0) {
             
