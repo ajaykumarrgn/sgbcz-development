@@ -52,6 +52,10 @@ frappe.ui.form.on('Design', {
     },
     
     refresh: function(frm) {
+        if(frm.doc.status != 'Draft'){
+            frm.set_read_only();
+            frm.disable_save();
+        }
         if (frm.is_new()) {
             frm.trigger('fnTappings');
             frm.trigger('fnUpdateInsulationClass');
@@ -154,8 +158,8 @@ frappe.ui.form.on('Design', {
     // When calculation is needed by Gitra, only need HV 
     //rated voltage not HV1 and HV2
     is_design: function(frm) {
-        if (frm.is_new() && frm.doc.is_design) {
-            frappe.msgprint(__('Reset: Please revisit the THDi and LPA values'));
+        if (frm.doc.is_design) {
+            frappe.msgprint(__('Resetted THDi value to 5 and LPA to 0'));
             frm.ignore_thdi_change = true;
             frm.set_value('thdi', 5);
             frm.set_value('lpa', 0);
@@ -170,6 +174,9 @@ frappe.ui.form.on('Design', {
             frm.set_df_property('electrostatic_screen', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
             frm.set_value('electrostatic_screen', 0);
             frm.set_df_property('parallel_coil', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
+            frm.set_df_property('vector_group', 'options', ['Dyn1', 'Dyn5', 'Dyn7', 'Dyn11']);
+            frm.set_df_property('climatic_class', 'options', ['C2', 'C3']);
+            frm.set_df_property('environmental_class', 'options', ['E2', 'E3']);
             
         } else {
             // Display hv_html field
@@ -179,6 +186,11 @@ frappe.ui.form.on('Design', {
             frm.set_df_property('type_lv', 'hidden', false);
             frm.set_df_property('electrostatic_screen', 'hidden', false);
             frm.set_df_property('parallel_coil', 'hidden', false);
+            frm.set_df_property('vector_group', 'options', [ 'Dyn1', 'Dyn5', 'Dyn7', 'Dyn11','Yy0','Yd1',
+            'Yd5','Yd7','Yd11','YD1','Yz1','Yz5','YZ5','Yz7','Yz11','Dzn0']);
+            frm.set_df_property('climatic_class', 'options', ['C2', 'C3', 'C4', 'C5']);
+            frm.set_df_property('environmental_class', 'options', ['E2', 'E3', 'E4', 'E5']);
+            
         }
     },
     // When designing the transformer need to follow some condition
@@ -186,14 +198,14 @@ frappe.ui.form.on('Design', {
     // Otherwise it accepts from 5 to 99,
     // it exceeds this value arise the error message
     thdi: function(frm) {
-        if (frm.is_new()) {
+       
             let thdiValue = frm.doc.thdi;
             if (!thdiValue) return;
  
-            if (frm.ignore_thdi_change) {
-                frm.ignore_thdi_change = false;
-                return;
-            }
+            // if (frm.ignore_thdi_change) {
+            //     frm.ignore_thdi_change = false;
+            //     return;
+            // }
  
             if (frm.doc.is_design) {
                 if (![5, 20].includes(thdiValue)) {
@@ -206,9 +218,16 @@ frappe.ui.form.on('Design', {
                     frappe.throw('Enter a THDi value between 5 and 99');
                 }
             }
-        }
+        
     },
     
+    hv2(frm){
+        if(frm.doc.hv2 > 0){
+             frm.set_df_property('parallel_coil', 'hidden', true);
+        }else{
+             frm.set_df_property('parallel_coil', 'hidden', false);
+        }
+    },
  
     // When the factory is changed, dependent fields also
     // want to be show or hide based on the factory

@@ -63,6 +63,7 @@ frappe.ui.form.on("Design", {
        // Update button whenever the checkbox is enabled
        fnUpdateButtonGroup(frm);
        fnDirectMaterial(frm);
+       fnXMLDataTab(frm);
 
    },
 
@@ -94,22 +95,27 @@ frappe.ui.form.on("Design", {
    }
 });
 
+function fnXMLDataTab(frm){
+    //restrict XML Data tab for other region except SGBCZ
+       
+   var lXmlDataTab = document.getElementById('design-xml_data_tab-tab');
+       
+   if (frm.doc.factory === "SGBCZ" && frm.doc.is_design) {
+        lXmlDataTab.hidden = false;
+      
+   } else {
+        lXmlDataTab.hidden = true;
+        frm.doc.gitra_xml = '';
+   }
+}
+
 function fnFetchTransformerType(frm) {
 
 //calling the get_item_variant_based_on_factory
    //to get the list of item template available for the
    //selected factory
-             
-   //restrict XML Data tab for other region except SGBCZ
-       
-   var lXmlDataTab = document.getElementById('design-xml_data_tab-tab');
-       
-   if (frm.doc.factory != "SGBCZ") {
-       lXmlDataTab.hidden = true;
-   } else {
-       lXmlDataTab.hidden = false;
-   }
-   
+            
+    fnXMLDataTab(frm);
    //Mapped the factory with its relevant item group
    const LD_TRANSFORMER_MAPPING = {
        "SGBCZ": "DTTHZ2N",
@@ -165,15 +171,20 @@ function fnShowButtonGroup(frm, iButtonLabel, iButtonFunction) {
    frm.clear_custom_buttons();
    
    if (iButtonLabel && iButtonFunction) {
-       frm.add_custom_button(__(iButtonLabel), function() {
-        if(!frm.is_dirty()){
-          iButtonFunction(frm);
-          }else{
-            frm.get_field(iButtonLabel).df.disabled = true;
-            frm.refresh_field(iButtonLabel);
-          }
-       });
-   }
+        // Add the custom button
+        const BUTTON = frm.add_custom_button(__(iButtonLabel), function() {
+            if (!frm.is_dirty()) {
+                iButtonFunction(frm);
+            }
+        });
+
+        // Ensure the button is enabled/disabled based on form dirty state
+        if (frm.is_dirty()) {
+            $(BUTTON).prop('disabled', true).css('pointer-events', 'none');
+        } else {
+            $(BUTTON).prop('disabled', false).css('pointer-events', 'auto');
+        }
+    }
 }
 
 
@@ -193,6 +204,7 @@ function fnDirectMaterial(frm){
 }
 
 function fncreateItem(frm) {
+ frappe.msg(__('The item is being created. Please wait a moment.'));
  frappe.call({
    method: "create_item_from_design_beta",
    args: { design: frm.doc.name },
@@ -220,7 +232,7 @@ function fncreateItem(frm) {
                if (gitraResponse.message) {
                  const LD_DATASHEETLANGUAGES =
                    gitraResponse.message.datasheet_languages;
-                 const laLANGUAGES = LD_DATASHEETLANGUAGES.map(
+                 const LA_LANGUAGES = LD_DATASHEETLANGUAGES.map(
                    (lang) => lang.language
                  );
                  let lTitle = frm.doc.title;
@@ -239,7 +251,7 @@ function fncreateItem(frm) {
                    args: {
                      im_source_doc_type: frm.doc.doctype,
                      im_source_doc_name: frm.doc.name,
-                     im_languages: laLANGUAGES,
+                     im_languages: LA_LANGUAGES,
                      im_letter_head: "Data Sheet",
                      im_target_doc_type: "Item",
                      im_target_doc_name: response.message.item_code,

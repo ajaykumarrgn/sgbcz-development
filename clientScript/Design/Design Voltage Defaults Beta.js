@@ -227,7 +227,7 @@ frappe.ui.form.on("Design", {
     });
   },
   
-  factory(frm) {
+  transformer_type(frm) {
     var lDoctype = "Gitra Settings";
 
     // Fetch Gitra Settings document asynchronously

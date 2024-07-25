@@ -88,7 +88,7 @@ function processFilesInFolder(folderPath, parentFolder = null) {
 
                         const encodedFilename = encodeURIComponent(file.replace(/\.js$/, ''));
                         const postFilename = file.replace(/\.js$/, '');
-                        const folderName = parentFolder ? encodeURIComponent(parentFolder) : '';
+                        const folderName = parentFolder ? parentFolder : '';
 
                         const requestOptions = {
                             method: 'PUT',
