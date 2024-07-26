@@ -13,7 +13,7 @@ frappe.ui.form.on('Design', {
       });
       
       const L_RATING_INT = parseInt(frm.doc.rating, 10);
-      const L_INDEX = losses_setting.findIndex(x => parseInt(x.rating, 10) > L_RATING_INT);
+      const L_INDEX = iLossesSetting.findIndex(x => parseInt(x.rating, 10) > L_RATING_INT);
       
       const L_RATING_LOSSES_HIGHER = iLossesSetting[L_INDEX];
       const L_RATING_LOSSES_LOWER = iLossesSetting[L_INDEX - 1];
@@ -43,7 +43,7 @@ frappe.ui.form.on('Design', {
           const LA_VALUES = frappe.model.get_list(ldDoctype);
           var lRatingLosses = LA_VALUES[0].losses_setting.find(x => x.rating === frm.doc.rating && 
              x.transformer_type === frm.doc.transformer_type);
-             
+       
           if (!lRatingLosses) {
               // Calculate custom losses if rating_losses not found
               lRatingLosses = frm.events.fnComputeCustomLosses(frm, LA_VALUES[0].iLossesSetting);
@@ -54,6 +54,7 @@ frappe.ui.form.on('Design', {
               frm.doc.load_loss_guarantee = lRatingLosses.load_loss;
               frm.doc.lpa_distance = lRatingLosses.lpa_distance;
               frm.doc.lwa = lRatingLosses.lwa;
+              frm.doc.lpa = lRatingLosses.lpa;
           }
           
           frm.refresh_fields();
@@ -68,6 +69,11 @@ frappe.ui.form.on('Design', {
       frm.refresh_fields();
   },
   transformer_type(frm) {
+      
+    frm.events.fnGetStandardLosses(frm, true);
+  
+  },
+  factory(frm) {
       
     frm.events.fnGetStandardLosses(frm, true);
   
