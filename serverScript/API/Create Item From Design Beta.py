@@ -234,7 +234,7 @@ for ld_attribute in la_template_attributes:
 
     # elif ld_attribute.attribute == 'Vector Group':
     #     item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ('DYN' + design.vector_group)))
-    
+
     elif ld_attribute.attribute == 'HV (kV)':
         hv_in_kv_str = str(int(design.hv_rated_voltage) / 1000)
         if float(hv_in_kv_str) % 1 == 0:
@@ -255,7 +255,7 @@ for ld_attribute in la_template_attributes:
         else:
             append_attribute(ld_attribute.attribute, 0)
     else:
-        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ld_docvalue))  
+        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ld_docvalue))
 
 # Append other attributes
 item_new.item_technical_name = design.rating + ' [kVA]'
