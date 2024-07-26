@@ -198,7 +198,7 @@ function fnDirectMaterial(frm){
 }
 
 function fncreateItem(frm) {
-  frappe.msg(__('The item is being created. Please wait a moment.'));
+  frappe.msgprint(__('The item is being created. Please wait a moment.'));
   frappe.call({
     "method": "create_item_from_design",
     "args": {
