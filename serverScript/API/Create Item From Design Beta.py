@@ -204,6 +204,7 @@ for ld_attribute in la_template_attributes:
     elif ld_attribute.attribute == 'Special parameters':
         if design.specifics:
             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'YES'))
+            item_new.custom_specifics = design.specifics
         else:
             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'NO'))
     elif ld_attribute.attribute == 'THDi (%)':
