@@ -333,6 +333,6 @@ function fnHTMLFieldReadOnly(iFieldname, isSpecial = false) {
             });
         }
     } else {
-        console.error(`${fieldname} not found`);
+        console.error(`${iFieldname} not found`);
     }
 }
