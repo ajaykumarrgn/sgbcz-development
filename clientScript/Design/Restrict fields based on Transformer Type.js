@@ -304,8 +304,8 @@ function fnResetValues(frm) {
         lvHtmlInput.val('');
     
 }
-function fnHTMLFieldReadOnly(fieldname, isSpecial = false) {
-    let htmlField = cur_frm.fields_dict[fieldname].$wrapper;
+function fnHTMLFieldReadOnly(iFieldname, isSpecial = false) {
+    let htmlField = cur_frm.fields_dict[iFieldname].$wrapper;
 
     if (htmlField) {
         // Handle the special case for vector_html
