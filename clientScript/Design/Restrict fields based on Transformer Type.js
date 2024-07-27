@@ -18,7 +18,7 @@ frappe.ui.form.on('Design', {
             // Set the LV placeholder when the single LV value is needed.
             if (frm.doc.factory === 'SGBCZ') {
                 frm.set_df_property('lv_rated_voltage', 'reqd', true);
-                frm.fields_dict['lv_rated_voltage'].$input.attr('placeholder', 'LV');
+                frm.fields_dict['lv_rated_voltage'].df.placeholder = 'LV';
             }
  
             // Triggering the toggle fields based on the factory by here.
@@ -53,6 +53,14 @@ frappe.ui.form.on('Design', {
     
     refresh: function(frm) {
         if(frm.doc.status != 'Draft'){
+          setTimeout(function() {
+            fnHTMLFieldReadOnly('hv_html');
+            fnHTMLFieldReadOnly('lv_html');
+            fnHTMLFieldReadOnly('power_lv');
+            fnHTMLFieldReadOnly('uk_lv');
+            fnHTMLFieldReadOnly('uk_hv_lv');
+            fnHTMLFieldReadOnly('vector_html', true);
+        }, 500);
             frm.set_read_only();
             frm.disable_save();
         }
@@ -72,7 +80,7 @@ frappe.ui.form.on('Design', {
             frm.trigger('fnUpdateInsulationClass');
             frm.trigger('fnToggleFields');
         
-    },
+    },   
     // Set the options for the insulation class varying for the factory
     fnUpdateInsulationClass: function(frm) {
       
@@ -295,4 +303,36 @@ function fnResetValues(frm) {
         let lvHtmlInput = $(frm.fields_dict.lv_html.wrapper).find('input');
         lvHtmlInput.val('');
     
+}
+function fnHTMLFieldReadOnly(fieldname, isSpecial = false) {
+    let htmlField = cur_frm.fields_dict[fieldname].$wrapper;
+
+    if (htmlField) {
+        // Handle the special case for vector_html
+        if (isSpecial) {
+            htmlField.find('.control-input-wrapper').each(function() {
+               
+                // Hide the .control-input div
+                let controlInput = $(this).find('.control-input');
+                controlInput.hide();
+
+                // Show the .control-value div and copy the selected value
+                let controlValue = $(this).find('.control-value');
+                controlValue.text(controlInput.find('select').val()).show();
+            });
+        } else {
+            // Iterate over each .control-input div
+            htmlField.find('.control-input').each(function() {
+               
+                // Find the parent .form-group and then hide the .control-input div
+                let parentFormGroup = $(this).closest('.form-group');
+                $(this).hide();
+                
+                // Show the next immediate sibling of the parent .form-group div
+                parentFormGroup.find('.control-value').show();
+            });
+        }
+    } else {
+        console.error(`${fieldname} not found`);
+    }
 }
