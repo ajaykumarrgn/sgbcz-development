@@ -54,12 +54,10 @@ frappe.ui.form.on('Design', {
     refresh: function(frm) {
         if(frm.doc.status != 'Draft'){
           setTimeout(function() {
-            fnHTMLFieldReadOnly('hv_html');
-            fnHTMLFieldReadOnly('lv_html');
-            fnHTMLFieldReadOnly('power_lv');
-            fnHTMLFieldReadOnly('uk_lv');
-            fnHTMLFieldReadOnly('uk_hv_lv');
-            fnHTMLFieldReadOnly('vector_html', true);
+              const FIELDS = ['hv_html', 'lv_html', 'power_lv', 
+                'uk_lv', 'uk_hv_lv', 'vector_html'];
+              const SELECT_FIELD = { 'vector_html': true };
+              fnHTMLFieldsReadOnly(FIELDS, SELECT_FIELD);
         }, 500);
             frm.set_read_only();
             frm.disable_save();
@@ -304,35 +302,35 @@ function fnResetValues(frm) {
         lvHtmlInput.val('');
     
 }
-function fnHTMLFieldReadOnly(iFieldname, isSpecial = false) {
-    let htmlField = cur_frm.fields_dict[iFieldname].$wrapper;
+function fnHTMLFieldsReadOnly(fields, specialCases = {}) {
+    fields.forEach(fieldname => {
+        let isSpecial = specialCases[fieldname] || false;
+        let htmlField = cur_frm.fields_dict[fieldname].$wrapper;
 
-    if (htmlField) {
-        // Handle the special case for vector_html
-        if (isSpecial) {
-            htmlField.find('.control-input-wrapper').each(function() {
-               
-                // Hide the .control-input div
-                let controlInput = $(this).find('.control-input');
-                controlInput.hide();
+        if (htmlField) {
+            if (isSpecial) {
+                htmlField.find('.control-input-wrapper').each(function() {
+                    // Hide the .control-input div
+                    let controlInput = $(this).find('.control-input');
+                    controlInput.hide();
 
-                // Show the .control-value div and copy the selected value
-                let controlValue = $(this).find('.control-value');
-                controlValue.text(controlInput.find('select').val()).show();
-            });
+                    // Show the .control-value div and copy the selected value
+                    let controlValue = $(this).find('.control-value');
+                    controlValue.text(controlInput.find('select').val()).show();
+                });
+            } else {
+                // Iterate over each .control-input div
+                htmlField.find('.control-input').each(function() {
+                    // Find the parent .form-group and then hide the .control-input div
+                    let parentFormGroup = $(this).closest('.form-group');
+                    $(this).hide();
+
+                    // Show the next immediate sibling of the parent .form-group div
+                    parentFormGroup.find('.control-value').show();
+                });
+            }
         } else {
-            // Iterate over each .control-input div
-            htmlField.find('.control-input').each(function() {
-               
-                // Find the parent .form-group and then hide the .control-input div
-                let parentFormGroup = $(this).closest('.form-group');
-                $(this).hide();
-                
-                // Show the next immediate sibling of the parent .form-group div
-                parentFormGroup.find('.control-value').show();
-            });
+            console.error(`${fieldname} not found`);
         }
-    } else {
-        console.error(`${iFieldname} not found`);
-    }
+    });
 }
