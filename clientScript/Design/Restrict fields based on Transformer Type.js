@@ -18,7 +18,7 @@ frappe.ui.form.on('Design', {
             // Set the LV placeholder when the single LV value is needed.
             if (frm.doc.factory === 'SGBCZ') {
                 frm.set_df_property('lv_rated_voltage', 'reqd', true);
-                frm.fields_dict['lv_rated_voltage'].$input.attr('placeholder', 'LV');
+                frm.fields_dict['lv_rated_voltage'].df.placeholder = 'LV';
             }
  
             // Triggering the toggle fields based on the factory by here.
@@ -53,18 +53,32 @@ frappe.ui.form.on('Design', {
     
     refresh: function(frm) {
         if(frm.doc.status != 'Draft'){
+          setTimeout(function() {
+             fnHTMLFieldsReadOnly();
+        }, 500);
             frm.set_read_only();
             frm.disable_save();
         }
-        if (frm.is_new()) {
+        if(frm.doc.is_design){
+            frm.toggle_display('hv_html', false);
+            // Display hv_rated_voltage field
+            frm.toggle_display('hv_rated_voltage', true);
+            frm.set_df_property('hv_rated_voltage', 'reqd', true);
+            frm.set_df_property('electrostatic_screen', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
+            frm.set_value('electrostatic_screen', 0);
+            frm.set_df_property('vector_group', 'options', ['Dyn1', 'Dyn5', 'Dyn7', 'Dyn11']);
+            frm.set_df_property('climatic_class', 'options', ['C2', 'C3']);
+            frm.set_df_property('environmental_class', 'options', ['E2', 'E3']);
+        }
+     
             frm.trigger('fnTappings');
             frm.trigger('fnUpdateInsulationClass');
             frm.trigger('fnToggleFields');
-        }
-    },
+        
+    },   
     // Set the options for the insulation class varying for the factory
     fnUpdateInsulationClass: function(frm) {
-        if (frm.is_new()) {
+      
             let laOptions = [];
             switch (frm.doc.factory) {
                 case 'RGB':
@@ -75,11 +89,11 @@ frappe.ui.form.on('Design', {
                     break;
             }
             frm.set_df_property('insulation_class', 'options', laOptions);
-        }
+        
     },
     // Set the options for the Tappings is varying based on factory
     fnTappings: function(frm) {
-        if (frm.is_new()) {
+      
             let laTappings = [];
             switch (frm.doc.factory) {
                 case 'SGBCZ':
@@ -91,12 +105,12 @@ frappe.ui.form.on('Design', {
             }
             frm.set_df_property('tapping_plus', 'options', laTappings);
             frm.set_df_property('tapping_minus', 'options', laTappings);
-        }
+        
     },
     // This function is used to hide and show fields 
     //based on the factory by controlling here.
     fnToggleFields: function(frm) {
-        if (frm.is_new()) {
+       
             const FIELDS = [
                 'vector_html', 'power_lv', 'uk_lv', 'uk_hv_lv', 'lv_html',
                 'insulation_class', 'winding_material', 'cooling_method',
@@ -151,7 +165,11 @@ frappe.ui.form.on('Design', {
                 frm.toggle_display('uk_hv_lv', false);
                 frm.toggle_display('impedance', false);
             }
-        }
+            if(frm.doc.factory === 'SGBCZ' && frm.doc.is_design) {
+                frm.toggle_display('parallel_coil', false);
+                frm.toggle_display('type_lv', false);
+            }
+        
     },
     
     // Set the default value for the THDi is 5 when designing the transformer
@@ -232,7 +250,7 @@ frappe.ui.form.on('Design', {
     // When the factory is changed, dependent fields also
     // want to be show or hide based on the factory
     validate: function(frm) {
-        if (frm.is_new()) {
+     
             if (frm.doc.factory === 'SGBCZ' && !frm.doc.lv_rated_voltage) {
                 frappe.msgprint(__('LV Value is mandatory'));
                 frappe.validated = false; 
@@ -264,13 +282,13 @@ frappe.ui.form.on('Design', {
  
             frappe.validated = true; // If all validations pass
         }
-    }
+    
 });
  
 // When changing the HTMl field, clear the below field value
 // as well as html input value
 function fnResetValues(frm) {
-    if (frm.is_new()) {
+ 
         frm.set_value('lv_rated_voltage', '');
         frm.set_value('highest_operation_voltage_hv', '');
         frm.set_value('ac_phase_hv', '');
@@ -279,5 +297,25 @@ function fnResetValues(frm) {
         hvHtmlInput.val('');
         let lvHtmlInput = $(frm.fields_dict.lv_html.wrapper).find('input');
         lvHtmlInput.val('');
-    }
+    
+}
+function fnHTMLFieldsReadOnly() {
+    Object.keys(cur_frm.fields_dict).forEach(fieldname => {
+        let htmlField = cur_frm.fields_dict[fieldname].$wrapper;
+
+        if (htmlField) {
+           
+                htmlField.find('.control-input').each(function() {
+                    // Find the parent .form-group and then hide the .control-input div
+                    let parentFormGroup = $(this).closest('.form-group');
+                    $(this).hide();
+
+                    // Show the next immediate sibling of the parent .form-group div
+                    parentFormGroup.find('.control-value').show();
+                });
+            
+        } else {
+            // console.error(`${fieldname} not found`);
+        }
+    });
 }

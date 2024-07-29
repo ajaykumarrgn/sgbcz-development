@@ -403,7 +403,7 @@ function fnGetComboTemplate(){
                             </svg>
                         </div>
                     </div>
-                    <div class="control-value like-disabled-input bold" style="display: none;">{{ frm.events.fnTransposeDocfieldToHtml(field.fieldname, frm) }}</div>
+                    <div class="control-value like-disabled-input" style="display: none;">{{ frm.events.fnTransposeDocfieldToHtml(field.fieldname + '_1', frm) }}</div>
                     <p class="help-box small text-muted"></p>
                 </div>
             </div>
@@ -432,7 +432,7 @@ function fnGetComboTemplate(){
                             </svg>
                         </div>
                     </div>
-                    <div class="control-value like-disabled-input bold" style="display: none;">"{{frm.events.fnTransposeDocfieldToHtml(field.fieldname, frm)}}"</div>
+                    <div class="control-value like-disabled-input" style="display: none;">{{ frm.events.fnTransposeDocfieldToHtml(field.fieldname + '_2', frm) }}</div>
                     <p class="help-box small text-muted"></div>
                 </div>
             </div>
