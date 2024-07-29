@@ -6,7 +6,7 @@ frappe.ui.form.on("Design", {
      if (
       frm.doc.factory === "SGBCZ" &&
       frm.doc.transformer_type === "DTTHZ2N" &&
-      frm.doc.is_design
+      frm.doc.is_design && frm.doc.status === 'Draft'
     ) { 
     function fnAddTappingsXml(frm, iXml, iaTappingNodes) {
       // Parse the XML template to JavaScript object
@@ -93,6 +93,10 @@ frappe.ui.form.on("Design", {
                 //here 0 is treated as falsy in xml
                 //so that it is converted to string here
                 lValue = String(frm.doc.li_phase_lv);
+            }
+            else if(iVariable === "frm.doc.vector_group"){
+               let  vectorGroup = frm.doc.vector_group;
+               lValue = vectorGroup.replace(/\D/g,'');
             }
             else {
                 lValue = eval(iVariable);
