@@ -41,7 +41,7 @@ frappe.ui.form.on('Design', {
                 case 'NEU':
                     frm.set_df_property('lv_rated_voltage', 'reqd', false);
                     frm.set_value('transformer_type', 
-                                frm.doc.factory === 'RGB' ? 'DTTH2N' : 'DOTML');
+                        frm.doc.factory === 'RGB' ? 'DTTH2N' : 'DOTML');
                     break;
             }
             
@@ -168,8 +168,7 @@ frappe.ui.form.on('Design', {
             if(frm.doc.factory === 'SGBCZ' && frm.doc.is_design) {
                 frm.toggle_display('parallel_coil', false);
                 frm.toggle_display('type_lv', false);
-            }
-        
+            }   
     },
     
     // Set the default value for the THDi is 5 when designing the transformer
@@ -240,10 +239,12 @@ frappe.ui.form.on('Design', {
     },
     
     hv2(frm){
-        if(frm.doc.hv2 > 0){
+        if(frm.doc.hv2 > 0 && frm.doc.factory === 'SGBCZ'){
              frm.set_df_property('parallel_coil', 'hidden', true);
         }else{
+            if(frm.doc.factory === 'SGBCZ'){
              frm.set_df_property('parallel_coil', 'hidden', false);
+            }
         }
     },
  
