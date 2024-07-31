@@ -85,21 +85,29 @@ frappe.ui.form.on("Design", {
             //} else {
             //  lValue = eval(iVariable);
             //}
-            if (iVariable === "frm.doc.thdi") {
-              var lThdi = frm.doc.thdi == "20" ? "6395" : "6396";
-              lValue = lThdi;
-            }
-            else if (iVariable === "frm.doc.li_phase_lv") {
-                //here 0 is treated as falsy in xml
-                //so that it is converted to string here
+            switch (iVariable) {
+              case "frm.doc.thdi":
+                var lThdi = frm.doc.thdi == "20" ? "6395" : "6396";
+                lValue = lThdi;
+                break;
+        
+              case "frm.doc.li_phase_lv":
+                // here 0 is treated as falsy in xml
+                // so that it is converted to string here
                 lValue = String(frm.doc.li_phase_lv);
-            }
-            else if(iVariable === "frm.doc.vector_group"){
-               let  vectorGroup = frm.doc.vector_group;
-               lValue = vectorGroup.replace(/\D/g,'');
-            }
-            else {
+                break;
+        
+              case "frm.doc.vector_group":
+                  
+                //Trim the Number from Vector group
+                //only option [1,5,7,11] is accepted in gitra
+                let vectorGroup = frm.doc.vector_group;
+                lValue = vectorGroup.replace(/\D/g, '');
+                break;
+        
+              default:
                 lValue = eval(iVariable);
+                break;
             }
             return lValue || "";
           }
