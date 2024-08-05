@@ -105,8 +105,11 @@ frappe.ui.form.on('Design', {
                     laTappings = ['2', '3'];
                     break;
                 case 'RGB':
+                    laTappings = ['2', '3', '4', '5', '6', '7', '8'];
+                    break;
                 case 'NEU':
                     laTappings = ['2', '3', '4', '5', '6', '7', '8'];
+                    break;
             }
             frm.set_df_property('tapping_plus', 'options', laTappings);
             frm.set_df_property('tapping_minus', 'options', laTappings);
