@@ -52,7 +52,8 @@ frappe.ui.form.on('Design', {
     },
     
     refresh: function(frm) {
-       
+       //other then Draft, 
+       //the frm should be read only
         if(frm.doc.status != 'Draft'){
           setTimeout(function() {
              fnHTMLFieldsReadOnly();
@@ -60,6 +61,9 @@ frappe.ui.form.on('Design', {
             frm.set_read_only();
             frm.disable_save();
         }
+
+        //is_design based field
+        //restriction
         if(frm.doc.is_design){
           
             fnIsDesignBasedFields(frm)
