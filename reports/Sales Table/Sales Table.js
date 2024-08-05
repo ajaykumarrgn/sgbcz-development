@@ -1,6 +1,6 @@
 // Change References
 // Saved Column:(Issue# : ISS-2024-00005)
-// Remove the columns filter when there is no data for the filter (Issue# : ISS-2024-00008)
+// Remove the columns filter when there is no data for the filter(Issue# : ISS-2024-00008)
 // Some Columns not visible using Saved Column (Issue# : ISS-2024-00020)
 
 frappe.query_reports['Sales Table'] = {
@@ -9,15 +9,13 @@ frappe.query_reports['Sales Table'] = {
             "fieldname": "from_date",
             "label": __("PO Date From"),
             "fieldtype": "Date",
-            "width": "80",
-            "default": frappe.datetime.month_start()
+            "width": "80"
         },
         {
             "fieldname": "to_date",
             "label": __("PO Date To"),
             "fieldtype": "Date",
-            "width": "80",
-            "default": frappe.datetime.month_end()
+            "width": "80"
         },
         {
             "fieldname": "date_type",
@@ -27,24 +25,24 @@ frappe.query_reports['Sales Table'] = {
                 "",
                 {
                     "label": __("PO Date"),
-                    "value": "PO Date",
+                    "value": "PO Date"
                 },
                 {
                     "label": __("OA Confirmed Date"),
-                    "value": "OA Confirmed Date",
+                    "value": "OA Confirmed Date"
                 },
                 {
                     "label": __("Delivery Date"),
-                    "value": "Delivery Date",
+                    "value": "Delivery Date"
                 },
                 {
                     "label": __("Planned Production End Date"),
-                    "value": "Planned Production End Date",
+                    "value": "Planned Production End Date"
                 },
                 {
                     "label": __("Invoice Date"),
-                    "value": "Invoice Date",
-                },
+                    "value": "Invoice Date"
+                }
             ],
             "default": ""
         },
@@ -66,7 +64,7 @@ frappe.query_reports['Sales Table'] = {
                     {'description': '', 'value': 'Sep'},
                     {'description': '', 'value': 'Oct'},
                     {'description': '', 'value': 'Nov'},
-                    {'description': '', 'value': 'Dec'},
+                    {'description': '', 'value': 'Dec'}
                 ];
                 return months;
             }
@@ -121,6 +119,21 @@ frappe.query_reports['Sales Table'] = {
     // >> ISS-2024-00005
     //Uncomment this section lines of code
     "onload": function (report) {
+        // Fetch from User Session Defaults Document for from and to date
+        frappe.call({
+            "method":"frappe.client.get",
+                     "args":{
+                        "doctype":"User Session Defaults",
+                        "name":frappe.session.user
+                    },
+                    "async": false,
+            "callback": (r)=> {
+                if(r.message){
+                        report.set_filter_value("from_date", r.message?.from_date ? r.message.from_date : frappe.datetime.month_start());
+                        report.set_filter_value("to_date", r.message?.to_date ? r.message.to_date : frappe.datetime.month_end());
+                            }
+                    }
+        });  
         // Add inner button to the report page
         report.page.add_inner_button(__("Save Columns"), function() {
             // Get the values of the report
@@ -134,16 +147,19 @@ frappe.query_reports['Sales Table'] = {
                 const CLASSNAME = `dt-cell__content--header-${i}`;
                 const ELEMENT = document.querySelector(`.${CLASSNAME}`);
                 if (ELEMENT) {
-                    // Get the text content of all the header elements and store it in TextArray.
+                    // Get the text content of all the header elements 
+                    // and store it in TextArray.
                     const TEXT = ELEMENT.innerText;
                     ltTextArray.push(TEXT);
                    }
                 }
-                // Whenever empty spaces appear in the header element, use the <br> tag to prevent text skipping
+                // Whenever empty spaces appear in the header element, use the <br> tag
+                // to prevent text skipping
                 var ltColumnArray = ltTextArray.map(function(ELEMENT) {
                     return ELEMENT.replace(/\n/g, '<br>');
                 });
-                // Convert the array values into a JSON string to store them as a single value in the database
+                // Convert the array values into a JSON string to store them as
+                // a single value in the database
                 const COLUMN_ORDER_ARRAY=JSON.stringify(ltColumnArray);
                 //Set the modified columns as the report columns for the specific user
                 frappe.call({
@@ -152,9 +168,10 @@ frappe.query_reports['Sales Table'] = {
                         "doctype":"User Session Defaults",
                         "name":frappe.session.user,
                         "fieldname":"report_columns",
-                        "value":COLUMN_ORDER_ARRAY,
+                        "value":COLUMN_ORDER_ARRAY
                     },
-                // Display a success message when the columns are successfully updated otherwise shows the error mesaage.
+                // Display a success message when the columns are successfully 
+                // updated otherwise shows the error mesaage.
                 "callback": (r)=> {
                 if(r.message){
                         frappe.show_alert({
@@ -174,15 +191,17 @@ frappe.query_reports['Sales Table'] = {
                 })
             });
     
-    }, 
+    }
     //<< ISS-2024-00005
         
 };
 
 
 //Highlight the selected checkbox row in the Sales Order by shading it dark.
-//Fix the first two columns in the Sales table report to facilitate easy identification of the remaining data.
-//Column filters do not work when no filter data is found in the list. Then set the width for the scroll bar.
+//Fix the first two columns in the Sales table report to facilitate
+//easy identification of the remaining data.
+//Column filters do not work when no filter data is found in the list.
+// Then set the width for the scroll bar.
 //>> ISS-2024-00008
 const style = document.createElement('style');
 style.innerHTML = `

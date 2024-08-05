@@ -6,6 +6,7 @@ on:
       - main
       - r2
       - hot-fix
+      - develop
     paths-ignore:
       - '**/cypress/**'
 
@@ -17,13 +18,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       )
     steps:
       - name: Use Node.js v20
@@ -75,13 +76,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       )
     needs: code_quality_check
     env:
@@ -116,13 +117,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       )
     env:
       USER_NAME: ${{ vars.TEST_USER_NAME }}
@@ -210,16 +211,16 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
       )
 
     steps:
@@ -239,16 +240,16 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
       )
     env:
       HOST: ${{ vars.PROD_HOST }}

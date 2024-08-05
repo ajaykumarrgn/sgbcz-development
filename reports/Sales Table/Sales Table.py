@@ -177,29 +177,37 @@ def set_session_defaults(filters):
     ld_user_session_default_if_exist = frappe.db.exists(
         "User Session Defaults", ld_user)
 
-    # If the session data available for user
+    #If the session data available for user
     if ld_user_session_default_if_exist:
         # Set "from date" and "to date" for the existing logging-in user
-        user_session_default = frappe.get_doc("User Session Defaults", ld_user)
+        user_session_default = frappe.get_doc("User Session Defaults", ld_user).as_dict()
 
-        # initialize session data update as false
-        update_required = False
-
-        # Check if there is change in the session params
-        if user_session_default.from_date != filters.from_date:
-            user_session_default.from_date = filters.from_date
-            update_required = True
-
-        if user_session_default.to_date != filters.to_date:
-            user_session_default.to_date = filters.to_date
-            update_required = True
-
-        # If there is a change in the session variables then update the session
-        if update_required:
-            user_session_default.save(ignore_permissions=True)
+        if str(user_session_default['from_date']) != str(filters.from_date):
+            frappe.db.set_value("User Session Defaults", ld_user, "from_date", filters.from_date, update_modified=False)
             frappe.db.commit()
 
-    # If the session data not available, then create a new session data for the user
+        if str(user_session_default['to_date']) != str(filters.to_date):
+            frappe.db.set_value("User Session Defaults", ld_user, "to_date", filters.to_date, update_modified=False)
+            frappe.db.commit()
+
+        # # Commented for the fix of "Document has been updated. Refresh it"
+        # # initialize session data update as false
+        # update_required = False
+
+        # # Check if there is change in the session params
+        # if user_session_default.from_date != filters.from_date:
+        #     user_session_default.from_date = filters.from_date
+        #     update_required = True
+
+        # if user_session_default.to_date != filters.to_date:
+        #     user_session_default.to_date = filters.to_date
+        #     update_required = True
+
+        # # If there is a change in the session variables then update the session
+        # if update_required:
+        #     user_session_default.save(ignore_permissions=True)
+        #     frappe.db.commit()
+
     else:
         # Insert "from date" and "to date" for the new login user
         user_session_default = frappe.get_doc({
@@ -269,16 +277,17 @@ def filter_invoiced_records(it_data_table, ifilters):
     la_filtered_table = []
 
     # Iterate the output table
-    for it_data in it_data_table:
+    if it_data_table:
+        for it_data in it_data_table:
 
-        # if the record has invoice number then check if the status is
-        # not Done - Expedited only then include in the final output
-        if it_data['invoice_number']:
-            if it_data['transformer_status'] != "Done - Expedited":
+            # if the record has invoice number then check if the status is
+            # not Done - Expedited only then include in the final output
+            if it_data['invoice_number']:
+                if it_data['transformer_status'] != "Done - Expedited":
+                    la_filtered_table.append(it_data)
+            else:
+                # if there is no invoice number then include in the final output
                 la_filtered_table.append(it_data)
-        else:
-            # if there is no invoice number then include in the final output
-            la_filtered_table.append(it_data)
 
     return la_filtered_table
 
@@ -605,7 +614,7 @@ def get_result(filters):
         # Filter schedule lines for the intended Position
         ld_schedule_lines = [
             line for line in ld_schedule_lines_all if line['pos'] == i_pos]
-        
+
         for index, ld_schedule_line in enumerate(ld_schedule_lines):
             # if ld_schedule_line.pos == i_pos:
             ld_schedule_line_row = {}
@@ -643,9 +652,9 @@ def get_result(filters):
                 ld_schedule_line_row['planned_week'] = None
             ld_schedule_line_row['gta_serial_number'] = ld_schedule_line.gta_serial_number
             ld_schedule_line_row['on_time_delivery'] = ld_schedule_line.on_time_delivery
-            # Tests are generally performed for 1 transformer. The quantity is always 
+            # Tests are generally performed for 1 transformer. The quantity is always
             # lesser than parent The qty of tests are captured in the map_accessories function
-            # If the parent qty(schedule line count) is more than tests qty then do not 
+            # If the parent qty(schedule line count) is more than tests qty then do not
             # include in the respective line
             if ld_schedule_line_row['test_lab'] != ' ' and int(ld_schedule_line_row['test_lab_qty']) < (index + 1):
                 ld_schedule_line_row['test_lab'] = ' '
@@ -932,7 +941,7 @@ def get_result(filters):
                 po_item_row['price_gts'] = ld_item.base_rate #<<Added the line for ISS-2024-00081
                 po_item_row['engineering_required'] = '' if ld_item.engineering_required == "No" else str(
                     ld_item.engineering_required)
-                # po_item_row['silicon_free'] = 
+                # po_item_row['silicon_free'] =
                     # (ld_item.silicon_free if ld_item.silicon_free else '')
                 po_item_row['silicon_free'] = '' if ld_item.silicon_free == "No" else str(
                     ld_item.silicon_free)
