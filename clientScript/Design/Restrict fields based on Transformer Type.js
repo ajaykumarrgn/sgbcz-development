@@ -27,7 +27,7 @@ frappe.ui.form.on('Design', {
     },
     // When factory is changed, fields also changed for that dependent request.
     factory: function(frm) {
-        if (frm.is_new()) {
+            //set the lv1 and lv 2 to null
             frm.set_value('lv1', '');   
             frm.set_value('lv_2', ''); 
             fnResetValues(frm);
@@ -48,10 +48,11 @@ frappe.ui.form.on('Design', {
             frm.trigger('fnToggleFields');
             frm.trigger('fnUpdateInsulationClass');
             frm.trigger('fnTappings');
-        }
+        
     },
     
     refresh: function(frm) {
+       
         if(frm.doc.status != 'Draft'){
           setTimeout(function() {
              fnHTMLFieldsReadOnly();
@@ -60,17 +61,11 @@ frappe.ui.form.on('Design', {
             frm.disable_save();
         }
         if(frm.doc.is_design){
-            frm.toggle_display('hv_html', false);
-            // Display hv_rated_voltage field
-            frm.toggle_display('hv_rated_voltage', true);
-            frm.set_df_property('hv_rated_voltage', 'reqd', true);
-            frm.set_df_property('electrostatic_screen', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
-            frm.set_value('electrostatic_screen', 0);
-            frm.set_df_property('vector_group', 'options', ['Dyn1', 'Dyn5', 'Dyn7', 'Dyn11']);
-            frm.set_df_property('climatic_class', 'options', ['C2', 'C3']);
-            frm.set_df_property('environmental_class', 'options', ['E2', 'E3']);
+          
+            fnIsDesignBasedFields(frm)
         }
-     
+         
+        
             frm.trigger('fnTappings');
             frm.trigger('fnUpdateInsulationClass');
             frm.trigger('fnToggleFields');
@@ -126,6 +121,7 @@ frappe.ui.form.on('Design', {
  
             let laShowFields = [];
             switch (frm.doc.factory) {
+                //the mentioned fields will be hide from display
                 case 'SGBCZ':
                     laShowFields = ['vector_group', 'impedance', 
                                     'lv_rated_voltage', 'temperature_rise',
@@ -160,15 +156,38 @@ frappe.ui.form.on('Design', {
             }
  
             laShowFields.forEach(field => frm.toggle_display(field, true));
- 
-            if (frm.doc.factory === 'RGB' && frm.doc.lv_2) {
-                frm.toggle_display('uk_hv_lv', false);
-                frm.toggle_display('impedance', false);
-            }
-            if(frm.doc.factory === 'SGBCZ' && frm.doc.is_design) {
+            
+            
+            //at RGB hide parallel_coil
+            //hide uk_hv_lv, impedance based on the presence of lv 2 value
+            if (frm.doc.factory === 'RGB') {
+                frm.toggle_display('uk_hv_lv', frm.doc.lv_2 ? false : true);
+                frm.toggle_display('impedance', frm.doc.lv_2 ? false : true);
                 frm.toggle_display('parallel_coil', false);
-                frm.toggle_display('type_lv', false);
-            }                    
+            }
+            
+            //at RGB hide parallel_coil
+            //hide impedance based on the presence of lv 2 value
+            if (frm.doc.factory === 'NEU') {
+                frm.toggle_display('impedance', frm.doc.lv_2 ? false : true);
+                frm.toggle_display('parallel_coil', false);
+            }
+            
+            if (frm.doc.factory === 'SGBCZ') {
+                
+                //for is_design or lv 2 value present 
+                //hide the parallel coil
+                if (frm.doc.is_design || frm.doc.hv2 > 0) {
+                    frm.toggle_display('parallel_coil', false);
+                }
+                
+                //for is_design hide the type of lv
+                if (frm.doc.is_design) {
+                    frm.toggle_display('type_lv', false);
+                }
+            }
+           
+        
     },
     
     // Set the default value for the THDi is 5 when designing the transformer
@@ -176,24 +195,20 @@ frappe.ui.form.on('Design', {
     //rated voltage not HV1 and HV2
     is_design: function(frm) {
         if (frm.doc.is_design) {
+            
+            //message indicating what are the fields are resetted
             frappe.msgprint(__('Resetted THDi value to 5 and LPA to 0'));
-            frm.ignore_thdi_change = true;
+            
+            //set the default value for thdi and lpa
             frm.set_value('thdi', 5);
             frm.set_value('lpa', 0);
-            // Hide hv_html field
-            frm.toggle_display('hv_html', false);
-            // Display hv_rated_voltage field
-            frm.toggle_display('hv_rated_voltage', true);
-            frm.set_df_property('hv_rated_voltage', 'reqd', true);
-            frm.set_df_property('type_lv', 'hidden', true);
+    
+            //reset the placeholder of hv_rated_voltage
             frm.fields_dict['hv_rated_voltage'].set_label('HV Value(V)');
-            frm.fields_dict['hv_rated_voltage'].$input.attr('placeholder', 'HV');
-            frm.set_df_property('electrostatic_screen', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
-            frm.set_value('electrostatic_screen', 0);
-            frm.set_df_property('parallel_coil', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
-            frm.set_df_property('vector_group', 'options', ['Dyn1', 'Dyn5', 'Dyn7', 'Dyn11']);
-            frm.set_df_property('climatic_class', 'options', ['C2', 'C3']);
-            frm.set_df_property('environmental_class', 'options', ['E2', 'E3']);
+            frm.set_df_property('hv_rated_voltage', 'placeholder', 'HV');
+          
+            fnIsDesignBasedFields(frm)
+            
             
         } else {
             // Display hv_html field
@@ -210,6 +225,8 @@ frappe.ui.form.on('Design', {
             
         }
     },
+    
+    
     // When designing the transformer need to follow some condition
     // such as THDi is either 5 or 20
     // Otherwise it accepts from 5 to 99,
@@ -219,11 +236,8 @@ frappe.ui.form.on('Design', {
             let thdiValue = frm.doc.thdi;
             if (!thdiValue) return;
  
-            // if (frm.ignore_thdi_change) {
-            //     frm.ignore_thdi_change = false;
-            //     return;
-            // }
- 
+            //the thdi value can either be 5 or 20 
+            //for SGBCZ is_design condition
             if (frm.doc.is_design) {
                 if (![5, 20].includes(thdiValue)) {
                     frm.set_value('thdi','');
@@ -239,6 +253,10 @@ frappe.ui.form.on('Design', {
     },
     
     hv2(frm){
+        
+        //When there is double voltage on HV then Parallel coil 
+        //should be hidden for SGBCZ.
+        
         if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
             frm.set_df_property('parallel_coil', 'hidden', frm.doc.hv2 > 0);
          }
@@ -247,12 +265,16 @@ frappe.ui.form.on('Design', {
     // When the factory is changed, dependent fields also
     // want to be show or hide based on the factory
     validate: function(frm) {
-     
+            
+            //for SGBCZ LV should be mandatory
             if (frm.doc.factory === 'SGBCZ' && !frm.doc.lv_rated_voltage) {
                 frappe.msgprint(__('LV Value is mandatory'));
                 frappe.validated = false; 
                 return;
             }
+            
+            //For RGB if lv_2 is given rating lv1, rating lv2 and
+            //uk_lv1 and uk_lv2 are mandatory
             if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && 
             (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
                 frappe.msgprint(__('Please enter both Rating LV1 and Rating LV2 for RGB'));
@@ -265,6 +287,8 @@ frappe.ui.form.on('Design', {
                 return;
             }
             
+            //For NEU if lv_2 is given rating lv1, rating lv2 and
+            // ukhv_lv1, ukhv_lv2 are mandatory
             if (frm.doc.factory === 'NEU' && frm.doc.lv_2 && 
             (!frm.doc.power_lv1 || !frm.doc.power_lv2)) {
                 frappe.msgprint(__('Please enter both Rating LV1 and Rating LV2 for RGB'));
@@ -281,7 +305,27 @@ frappe.ui.form.on('Design', {
         }
     
 });
- 
+
+function fnIsDesignBasedFields(frm){
+     // Hide hv_html field
+    frm.toggle_display('hv_html', false);
+    // Display hv_rated_voltage field
+    frm.toggle_display('hv_rated_voltage', true);
+    //make hv_rated_voltage field mandatory
+    frm.set_df_property('hv_rated_voltage', 'reqd', true);
+    //there will be no type of lv
+    frm.set_df_property('type_lv', 'hidden', true);
+    //electrostatic_screen, parallel_coil should be hidden on sgncz is_design condition
+    frm.set_df_property('electrostatic_screen', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
+    frm.set_value('electrostatic_screen', 0);
+    frm.set_df_property('parallel_coil', 'hidden', frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
+    //restricting vector group, climatic and enviromental class option
+    //later this value will be maintained in gitra settings
+    frm.set_df_property('vector_group', 'options', ['Dyn1', 'Dyn5', 'Dyn7', 'Dyn11']);
+    frm.set_df_property('climatic_class', 'options', ['C2', 'C3']);
+    frm.set_df_property('environmental_class', 'options', ['E2', 'E3']);
+}
+
 // When changing the HTMl field, clear the below field value
 // as well as html input value
 function fnResetValues(frm) {
@@ -290,13 +334,19 @@ function fnResetValues(frm) {
         frm.set_value('highest_operation_voltage_hv', '');
         frm.set_value('ac_phase_hv', '');
         frm.set_value('li_phase_hv', '');
+        
+        //clearing html field(hv_html, lv_html)
+        
         let hvHtmlInput = $(frm.fields_dict.hv_html.wrapper).find('input');
         hvHtmlInput.val('');
         let lvHtmlInput = $(frm.fields_dict.lv_html.wrapper).find('input');
         lvHtmlInput.val('');
     
 }
+
+//function to make html field read_only
 function fnHTMLFieldsReadOnly() {
+    //looping through each fields
     Object.keys(cur_frm.fields_dict).forEach(fieldname => {
         let htmlField = cur_frm.fields_dict[fieldname].$wrapper;
 
