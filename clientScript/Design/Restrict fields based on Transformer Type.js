@@ -27,17 +27,21 @@ frappe.ui.form.on('Design', {
     },
     // When factory is changed, fields also changed for that dependent request.
     factory: function(frm) {
+        if(frm.is_new()){
             //set the lv1 and lv 2 to null
             frm.set_value('lv1', '');   
             frm.set_value('lv_2', ''); 
             fnResetValues(frm);
             
+            //setting the default transformer type
+            //based on factory
             switch (frm.doc.factory) {
                 case 'SGBCZ':
                     frm.set_df_property('lv_rated_voltage', 'reqd', true);
                     frm.set_value('transformer_type', 'DTTHZ2N');
                     break;
                 case 'RGB':
+                    break;
                 case 'NEU':
                     frm.set_df_property('lv_rated_voltage', 'reqd', false);
                     frm.set_value('transformer_type', 
@@ -48,7 +52,7 @@ frappe.ui.form.on('Design', {
             frm.trigger('fnToggleFields');
             frm.trigger('fnUpdateInsulationClass');
             frm.trigger('fnTappings');
-        
+        }
     },
     
     refresh: function(frm) {
