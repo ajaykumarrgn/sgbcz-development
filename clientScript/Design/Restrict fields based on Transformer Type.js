@@ -239,10 +239,9 @@ frappe.ui.form.on('Design', {
     },
     
     hv2(frm){
-        if (frm.doc.factory === 'SGBCZ') {
-        const shouldHideParallelCoil = frm.doc.hv2 > 0;
-        frm.set_df_property('parallel_coil', 'hidden', shouldHideParallelCoil);
-    }
+        if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
+            frm.set_df_property('parallel_coil', 'hidden', frm.doc.hv2 > 0);
+         }
     },
  
     // When the factory is changed, dependent fields also
