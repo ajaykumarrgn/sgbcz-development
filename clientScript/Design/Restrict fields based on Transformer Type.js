@@ -26,6 +26,8 @@ frappe.ui.form.on('Design', {
         }
     },
     // When factory is changed, fields also changed for that dependent request.
+
+    //onchange of factory select field event
     factory: function(frm) {
         if(frm.is_new()){
             //set the lv1 and lv 2 to null
@@ -41,17 +43,17 @@ frappe.ui.form.on('Design', {
                     frm.set_value('transformer_type', 'DTTHZ2N');
                     break;
                 case 'RGB':
+                    frm.set_value('transformer_type', 'DTTH2N');
                     break;
                 case 'NEU':
                     frm.set_df_property('lv_rated_voltage', 'reqd', false);
-                    frm.set_value('transformer_type', 
-                        frm.doc.factory === 'RGB' ? 'DTTH2N' : 'DOTML');
+                    frm.set_value('transformer_type', 'DOTML');
                     break;
             }
             
             frm.trigger('fnToggleFields');
             frm.trigger('fnUpdateInsulationClass');
-            frm.trigger('fnTappings');
+            frm.trigger('fnSetTappingsOption');
         }
     },
     
@@ -60,7 +62,7 @@ frappe.ui.form.on('Design', {
        //the frm should be read only
         if(frm.doc.status != 'Draft'){
           setTimeout(function() {
-             fnHTMLFieldsReadOnly();
+            fnSetHTMLFieldsToReadOnly();
         }, 500);
             frm.set_read_only();
             frm.disable_save();
@@ -70,11 +72,11 @@ frappe.ui.form.on('Design', {
         //restriction
         if(frm.doc.is_design){
           
-            fnIsDesignBasedFields(frm)
+            fnUpdateFieldBasedOnIsDesign(frm)
         }
          
         
-            frm.trigger('fnTappings');
+            frm.trigger('fnSetTappingsOption');
             frm.trigger('fnUpdateInsulationClass');
             frm.trigger('fnToggleFields');
         
@@ -95,7 +97,7 @@ frappe.ui.form.on('Design', {
         
     },
     // Set the options for the Tappings is varying based on factory
-    fnTappings: function(frm) {
+    fnSetTappingsOption: function(frm) {
       
             let laTappings = [];
             switch (frm.doc.factory) {
@@ -201,6 +203,8 @@ frappe.ui.form.on('Design', {
     // Set the default value for the THDi is 5 when designing the transformer
     // When calculation is needed by Gitra, only need HV 
     //rated voltage not HV1 and HV2
+
+    //onchange of is_design checkbox event
     is_design: function(frm) {
         if (frm.doc.is_design) {
             
@@ -215,7 +219,7 @@ frappe.ui.form.on('Design', {
             frm.fields_dict['hv_rated_voltage'].set_label('HV Value(V)');
             frm.set_df_property('hv_rated_voltage', 'placeholder', 'HV');
           
-            fnIsDesignBasedFields(frm)
+            fnUpdateFieldBasedOnIsDesign(frm)
             
             
         } else {
@@ -239,6 +243,8 @@ frappe.ui.form.on('Design', {
     // such as THDi is either 5 or 20
     // Otherwise it accepts from 5 to 99,
     // it exceeds this value arise the error message
+
+    //onchange of thdi int field event
     thdi: function(frm) {
        
             let thdiValue = frm.doc.thdi;
@@ -260,6 +266,7 @@ frappe.ui.form.on('Design', {
         
     },
     
+    //onchange of hv2 int field event
     hv2(frm){
         
         //When there is double voltage on HV then Parallel coil 
@@ -314,7 +321,7 @@ frappe.ui.form.on('Design', {
     
 });
 
-function fnIsDesignBasedFields(frm){
+function fnUpdateFieldBasedOnIsDesign(frm){
      // Hide hv_html field
     frm.toggle_display('hv_html', false);
     // Display hv_rated_voltage field
@@ -353,7 +360,7 @@ function fnResetValues(frm) {
 }
 
 //function to make html field read_only
-function fnHTMLFieldsReadOnly() {
+function fnSetHTMLFieldsToReadOnly() {
     //looping through each fields
     Object.keys(cur_frm.fields_dict).forEach(fieldname => {
         let htmlField = cur_frm.fields_dict[fieldname].$wrapper;
