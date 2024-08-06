@@ -193,54 +193,73 @@ for ld_attribute in la_template_attributes:
     # Conditionally append attributes
     if ld_attribute.attribute == 'Electrostatic screen':
         if design.electrostatic_screen == 0:
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'NO'))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, ld_attribute.attribute, 'NO'))
         else:
-             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'YES'))
+             item_new.append("attributes", get_attribute(
+                 design.transformer_type, ld_attribute.attribute, 'YES'))
     elif ld_attribute.attribute == 'Parallel coil':
         if design.parallel_coil == 0:
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'NO'))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, ld_attribute.attribute, 'NO'))
         else:
-             item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'YES'))
+             item_new.append("attributes", get_attribute(
+                 design.transformer_type, ld_attribute.attribute, 'YES'))
     elif ld_attribute.attribute == 'Special parameters':
         if design.specifics:
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'YES'))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, ld_attribute.attribute, 'YES'))
             item_new.custom_specifics = design.specifics
         else:
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 'NO'))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, ld_attribute.attribute, 'NO'))
     elif ld_attribute.attribute == 'THDi (%)':
         if design.k4_factor == 'Yes':
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 20))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, ld_attribute.attribute, 20))
         else:
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, 5))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, ld_attribute.attribute, 5))
             
     elif ld_attribute.attribute == 'Vector Group':
         if design.lv_2 == 0:
             attribute_value = design.vector_group
-            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group', attribute_value))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, 'Vector Group', attribute_value))
         else:
-            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group', 0))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, 'Vector Group', 0))
     elif ld_attribute.attribute == 'Vector Group LV 1':
         if design.lv_2 != 0:
             vector_group_lv1_value = design.vector_group_lv1
-            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group LV 1', vector_group_lv1_value))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, 'Vector Group LV 1', vector_group_lv1_value))
         else:
-            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group LV 1', 0))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, 'Vector Group LV 1', 0))
     elif ld_attribute.attribute == 'Vector Group LV 2':
         if design.lv_2 != 0:
             vector_group_lv2_value = design.vector_group_lv2
-            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group LV 2', vector_group_lv2_value))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, 'Vector Group LV 2', vector_group_lv2_value))
         else:
-            item_new.append("attributes", get_attribute(design.transformer_type, 'Vector Group LV 2', 0))
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, 'Vector Group LV 2', 0))
 
     # elif ld_attribute.attribute == 'Vector Group':
     #     item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ('DYN' + design.vector_group)))
 
+    #converting hv, hv 1, hv 2 from V to kV 
     elif ld_attribute.attribute == 'HV (kV)':
         hv_in_kv_str = str(int(design.hv_rated_voltage) / 1000)
-        if float(hv_in_kv_str) % 1 == 0:
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
-        else:
-            item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
+        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
+    elif ld_attribute.attribute == 'HV 1 (kV)':
+        hv_in_kv_str = str(int(design.hv1) / 1000)
+        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
+    elif ld_attribute.attribute == 'HV 2 (kV)':
+        hv_in_kv_str = str(int(design.hv2) / 1000)
+        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
+            
     elif ld_designdoc_field in ['lwa', 'lpa']:
         ld_target_attribute_value = design.get(ld_designdoc_field)
         if ld_target_attribute_value is not None:
@@ -273,9 +292,6 @@ item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(de
 item_new.item_technical_name = item_new.item_technical_name + ', P(k) ' + str(design.load_loss_guarantee) + ' [W]'
 
 item_new.item_code = get_item_code_from_attributes(item_new).replace('.',',')
-
-# item_new.item_code = get_item_code_from_attributes(item_new).replace('//', '/0/')
-# item_new.item_code = get_item_code_from_attributes(item_new).replace('///', '/0/0/')
 
 item_new.insert()
 frappe.response['message'] = item_new
