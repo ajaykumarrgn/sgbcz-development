@@ -1,7 +1,8 @@
 // Change References
 // Saved Column:(Issue# : ISS-2024-00005)
-// Remove the columns filter when there is no data for the filter (Issue# : ISS-2024-00008)
+// Remove the columns filter when there is no data for the filter(Issue# : ISS-2024-00008)
 // Some Columns not visible using Saved Column (Issue# : ISS-2024-00020)
+// User session defaults functionality is not working (Issue# : ISS-2024-00085)
 
 frappe.query_reports['Sales Table'] = {
     "filters": [
@@ -9,15 +10,13 @@ frappe.query_reports['Sales Table'] = {
             "fieldname": "from_date",
             "label": __("PO Date From"),
             "fieldtype": "Date",
-            "width": "80",
-            "default": frappe.datetime.month_start()
+            "width": "80"
         },
         {
             "fieldname": "to_date",
             "label": __("PO Date To"),
             "fieldtype": "Date",
-            "width": "80",
-            "default": frappe.datetime.month_end()
+            "width": "80"
         },
         {
             "fieldname": "date_type",
@@ -27,24 +26,24 @@ frappe.query_reports['Sales Table'] = {
                 "",
                 {
                     "label": __("PO Date"),
-                    "value": "PO Date",
+                    "value": "PO Date"
                 },
                 {
                     "label": __("OA Confirmed Date"),
-                    "value": "OA Confirmed Date",
+                    "value": "OA Confirmed Date"
                 },
                 {
                     "label": __("Delivery Date"),
-                    "value": "Delivery Date",
+                    "value": "Delivery Date"
                 },
                 {
                     "label": __("Planned Production End Date"),
-                    "value": "Planned Production End Date",
+                    "value": "Planned Production End Date"
                 },
                 {
                     "label": __("Invoice Date"),
-                    "value": "Invoice Date",
-                },
+                    "value": "Invoice Date"
+                }
             ],
             "default": ""
         },
@@ -53,8 +52,8 @@ frappe.query_reports['Sales Table'] = {
             "label": __("Months"),
             "fieldtype": "MultiSelectList",
             "options": "Months",
-            "get_data": function(txt) {
-                var months = [
+            "get_data": function(iTxt) {
+                var laMonths = [
                     {'description': '', 'value': 'Jan'},
                     {'description': '', 'value': 'Feb'},
                     {'description': '', 'value': 'Mar'},
@@ -66,9 +65,9 @@ frappe.query_reports['Sales Table'] = {
                     {'description': '', 'value': 'Sep'},
                     {'description': '', 'value': 'Oct'},
                     {'description': '', 'value': 'Nov'},
-                    {'description': '', 'value': 'Dec'},
+                    {'description': '', 'value': 'Dec'}
                 ];
-                return months;
+                return laMonths;
             }
         },
         {
@@ -116,16 +115,38 @@ frappe.query_reports['Sales Table'] = {
 		// Wrap the component with empty paragraph. Otherwise the changes will not reflect
 		value = $value.wrap("<p></p>").parent().html();
 		
-        return value
+        return value;
     },
     // >> ISS-2024-00005
     //Uncomment this section lines of code
     "onload": function (report) {
+
+        // << ISS-2024-00085
+        // Fetch from and to date from User Session Defaults Document
+        //during onload event using a synchronous call.
+        frappe.call({
+            "method":"frappe.client.get",
+                     "args":{
+                        "doctype":"User Session Defaults",
+                        "name":frappe.session.user
+                    },
+                    "async": false,
+            "callback": (iResponse)=> {
+                if(iResponse.message){
+                        // Set the from date fetched from user session to the report filter
+                        report.set_filter_value("from_date", iResponse.message?.from_date ? iResponse.message.from_date : frappe.datetime.month_start());
+                        // Set the to date fetched from user session to the report filter
+                        report.set_filter_value("to_date", iResponse.message?.to_date ? iResponse.message.to_date : frappe.datetime.month_end());
+                            }
+                    }
+        });
+        // >> ISS-2024-00085
+
         // Add inner button to the report page
         report.page.add_inner_button(__("Save Columns"), function() {
             // Get the values of the report
             var lFilters = report.get_values();
-            var ltTextArray=[];
+            var laTextArray=[];
             // >> ISS-2024-00020
             // Iterate through header columns (assuming a maximum of 69 columns)
             for (let i = 0; i <= 69; i++) {
@@ -134,17 +155,20 @@ frappe.query_reports['Sales Table'] = {
                 const CLASSNAME = `dt-cell__content--header-${i}`;
                 const ELEMENT = document.querySelector(`.${CLASSNAME}`);
                 if (ELEMENT) {
-                    // Get the text content of all the header elements and store it in TextArray.
+                    // Get the text content of all the header elements 
+                    // and store it in TextArray.
                     const TEXT = ELEMENT.innerText;
-                    ltTextArray.push(TEXT);
+                    laTextArray.push(TEXT);
                    }
                 }
-                // Whenever empty spaces appear in the header element, use the <br> tag to prevent text skipping
-                var ltColumnArray = ltTextArray.map(function(ELEMENT) {
+                // Whenever empty spaces appear in the header element, use the <br> tag
+                // to prevent text skipping
+                var laColumnArray = laTextArray.map(function(ELEMENT) {
                     return ELEMENT.replace(/\n/g, '<br>');
                 });
-                // Convert the array values into a JSON string to store them as a single value in the database
-                const COLUMN_ORDER_ARRAY=JSON.stringify(ltColumnArray);
+                // Convert the array values into a JSON string to store them as
+                // a single value in the database
+                const COLUMN_ORDER_ARRAY=JSON.stringify(laColumnArray);
                 //Set the modified columns as the report columns for the specific user
                 frappe.call({
                     "method":"frappe.client.set_value",
@@ -152,9 +176,10 @@ frappe.query_reports['Sales Table'] = {
                         "doctype":"User Session Defaults",
                         "name":frappe.session.user,
                         "fieldname":"report_columns",
-                        "value":COLUMN_ORDER_ARRAY,
+                        "value":COLUMN_ORDER_ARRAY
                     },
-                // Display a success message when the columns are successfully updated otherwise shows the error mesaage.
+                // Display a success message when the columns are successfully 
+                // updated otherwise shows the error mesaage.
                 "callback": (r)=> {
                 if(r.message){
                         frappe.show_alert({
@@ -174,15 +199,17 @@ frappe.query_reports['Sales Table'] = {
                 })
             });
     
-    }, 
+    }
     //<< ISS-2024-00005
         
 };
 
 
 //Highlight the selected checkbox row in the Sales Order by shading it dark.
-//Fix the first two columns in the Sales table report to facilitate easy identification of the remaining data.
-//Column filters do not work when no filter data is found in the list. Then set the width for the scroll bar.
+//Fix the first two columns in the Sales table report to facilitate
+//easy identification of the remaining data.
+//Column filters do not work when no filter data is found in the list.
+// Then set the width for the scroll bar.
 //>> ISS-2024-00008
 const style = document.createElement('style');
 style.innerHTML = `
