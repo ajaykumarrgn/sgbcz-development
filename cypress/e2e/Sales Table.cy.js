@@ -22,38 +22,27 @@ describe('Sales Table Report', () => {
         // Clear and type dates in the input fields
         cy.wait(1000);
 
-        // Wait for the page content to be visible and perform validations
         cy.get('#page-query-report > .page-body > .page-wrapper > .page-content > .row > .layout-main-section-wrapper', { timeout: 10000 }).should('be.visible');
-        
-        cy.get('body').then(($body) => {
-            if ($body.find('.model-body').length > 0) {
-              cy.get('.btn-model-close').click();
-            }
-          });
 
-        cy.get('#page-query-report > .page-head > .container > .row').click({ force: true });
-        cy.get('body').then(($body) => {
-            if ($body.find('.model-body').length > 0) {
-              cy.get('.btn-model-close').click();
-            }
-          });
-        cy.get('body').then(($body) => {
-            if ($body.find('.model').length > 0) {
-              cy.get('.btn-model-close').click();
-            }
-          });
-        cy.get('.dt-cell--col-2 > .dt-cell__content > .dt-filter').type(env.salesOrder)
-        cy.get('body').then(($body) => {
-            if ($body.find('.model-body').length > 0) {
-              cy.get('.btn-model-close').click();
-            }
-          });
-        cy.get('body').then(($body) => {
-            if ($body.find('.model').length > 0) {
-              cy.get('.btn-model-close').click();
-            }
-          });
+        cy.get('[data-original-title="PO Date From"] > .input-with-feedback')
+          .should('be.visible')
+          .clear()
+          .click()
+          .type(env.fromDate);
 
+        cy.get('[data-original-title="PO Date To"] > .input-with-feedback')
+          .should('be.visible')
+          .clear()
+          .click()
+          .type(env.toDate);
+
+        cy.wait(1000);
+
+        cy.get('#page-query-report > .page-body > .page-wrapper > .page-content > .row > .layout-main-section-wrapper', { timeout: 10000 }).should('be.visible');
+  
+        cy.get('.dt-cell--col-2 > .dt-cell__content > .dt-filter')
+          .should('be.visible')
+          .type(env.salesOrder);
         cy.get('.dt-scrollable > .dt-row > .dt-cell--col-2 > .dt-cell__content', { timeout: 10000 })
           .should('be.visible')
           .contains(env.salesOrder);
