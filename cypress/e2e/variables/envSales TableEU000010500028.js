@@ -1,6 +1,6 @@
 export const source = 'https://qsgbcz.lmnas.com/login#login';
 export const target = 'https://qsgbcz.lmnas.com/app/query-report/Sales%20Table';
-export const fromDate = '01.01.2024';
+export const fromDate = '01.07.2024';
 export const toDate = '31.07.2024';
 export const salesOrder = 'SAL-ORD-2024-00069';
 export const customer = 'Temes s.r.o.';
