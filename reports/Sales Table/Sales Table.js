@@ -2,6 +2,7 @@
 // Saved Column:(Issue# : ISS-2024-00005)
 // Remove the columns filter when there is no data for the filter(Issue# : ISS-2024-00008)
 // Some Columns not visible using Saved Column (Issue# : ISS-2024-00020)
+// User session defaults functionality is not working (Issue# : ISS-2024-00085)
 
 frappe.query_reports['Sales Table'] = {
     "filters": [
@@ -51,8 +52,8 @@ frappe.query_reports['Sales Table'] = {
             "label": __("Months"),
             "fieldtype": "MultiSelectList",
             "options": "Months",
-            "get_data": function(txt) {
-                var months = [
+            "get_data": function(iTxt) {
+                var laMonths = [
                     {'description': '', 'value': 'Jan'},
                     {'description': '', 'value': 'Feb'},
                     {'description': '', 'value': 'Mar'},
@@ -66,7 +67,7 @@ frappe.query_reports['Sales Table'] = {
                     {'description': '', 'value': 'Nov'},
                     {'description': '', 'value': 'Dec'}
                 ];
-                return months;
+                return laMonths;
             }
         },
         {
@@ -114,11 +115,13 @@ frappe.query_reports['Sales Table'] = {
 		// Wrap the component with empty paragraph. Otherwise the changes will not reflect
 		value = $value.wrap("<p></p>").parent().html();
 		
-        return value
+        return value;
     },
     // >> ISS-2024-00005
     //Uncomment this section lines of code
     "onload": function (report) {
+
+        // << ISS-2024-00085
         // Fetch from and to date from User Session Defaults Document
         //during onload event using a synchronous call.
         frappe.call({
@@ -128,22 +131,22 @@ frappe.query_reports['Sales Table'] = {
                         "name":frappe.session.user
                     },
                     "async": false,
-            "callback": (r)=> {
-                if(r.message){
+            "callback": (iResponse)=> {
+                if(iResponse.message){
                         // Set the from date fetched from user session to the report filter
-                        // using set_filter_value method.
-                        report.set_filter_value("from_date", r.message?.from_date ? r.message.from_date : frappe.datetime.month_start());
+                        report.set_filter_value("from_date", iResponse.message?.from_date ? iResponse.message.from_date : frappe.datetime.month_start());
                         // Set the to date fetched from user session to the report filter
-                        // using set_filter_value method.
-                        report.set_filter_value("to_date", r.message?.to_date ? r.message.to_date : frappe.datetime.month_end());
+                        report.set_filter_value("to_date", iResponse.message?.to_date ? iResponse.message.to_date : frappe.datetime.month_end());
                             }
                     }
-        });  
+        });
+        // >> ISS-2024-00085
+
         // Add inner button to the report page
         report.page.add_inner_button(__("Save Columns"), function() {
             // Get the values of the report
             var lFilters = report.get_values();
-            var ltTextArray=[];
+            var laTextArray=[];
             // >> ISS-2024-00020
             // Iterate through header columns (assuming a maximum of 69 columns)
             for (let i = 0; i <= 69; i++) {
@@ -155,17 +158,17 @@ frappe.query_reports['Sales Table'] = {
                     // Get the text content of all the header elements 
                     // and store it in TextArray.
                     const TEXT = ELEMENT.innerText;
-                    ltTextArray.push(TEXT);
+                    laTextArray.push(TEXT);
                    }
                 }
                 // Whenever empty spaces appear in the header element, use the <br> tag
                 // to prevent text skipping
-                var ltColumnArray = ltTextArray.map(function(ELEMENT) {
+                var laColumnArray = laTextArray.map(function(ELEMENT) {
                     return ELEMENT.replace(/\n/g, '<br>');
                 });
                 // Convert the array values into a JSON string to store them as
                 // a single value in the database
-                const COLUMN_ORDER_ARRAY=JSON.stringify(ltColumnArray);
+                const COLUMN_ORDER_ARRAY=JSON.stringify(laColumnArray);
                 //Set the modified columns as the report columns for the specific user
                 frappe.call({
                     "method":"frappe.client.set_value",

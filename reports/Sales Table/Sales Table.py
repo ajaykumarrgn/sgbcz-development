@@ -8,6 +8,7 @@
 # based on Payment Terms(Issue# : ISS-2024-00045)
 #"Order Value" and "Price GTS"should be displayed in EUR in Sales Table
 # when CZK currency is selected in Sales Order.(Issue# : ISS-2024-00081)
+# User session defaults functionality is not working (Issue# : ISS-2024-00085)
 
 # Change Request
 # Transfer Note section from Sales order to Delivery Schedule (Task#: TASK-2024-00221)
@@ -171,31 +172,32 @@ def get_columns(filters):
 def set_session_defaults(filters):
 
     # Get the current logged in user
-    ld_user = frappe.session.user
+    l_user = frappe.session.user
 
     # Get the session default stored earlier for the logged in user
     ld_user_session_default_if_exist = frappe.db.exists(
-        "User Session Defaults", ld_user)
+        "User Session Defaults", l_user)
 
+    # << ISS-2024-00085
     #If the session data available for user
     if ld_user_session_default_if_exist:
         # Get the Session document for the logging-in user.
-        user_session_default = frappe.get_doc("User Session Defaults", ld_user).as_dict()
+        user_session_default = frappe.get_doc("User Session Defaults", l_user).as_dict()
         # Checks if the filter from date and user session defaults from date are not equal
         if str(user_session_default['from_date']) != str(filters.from_date):
             #If True it updates the from date of the user session default
             # and commit the changes.
-            frappe.db.set_value("User Session Defaults", ld_user, "from_date", filters.from_date, update_modified=False)
+            frappe.db.set_value("User Session Defaults", l_user, "from_date", filters.from_date, update_modified=False)
             frappe.db.commit()
 
         # Checks if the filter from date and user session defaults from date are equal
         if str(user_session_default['to_date']) != str(filters.to_date):
             #If True it updates the to date of the user session default
             # and commit the changes.
-            frappe.db.set_value("User Session Defaults", ld_user, "to_date", filters.to_date, update_modified=False)
+            frappe.db.set_value("User Session Defaults", l_user, "to_date", filters.to_date, update_modified=False)
             frappe.db.commit()
 
-        # # Commented for the fix of "Document has been updated. Refresh it"
+        # # Commented for the fix of Issue ISS-2024-00085
         # # initialize session data update as false
         # update_required = False
 
@@ -213,11 +215,12 @@ def set_session_defaults(filters):
         #     user_session_default.save(ignore_permissions=True)
         #     frappe.db.commit()
 
+        # >> ISS-2024-00085
     else:
         # Insert "from date" and "to date" for the new login user
         user_session_default = frappe.get_doc({
             'doctype': 'User Session Defaults',
-            'user': ld_user,
+            'user': l_user,
             'from_date': filters.from_date,
             'to_date': filters.to_date,
 
