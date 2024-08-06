@@ -179,14 +179,19 @@ def set_session_defaults(filters):
 
     #If the session data available for user
     if ld_user_session_default_if_exist:
-        # Set "from date" and "to date" for the existing logging-in user
+        # Get the Session document for the logging-in user.
         user_session_default = frappe.get_doc("User Session Defaults", ld_user).as_dict()
-
+        # Checks if the filter from date and user session defaults from date are not equal
         if str(user_session_default['from_date']) != str(filters.from_date):
+            #If True it updates the from date of the user session default
+            # and commit the changes.
             frappe.db.set_value("User Session Defaults", ld_user, "from_date", filters.from_date, update_modified=False)
             frappe.db.commit()
 
+        # Checks if the filter from date and user session defaults from date are equal
         if str(user_session_default['to_date']) != str(filters.to_date):
+            #If True it updates the to date of the user session default
+            # and commit the changes.
             frappe.db.set_value("User Session Defaults", ld_user, "to_date", filters.to_date, update_modified=False)
             frappe.db.commit()
 

@@ -119,7 +119,8 @@ frappe.query_reports['Sales Table'] = {
     // >> ISS-2024-00005
     //Uncomment this section lines of code
     "onload": function (report) {
-        // Fetch from User Session Defaults Document for from and to date
+        // Fetch from and to date from User Session Defaults Document
+        //during onload event using a synchronous call.
         frappe.call({
             "method":"frappe.client.get",
                      "args":{
@@ -129,7 +130,11 @@ frappe.query_reports['Sales Table'] = {
                     "async": false,
             "callback": (r)=> {
                 if(r.message){
+                        // Set the from date fetched from user session to the report filter
+                        // using set_filter_value method.
                         report.set_filter_value("from_date", r.message?.from_date ? r.message.from_date : frappe.datetime.month_start());
+                        // Set the to date fetched from user session to the report filter
+                        // using set_filter_value method.
                         report.set_filter_value("to_date", r.message?.to_date ? r.message.to_date : frappe.datetime.month_end());
                             }
                     }
