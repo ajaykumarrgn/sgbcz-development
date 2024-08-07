@@ -13,13 +13,28 @@ on:
 
 jobs:
   code_quality_check:
-
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')" # Skip if commit message contains [skip ci]
-
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+      )
     steps:
+      - name: Use Node.js v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          
       - name: Checkout head branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
@@ -32,7 +47,7 @@ jobs:
       - name: Lint JavaScript files
         run: |
           set -e
-          git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep '.js$' | while IFS= read -r file; do
+          git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep -E '\.js$' | grep -v '\.cy\.js$' | while IFS= read -r file; do
             output=$(npx eslint --config=./eslint.config.js "$file")
             echo "$output"
             total_errors_warnings=$(echo "$output" | grep -Eo '[0-9]+ (error|warning)' | awk '{sum += $1} END {print sum}')
@@ -57,7 +72,19 @@ jobs:
 
   quality:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')" # Skip if commit message contains [skip ci]
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+      )
     needs: code_quality_check
     env:
       HOST: ${{ vars.QA_HOST }}
@@ -68,13 +95,13 @@ jobs:
       KEY: ${{ vars.QA_KEY }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Use Node.js v20.10.0
-        uses: actions/setup-node@v2
+      - name: Use Node.js v20
+        uses: actions/setup-node@v4
         with:
-          node-version: v20.10.0
+          node-version: 20
+
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Upload the files
         run: |
@@ -84,21 +111,36 @@ jobs:
   ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
   cypress_test:
-
     runs-on: ubuntu-latest
     needs: quality
-
-    if: "!contains(github.event.head_commit.message, '[skip ci]')" # Skip if commit message contains [skip ci]
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+      )
     env:
-      USER_NAME: ${{ vars.TEST_USER_NAME }}
-      PASSWORD: ${{ vars.TEST_PASSWORD }}
+      USER_NAME: ${{ secrets.TEST_USER_NAME }}
+      PASSWORD: ${{ secrets.TEST_PASSWORD }}
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - name: Use Node.js v20
+        uses: actions/setup-node@v4
         with:
-          submodules: true # Fetch all submodules recursively
-          token: ${{ secrets.TEST_REPO_KEY }} # Use PAT for accessing private submodules
+          node-version: 20
+          
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          token: ${{ secrets.TEST_REPO_KEY }}
 
       - name: Read Commit Hash
         id: read_commit_hash
@@ -118,12 +160,16 @@ jobs:
         working-directory: testAutomate
         run: npm install cypress --save-dev
 
-      - name: Run Cypress Tests in Submodule
-        working-directory: testAutomate
-        run: npx cypress run --spec "cypress/e2e/*.cy.js" --config-file=./cypress.config.cjs
+      - name: Clean Up Existing Cypress Folder in Parent Repo
+        run: |
+          rm -rf cypress
+          mkdir -p cypress/e2e cypress/fixtures cypress/support
 
-      - name: Overwrite Cypress Folder in Parent Repo
-        run: rsync -a --delete testAutomate/cypress/ cypress/
+      - name: Copy Cypress Folder from Submodule to Parent Repo
+        run: |
+          rsync -a testAutomate/cypress/e2e/ cypress/e2e/
+          rsync -a testAutomate/cypress/fixtures/ cypress/fixtures/
+          rsync -a testAutomate/cypress/support/ cypress/support/
 
       - name: Commit and Push Changes to New Branch in Parent Repo
         env:
@@ -134,11 +180,19 @@ jobs:
           CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
           BRANCH_NAME=cypress-results-$(date +%Y%m%d%H%M%S)
           git checkout -b $BRANCH_NAME
-          git add ./cypress
+          git add ./cypress/e2e ./cypress/fixtures ./cypress/support
           git commit -m 'Replace Cypress folder from submodule [skip ci]'
           git push origin $BRANCH_NAME
           echo "Creating pull request from $BRANCH_NAME to $CURRENT_BRANCH"
           gh pr create --base $CURRENT_BRANCH --head $BRANCH_NAME --title "Replace Cypress folder from submodule" --body "This PR includes the Cypress test results from the submodule, replacing the existing Cypress folder."
+        continue-on-error: true
+
+      - name: Merge PR and Delete Branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --head $BRANCH_NAME --json number,title --jq '.[] | select(.title | contains("[skip ci]")) | .number' | head -n 1)
+          gh pr merge $PR_NUMBER --merge --delete-branch --admin
         continue-on-error: true
 
       - name: Clean Up GitHub CLI Credentials
@@ -146,9 +200,30 @@ jobs:
         run: |
           rm -f ~/.config/gh/hosts.yml
 
+      - name: Run Cypress Tests in Submodule
+        working-directory: testAutomate
+        run: npx cypress run --spec "cypress/e2e/*.cy.js" --config-file=./cypress.config.cjs
+
   wait_for_approval:
     runs-on: ubuntu-latest
     needs: cypress_test
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+      ) &&
+      !(
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
+      )
+
     steps:
       - uses: trstringer/manual-approval@v1
         with:
@@ -161,6 +236,22 @@ jobs:
   production:
     runs-on: ubuntu-latest
     needs: wait_for_approval
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+      ) &&
+      !(
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
+      )
     env:
       HOST: ${{ vars.PROD_HOST }}
       PROTOCOL: ${{ vars.PROD_PROTOCOL }}
@@ -170,14 +261,13 @@ jobs:
       KEY: ${{ vars.PROD_KEY }}
 
     steps:
-   
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Use Node.js v20.10.0
-        uses: actions/setup-node@v2
+      - name: Use Node.js v20
+        uses: actions/setup-node@v4
         with:
-          node-version: v20.10.0
+          node-version: 20
+          
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Upload the files
         run: |

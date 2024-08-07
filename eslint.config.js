@@ -1,5 +1,7 @@
 import { rules as customRules } from './eslint-plugin-custom-rules.js';
 
+import { rules as customRules } from './eslint-plugin-custom-rules.js';
+
 export default [
   {
     files: ['**/*.js'],
