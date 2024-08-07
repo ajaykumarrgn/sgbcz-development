@@ -220,7 +220,20 @@ for ld_attribute in la_template_attributes:
         else:
             item_new.append("attributes", get_attribute(
                 design.transformer_type, ld_attribute.attribute, 5))
-            
+
+    #Tappings - number of tappings (+/-) should take greater va;ue in 
+    #either design's tapping_plus or tapping_minus
+    elif ld_attribute.attribute == 'Tappings - number of tappings (+/-)':
+        l_tapping_plus = int(design.tapping_plus)
+        l_tapping_minus = int(design.tapping_minus)
+        
+        if l_tapping_plus > l_tapping_minus:
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, ld_attribute.attribute, l_tapping_plus))
+        else:
+            item_new.append("attributes", get_attribute(
+                design.transformer_type, ld_attribute.attribute, l_tapping_minus))
+                    
     elif ld_attribute.attribute == 'Vector Group':
         if design.lv_2 == 0:
             attribute_value = design.vector_group

@@ -30,7 +30,7 @@ frappe.ui.form.on('Design', {
             L_RATING_LOSSES_LOWER.load_loss)),
           rating: frm.doc.rating,
           lwa: L_RATING_LOSSES_LOWER.lwa,
-          lpa_distance: L_RATING_LOSSES_LOWER.lpa_distance,
+          lpa_distance: String(L_RATING_LOSSES_LOWER.lpa_distance),
           lpa: L_RATING_LOSSES_LOWER.lpa
       };
       
@@ -45,14 +45,23 @@ frappe.ui.form.on('Design', {
              x.transformer_type === frm.doc.transformer_type);
        
           if (!lRatingLosses) {
+            
+              //commented this line because if rating is not found 
+              //in gitra settings, input value manually
               // Calculate custom losses if rating_losses not found
-              lRatingLosses = frm.events.fnComputeCustomLosses(frm, LA_VALUES[0].iLossesSetting);
+              //lRatingLosses = frm.events.fnComputeCustomLosses(frm, LA_VALUES[0].iLossesSetting);
+              frm.set_value('no_load_loss_guarantee', '');
+              frm.set_value('load_loss_guarantee', '');
+              frm.set_value('lwa', '');
+              frm.set_value('lpa', '');
+              
           }
           
-          if (iRefreshAllFields) {
+          if (iRefreshAllFields && lRatingLosses) {
               frm.doc.no_load_loss_guarantee = lRatingLosses.no_load_loss;
               frm.doc.load_loss_guarantee = lRatingLosses.load_loss;
-              frm.doc.lpa_distance = lRatingLosses.lpa_distance;
+              //converted into string because 0 is not displaying
+              frm.doc.lpa_distance = String(lRatingLosses.lpa_distance);
               frm.doc.lwa = lRatingLosses.lwa;
               frm.doc.lpa = lRatingLosses.lpa;
           }
@@ -68,29 +77,37 @@ frappe.ui.form.on('Design', {
       
       frm.refresh_fields();
   },
+
+  //onchange of transformer_type field event
   transformer_type(frm) {
       
     frm.events.fnGetStandardLosses(frm, true);
   
   },
+
+  //onchange of factory field event
   factory(frm) {
       
     frm.events.fnGetStandardLosses(frm, true);
   
   },
   
+  //onchange of rating field event
   rating(frm) {
       frm.events.fnGetStandardLosses(frm, true);
   },
   
+  //onchange of no_load_loss_guarantee field event
   no_load_loss_guarantee(frm) {
       frm.events.fnGetStandardLosses(frm, false, 'no_load_loss_guarantee', 'no_load_loss');
   },
   
+  //onchange of load_loss_guarantee field event
   load_loss_guarantee(frm) {
       frm.events.fnGetStandardLosses(frm, false, 'load_loss_guarantee', 'load_loss');
   },
   
+  //onchange of lwa field event
   lwa(frm) {
       if (frm.doc.is_design) {
           frm.events.fnGetStandardLosses(frm, false, 'lwa', 'lwa');
@@ -101,7 +118,8 @@ frappe.ui.form.on('Design', {
           }
       }
   },
-  
+
+  //onchange of lpa field event
   lpa(frm) {
       if (frm.doc.is_design) {
           frm.events.fnGetStandardLosses(frm, false, 'lpa', 'lpa');
