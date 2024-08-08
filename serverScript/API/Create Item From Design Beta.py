@@ -221,7 +221,7 @@ for ld_attribute in la_template_attributes:
             item_new.append("attributes", get_attribute(
                 design.transformer_type, ld_attribute.attribute, 5))
 
-    #Tappings - number of tappings (+/-) should take greater va;ue in 
+    #Tappings - number of tappings (+/-) should take greater value in 
     #either design's tapping_plus or tapping_minus
     elif ld_attribute.attribute == 'Tappings - number of tappings (+/-)':
         l_tapping_plus = int(design.tapping_plus)

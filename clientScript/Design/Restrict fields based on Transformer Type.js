@@ -29,10 +29,7 @@ frappe.ui.form.on('Design', {
 
     //onchange of factory select field event
     factory: function(frm) {
-        if(frm.is_new()){
-            //set the lv1 and lv 2 to null
-            frm.set_value('lv1', '');   
-            frm.set_value('lv_2', ''); 
+      
             fnResetValues(frm);
             
             //setting the default transformer type
@@ -54,7 +51,7 @@ frappe.ui.form.on('Design', {
             frm.trigger('fnToggleFields');
             frm.trigger('fnUpdateInsulationClass');
             frm.trigger('fnSetTappingsOption');
-        }
+        
     },
     
     refresh: function(frm) {
@@ -347,11 +344,25 @@ function fnUpdateFieldBasedOnIsDesign(frm){
 // When changing the HTMl field, clear the below field value
 // as well as html input value
 function fnResetValues(frm) {
- 
+
+    //resetting all the data and currency fields to empty 
+    //and 0 respectively
         frm.set_value('lv_rated_voltage', '');
+        frm.set_value('hv_rated_voltage', '');
         frm.set_value('highest_operation_voltage_hv', '');
         frm.set_value('ac_phase_hv', '');
         frm.set_value('li_phase_hv', '');
+        frm.set_value('lv1', '');   
+        frm.set_value('lv_2', ''); 
+        frm.set_value('hv1', '');
+        frm.set_value('hv2', '');
+        let laItemTabFields = ["direct_material_cost", "labour", "production_overhead", 
+            "cost_of_goods", "sales_overhead", "administrative_overhead", "total_cost"]
+            
+        for(let lField of laItemTabFields){
+            frm.set_value(lField, '0')
+            frm.set_df_property(lField, "read_only", false);
+        }
         
         //clearing html field(hv_html, lv_html)
         
@@ -359,7 +370,7 @@ function fnResetValues(frm) {
         hvHtmlInput.val('');
         let lvHtmlInput = $(frm.fields_dict.lv_html.wrapper).find('input');
         lvHtmlInput.val('');
-    
+        
 }
 
 //function to make html field read_only

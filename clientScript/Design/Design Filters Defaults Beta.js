@@ -142,11 +142,14 @@ frappe.ui.form.on('Design', {
     //onchange of tapping_plus_step field event
     tapping_plus_step(frm) {
         frm.events.fnValidateAttributeRange(frm, 'Tapping Plus Step', 'tapping_plus_step', frm.doc.transformer_type, false);
+        frm.set_value('tapping_minus_step', frm.doc.tapping_plus_step);
     },
     
-    //onchange of tapping_minus_step field event
-    tapping_minus_step(frm) {
-        frm.events.fnValidateAttributeRange(frm, 'Tapping Minus Step', 'tapping_minus_step',frm.doc.transformer_type, false);
-    },
+    //commented this because this field will
+    //take value from tapping_plus_step
+    // //onchange of tapping_minus_step field event
+    // tapping_minus_step(frm) {
+    //     frm.events.fnValidateAttributeRange(frm, 'Tapping Minus Step', 'tapping_minus_step',frm.doc.transformer_type, false);
+    // },
     
 });
