@@ -211,22 +211,32 @@ function fnDirectMaterial(frm){
 }
 
 function fncreateItem(frm) {
-  if(!frm.doc.no_load_loss_guarantee && frm.doc.load_loss_guarantee
-    && (!frm.doc.lwa || !frm.doc.lpa)
+  //the Item will be created if no load and load loss
+  //guarantee is not empty
+  if(frm.doc.no_load_loss_guarantee && frm.doc.load_loss_guarantee
+    && (frm.doc.lwa || frm.doc.lpa)
   ){
+
+    //Start of item creation
     frappe.msgprint(__('The item is being created. Please wait a moment.'));
+    //Calling the create_item_from_design_beta api
     frappe.call({
       method: "create_item_from_design_beta",
       args: { design: frm.doc.name },
       callback: function (response) {
         if (response.message) {
+
+          //after successfull creation
+          //an alert message
           frappe.show_alert(
             { message: __("Item Created"), indicator: "green" },
             5
           );
+          //setting the item field
           frm.set_value("item", response.message.item_code);
-          frm.set_value("status", "Item Created");
           frm.refresh_fields();
+          //pdf creation is enabled for
+          //is design SGBCZ transformer
           frm.save().then(() => {
             if (frm.doc.is_design === 1) {
               frappe.show_progress(
@@ -235,6 +245,8 @@ function fncreateItem(frm) {
                 100,
                 __("Please wait")
               );
+              //get the languange and separator
+              //from gitra settings
               frappe.call({
                 method: "frappe.client.get",
                 args: { doctype: "Gitra Settings" },
@@ -245,17 +257,31 @@ function fncreateItem(frm) {
                     const LA_LANGUAGES = LD_DATASHEETLANGUAGES.map(
                       (lang) => lang.language
                     );
+                    //the filename is generated using the argument
+                    // im_file_name, which takes a string 
+                    //that includes a placeholder for language.
+                    // Example:'Datasheet_${l_title}_${frm.doc.name}_{language}'
+                    // Here, {language} is the placeholder, 
+                    //ensuring the language appears at the end.
+                                        
+                    // The design title will be used as the filename.
                     let lTitle = frm.doc.title;
                     if (lTitle) {
+                      // Find the position of the first space
                       let lSpaceIndex = lTitle.indexOf(" ");
                       if (lSpaceIndex !== -1) {
+                        // Remove everything up to the first space
                         lTitle = lTitle.substring(lSpaceIndex + 1);
                       }
+                       // Replace slashes with gitra separator
                       lTitle = lTitle.replace(
                         /\//g,
                         gitraResponse.message.naming_separator
                       );
                     }
+
+                    //calling the custom fn_doc_pdf_source_to_target
+                    //developed inside the framework
                     frappe.call({
                       method: "pdf_on_submit.api.fn_doc_pdf_source_to_target",
                       args: {
@@ -269,7 +295,9 @@ function fncreateItem(frm) {
                       },
                       callback: function (pdfResponse) {
                         if (pdfResponse.message) {
+                          //update the status
                           frappe.hide_progress();
+                          frm.set_value('status', 'Item Created');
                           frm.save().then(() => {
                             fnUpdateButtonGroup(frm);
                           });
@@ -292,6 +320,8 @@ function fncreateItem(frm) {
         }
       },
     });
+  }else{
+    frappe.msgprint(__("No Load Loss and Load Loss Guarantee cannot be empty for creating an item"));
   }
 }
 

@@ -8,7 +8,7 @@ frappe.ui.form.on('Design', {
  
             // In the SGBCZ factory used only one LV value 
             // so I have renamed the LV rated Voltage into LV value
-            frm.fields_dict['lv_rated_voltage'].df.label = 'LV Value(V)';
+            frm.fields_dict.lv_rated_voltage.df.label = 'LV Value(V)';
  
             // If factory is SGBCZ, set the LV rated voltage 
             //as a mandatory field
@@ -18,7 +18,7 @@ frappe.ui.form.on('Design', {
             // Set the LV placeholder when the single LV value is needed.
             if (frm.doc.factory === 'SGBCZ') {
                 frm.set_df_property('lv_rated_voltage', 'reqd', true);
-                frm.fields_dict['lv_rated_voltage'].df.placeholder = 'LV';
+                frm.fields_dict.lv_rated_voltage.df.placeholder = 'LV';
             }
  
             // Triggering the toggle fields based on the factory by here.
@@ -52,6 +52,10 @@ frappe.ui.form.on('Design', {
             frm.trigger('fnUpdateInsulationClass');
             frm.trigger('fnSetTappingsOption');
         
+    },
+    
+    transformer_type: function(frm){
+        fnResetValues(frm);
     },
     
     refresh: function(frm) {
@@ -216,11 +220,14 @@ frappe.ui.form.on('Design', {
             frm.set_value('lpa', 0);
     
             //reset the placeholder of hv_rated_voltage
-            frm.fields_dict['hv_rated_voltage'].set_label('HV Value(V)');
+            frm.fields_dict.hv_rated_voltage.set_label('HV Value(V)');
             frm.set_df_property('hv_rated_voltage', 'placeholder', 'HV');
+            //reset the placeholder of lv_rated_voltage
+            frm.fields_dict.lv_rated_voltage.df.label = 'LV Value(V)';
+            frm.set_df_property('lv_rated_voltage', 'placeholder', 'LV');
           
-            fnUpdateFieldBasedOnIsDesign(frm)
-            
+            fnUpdateFieldBasedOnIsDesign(frm);
+            fnResetValues(frm);
             
         } else {
             // Display hv_html field
@@ -344,7 +351,7 @@ function fnUpdateFieldBasedOnIsDesign(frm){
 // When changing the HTMl field, clear the below field value
 // as well as html input value
 function fnResetValues(frm) {
-
+    if(frm.doc.status === 'Draft'){
     //resetting all the data and currency fields to empty 
     //and 0 respectively
         frm.set_value('lv_rated_voltage', '');
@@ -361,16 +368,28 @@ function fnResetValues(frm) {
             
         for(let lField of laItemTabFields){
             frm.set_value(lField, '0')
-            frm.set_df_property(lField, "read_only", false);
+            if(!frm.doc.is_design){
+                frm.set_df_property(lField, "read_only", false);
+            }
         }
         
+        //resetting the rating and High Voltage tab section
+       ['rating', 'tapping_plus', 'tapping_minus', 
+            'tapping_plus_step', 'vector_group'].map(fieldname => {
+        //find the field's default value in metadata
+        const fieldMeta = frm.meta.fields.find(field => field.fieldname === fieldname);
+        if (fieldMeta) {
+            frm.set_value(fieldname, fieldMeta.default);
+        }
+         });
+
         //clearing html field(hv_html, lv_html)
         
         let hvHtmlInput = $(frm.fields_dict.hv_html.wrapper).find('input');
         hvHtmlInput.val('');
         let lvHtmlInput = $(frm.fields_dict.lv_html.wrapper).find('input');
         lvHtmlInput.val('');
-        
+    }   
 }
 
 //function to make html field read_only

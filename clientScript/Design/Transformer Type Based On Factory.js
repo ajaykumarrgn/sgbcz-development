@@ -205,8 +205,8 @@ function fnDirectMaterial(frm){
 }
 
 function fncreateItem(frm) {
-    if(!frm.doc.no_load_loss_guarantee && frm.doc.load_loss_guarantee
-        && (!frm.doc.lwa || !frm.doc.lpa)
+    if(frm.doc.no_load_loss_guarantee && frm.doc.load_loss_guarantee
+        && (frm.doc.lwa || frm.doc.lpa)
       ){
         frappe.msgprint(__('The item is being created. Please wait a moment.'));
         frappe.call({
@@ -245,8 +245,7 @@ function fncreateItem(frm) {
                                     return laLanguage.language;
                                 });
                                         
-
-                                // In the fn_pdf_attachment function,  
+ 
                                 //the filename is generated using the argument
                                 // im_file_name, which takes a string 
                                 //that includes a placeholder for language.
@@ -284,7 +283,9 @@ function fncreateItem(frm) {
                                         if(pdfResponse.message){
                                             frappe.hide_progress();
                                             frm.set_value('status', 'Item Created');
-                                            frm.save();
+                                            frm.save().then(() => {
+                                                fnUpdateButtonGroup(frm);
+                                              });
                                                                     
                                         }
                                     }
@@ -301,7 +302,9 @@ function fncreateItem(frm) {
                             indicator:'red'
                 }, 5); }
             }}); 
-    }     
+    }else{
+       frappe.msgprint(__("No Load Loss and Load Loss Guarantee cannot be empty for creating an item"));
+    }   
 }
 
 function fncreateDesign(frm) {
