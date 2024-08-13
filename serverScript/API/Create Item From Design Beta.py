@@ -106,12 +106,15 @@ def append_attribute(attribute_name, attribute_value):
         existing_attributes.add(attribute_name)
 
 def get_lwa_attribute_value(design):
-    # Placeholder implementation, replace with actual logic
+    
     return design.get('lwa', 0)
 
 def get_lpa_attribute_value(design):
-    # Placeholder implementation, replace with actual logic
+   
     return design.get('lpa', 0)
+#function to convert volt ti kV
+def fn_convert_to_kv(value):
+    return str(int(value) / 1000)
 
 # Fetch the design details from the request
 design_id = frappe.form_dict.get('design')
@@ -123,12 +126,6 @@ la_parameter_map_def = fn_get_parameter_mapping_def()
 if design.transformer_type == 'DTTHZ2N':
     item_group = 'DTTHZ2N'
     variant_of = 'DTTHZ2N'
-# elif design.transformer_type == 'DTTH2N':
-#     item_group = 'RGB'
-#     variant_of = 'DTTH2N'
-# elif design.transformer_type == 'DOTML':
-#     item_group = 'NEU'
-#     variant_of = 'DOTML'
 elif design.transformer_type in ['DTTH2N', 'DTTHK2NG', 'DTTHDG', 'DTTH2NG']:
     item_group = 'RGB'
     variant_of = design.transformer_type
@@ -233,46 +230,31 @@ for ld_attribute in la_template_attributes:
         else:
             item_new.append("attributes", get_attribute(
                 design.transformer_type, ld_attribute.attribute, l_tapping_minus))
-                    
-    elif ld_attribute.attribute == 'Vector Group':
-        if design.lv_2 == 0:
-            attribute_value = design.vector_group
-            item_new.append("attributes", get_attribute(
-                design.transformer_type, 'Vector Group', attribute_value))
-        else:
-            item_new.append("attributes", get_attribute(
-                design.transformer_type, 'Vector Group', 0))
-    elif ld_attribute.attribute == 'Vector Group LV 1':
-        if design.lv_2 != 0:
-            vector_group_lv1_value = design.vector_group_lv1
-            item_new.append("attributes", get_attribute(
-                design.transformer_type, 'Vector Group LV 1', vector_group_lv1_value))
-        else:
-            item_new.append("attributes", get_attribute(
-                design.transformer_type, 'Vector Group LV 1', 0))
-    elif ld_attribute.attribute == 'Vector Group LV 2':
-        if design.lv_2 != 0:
-            vector_group_lv2_value = design.vector_group_lv2
-            item_new.append("attributes", get_attribute(
-                design.transformer_type, 'Vector Group LV 2', vector_group_lv2_value))
-        else:
-            item_new.append("attributes", get_attribute(
-                design.transformer_type, 'Vector Group LV 2', 0))
 
-    # elif ld_attribute.attribute == 'Vector Group':
-    #     item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ('DYN' + design.vector_group)))
+    #if lv_2 has a value then vector group should be 0
+    #if not vector group lv1 and lv2 should be 0
+    elif ld_attribute.attribute in ['Vector Group', 'Vector Group LV 1', 'Vector Group LV 2']:
+        if ld_attribute.attribute == 'Vector Group':
+            attribute_value = design.vector_group if design.lv_2 == 0 else 0
+        elif ld_attribute.attribute == 'Vector Group LV 1':
+            attribute_value = design.vector_group_lv1 if design.lv_2 != 0 else 0
+        elif ld_attribute.attribute == 'Vector Group LV 2':
+            attribute_value = design.vector_group_lv2 if design.lv_2 != 0 else 0
+        item_new.append("attributes", get_attribute(
+            design.transformer_type, ld_attribute.attribute, attribute_value
+        ))
 
-    #converting hv, hv 1, hv 2 from V to kV 
-    elif ld_attribute.attribute == 'HV (kV)':
-        hv_in_kv_str = str(int(design.hv_rated_voltage) / 1000)
-        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
-    elif ld_attribute.attribute == 'HV 1 (kV)':
-        hv_in_kv_str = str(int(design.hv1) / 1000)
-        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
-    elif ld_attribute.attribute == 'HV 2 (kV)':
-        hv_in_kv_str = str(int(design.hv2) / 1000)
-        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
-            
+   # Converting HV, HV 1, HV 2 from V to kV
+    elif ld_attribute.attribute in ['HV (kV)', 'HV 1 (kV)', 'HV 2 (kV)']:
+        hv_value_map = {
+            'HV (kV)': design.hv_rated_voltage,
+            'HV 1 (kV)': design.hv1,
+            'HV 2 (kV)': design.hv2
+        }
+        hv_in_kv_str = fn_convert_to_kv(hv_value_map[ld_attribute.attribute])
+        item_new.append("attributes", get_attribute(
+            design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
+
     elif ld_designdoc_field in ['lwa', 'lpa']:
         ld_target_attribute_value = design.get(ld_designdoc_field)
         if ld_target_attribute_value is not None:

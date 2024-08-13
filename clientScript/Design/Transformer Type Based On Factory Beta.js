@@ -234,6 +234,7 @@ function fncreateItem(frm) {
           );
           //setting the item field
           frm.set_value("item", response.message.item_code);
+          frm.set_value('status', 'Item Created');
           frm.refresh_fields();
           //pdf creation is enabled for
           //is design SGBCZ transformer

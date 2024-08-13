@@ -10,49 +10,39 @@ frappe.ui.form.on('Design', {
     * the current design for validation
     * @params {string} transformer_type - The type of transformer 
     * for which the range is validated
-    * @params {boolean} iShouldBeEmpty - for Data field normally will 
-    * be empty, Other than that set the default if it has or 
-    * the min value itself
     */
-    fnValidateAttributeRange(frm, iAttribute_label, iAttribute_name, iTransformer_type, iShouldBeEmpty = true) {
+    fnValidateAttributeRange(frm, iAttribute_label, 
+            iAttribute_name, iTransformer_type) {
         const DOCTYPE = "Gitra Settings";
- 
+         // Initialize the model with doctype Gitra Settings
         frappe.model.with_doc(DOCTYPE, DOCTYPE, function() {
-            let ldDoc = frappe.get_doc(DOCTYPE, DOCTYPE);
-            let ldAttribute = ldDoc.attributes.find(attr => 
+            // Then from the model get the list. This will
+            // return all attributes of the model including child table
+            let ldDoc = frappe.model.get_list(DOCTYPE);
+            // Find the specific attribute based on the attribute_label
+            //and transformer_type
+            let ldAttribute = ldDoc[0].attributes.find(attr => 
                 attr.parameter === iAttribute_label 
                 && attr.transformer_type === iTransformer_type);
-            let lFieldMeta = frm.meta.fields.find(field => field.fieldname === iAttribute_name);
             
-            if (ldAttribute) {
-                
- 
+            if(ldAttribute){
                 // Ensure all values are numeric for accurate comparison
                 let lAttributeName = parseFloat(frm.doc[iAttribute_name]);
                 let lMinValue = parseFloat(ldAttribute.min);
                 let lMaxValue = parseFloat(ldAttribute.max);
- 
+        
                 if (lAttributeName < lMinValue || lAttributeName > lMaxValue) {
+                    // Check if the attribute value is within the 
+                    //specified range and display an error message if it is not.
                     frappe.msgprint({
                         title: __('Validation Error'),
-                        message: __('Attribute Not in Range' + ', Min: ' + lMinValue + ', Max: ' + lMaxValue),
+                        message: __('Attribute Not in Range' + 
+                            ', Min: ' + lMinValue + ', Max: ' + lMaxValue),
                         indicator: 'red'
                     });
-
-                    //for Data field type set it to empty
-                    //other than Data field type set either default 
-                    //if there or minvalue
-                    frm.set_value(iAttribute_name, iShouldBeEmpty ? '' : lFieldMeta ? lFieldMeta.default : lMinValue); 
-                    frappe.validated = false; // Prevent form submission
                 }
-            } 
-            // else {
-            //     frappe.msgprint({
-            //         title: __('Attribute Not Found'),
-            //         message: __(iAttribute_label + ' for ' + iTransformer_type + ' is not found in Gitra Settings.'),
-            //         indicator: 'orange'
-            //     });
-            // }
+            }
+            
         });
     },
 
@@ -82,7 +72,7 @@ frappe.ui.form.on('Design', {
     //onchange of impedance field event
     impedance(frm) {
         
-        frm.events.fnValidateAttributeRange(frm, 'Impedance', 'impedance', frm.doc.transformer_type, false);
+        frm.events.fnValidateAttributeRange(frm, 'Impedance', 'impedance', frm.doc.transformer_type);
     },
     
     //onchange of lv_rated_voltage field event
@@ -141,7 +131,7 @@ frappe.ui.form.on('Design', {
 
     //onchange of tapping_plus_step field event
     tapping_plus_step(frm) {
-        frm.events.fnValidateAttributeRange(frm, 'Tapping Plus Step', 'tapping_plus_step', frm.doc.transformer_type, false);
+        frm.events.fnValidateAttributeRange(frm, 'Tapping Plus Step', 'tapping_plus_step', frm.doc.transformer_type);
         frm.set_value('tapping_minus_step', frm.doc.tapping_plus_step);
     },
     
