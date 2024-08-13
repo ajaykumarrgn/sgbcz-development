@@ -15,6 +15,7 @@ factory: function(frm) {
                 frm.set_value('transformer_type', 'DTTHZ2N');
                 break;
             case 'RGB':
+                frm.set_df_property('lv_rated_voltage', 'reqd', false);
                 frm.set_value('transformer_type', 'DTTH2N');
                 break;
             case 'NEU':
@@ -52,7 +53,6 @@ refresh: function(frm) {
         //when the design form is new
         frm.set_value('factory', 'SGBCZ');
         frm.set_value('transformer_type', 'DTTHZ2N');
-
         // If factory is SGBCZ, set the LV rated voltage 
         //as a mandatory field
         // not for other Trafo.
@@ -63,7 +63,6 @@ refresh: function(frm) {
             frm.set_df_property('lv_rated_voltage', 'reqd', true);
             frm.fields_dict.lv_rated_voltage.df.placeholder = 'LV';
         }
-
         // Triggering the toggle fields based on the factory by here.
         frm.trigger('fnToggleFields');
     }
@@ -189,9 +188,7 @@ fnToggleFields: function(frm) {
             if (frm.doc.is_design) {
                 frm.toggle_display('type_lv', false);
             }
-        }
-       
-    
+        }   
 },
 
 // Set the default value for the THDi is 5 when designing the transformer
@@ -276,6 +273,14 @@ validate: function(frm) {
         
         //for SGBCZ LV should be mandatory
         if (frm.doc.factory === 'SGBCZ' && !frm.doc.lv_rated_voltage) {
+            frappe.msgprint(__('LV Value is mandatory'));
+            frappe.validated = false; 
+            return;
+        }
+        //other than sgbcz, check if either 
+        //lv_rated_voltage or lv_2 is empty
+        if(frm.doc.factory !== 'SGBCZ' && 
+            (!!frm.doc.lv_rated_voltage || !frm.doc.lv_2)){
             frappe.msgprint(__('LV Value is mandatory'));
             frappe.validated = false; 
             return;
