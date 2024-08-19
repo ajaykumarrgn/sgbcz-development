@@ -192,95 +192,138 @@ function fnDirectMaterial(frm){
    // To create item without gitra calculation for SGBCZ, direct material cost
    // is required, so on draft status with is_design checkbox disable make
    // direct material cost mandatory
-   // and for all other factory make it disable
-   if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design && frm.doc.status === 'Draft') {
-       frm.set_df_property('direct_material_cost', 'read_only', 0);
-       frm.set_df_property('direct_material_cost', 'reqd', 1);
-   } else {
-       frm.set_df_property('direct_material_cost', 'read_only', 1);
-       frm.set_df_property('direct_material_cost', 'reqd', 0);
-   }
+   // and for all other factory make it non mandatory but editable
+   switch (true) {
+      case (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design && frm.doc.status === 'Draft'):
+          frm.set_df_property('direct_material_cost', 'read_only', 0);
+          frm.set_df_property('direct_material_cost', 'reqd', 1);
+          break;
+      case (frm.doc.factory === 'SGBCZ' && frm.doc.is_design && frm.doc.status === 'Draft'):
+          frm.set_df_property('direct_material_cost', 'read_only', 1);
+          frm.set_df_property('direct_material_cost', 'reqd', 0);
+          break;
+      default:
+          frm.set_df_property('direct_material_cost', 'read_only', 0);
+          frm.set_df_property('direct_material_cost', 'reqd', 0);
+          break;
+  }
    
 }
 
 function fncreateItem(frm) {
- frappe.msgprint(__('The item is being created. Please wait a moment.'));
- frappe.call({
-   method: "create_item_from_design_beta",
-   args: { design: frm.doc.name },
-   callback: function (response) {
-     if (response.message) {
-       frappe.show_alert(
-         { message: __("Item Created"), indicator: "green" },
-         5
-       );
-       frm.set_value("item", response.message.item_code);
-       frm.set_value("status", "Item Created");
-       frm.refresh_fields();
-       frm.save().then(() => {
-         if (frm.doc.is_design === 1) {
-           frappe.show_progress(
-             __("Creating with Pdf.."),
-             50,
-             100,
-             __("Please wait")
-           );
-           frappe.call({
-             method: "frappe.client.get",
-             args: { doctype: "Gitra Settings" },
-             callback: function (gitraResponse) {
-               if (gitraResponse.message) {
-                 const LD_DATASHEETLANGUAGES =
-                   gitraResponse.message.datasheet_languages;
-                 const LA_LANGUAGES = LD_DATASHEETLANGUAGES.map(
-                   (lang) => lang.language
-                 );
-                 let lTitle = frm.doc.title;
-                 if (lTitle) {
-                   let lSpaceIndex = lTitle.indexOf(" ");
-                   if (lSpaceIndex !== -1) {
-                     lTitle = lTitle.substring(lSpaceIndex + 1);
-                   }
-                   lTitle = lTitle.replace(
-                     /\//g,
-                     gitraResponse.message.naming_separator
-                   );
-                 }
-                 frappe.call({
-                   method: "pdf_on_submit.api.fn_doc_pdf_source_to_target",
-                   args: {
-                     im_source_doc_type: frm.doc.doctype,
-                     im_source_doc_name: frm.doc.name,
-                     im_languages: LA_LANGUAGES,
-                     im_letter_head: "Data Sheet",
-                     im_target_doc_type: "Item",
-                     im_target_doc_name: response.message.item_code,
-                     im_file_name: `Datasheet_${lTitle}_${frm.doc.name}_{language}`,
-                   },
-                   callback: function (pdfResponse) {
-                     if (pdfResponse.message) {
-                       frappe.hide_progress();
-                       frm.save().then(() => {
-                         fnUpdateButtonGroup(frm);
-                       });
-                     }
-                   },
-                 });
-               }
-             },
-           });
-         } else {
-           fnUpdateButtonGroup(frm);
-         }
-       });
-     } else {
-       frappe.show_alert(
-         { message: __("Error Creating Item"), indicator: "red" },
-         5
-       );
-     }
-   },
- });
+  //the Item will be created if no load and load loss
+  //guarantee is not empty
+  if(frm.doc.no_load_loss_guarantee && frm.doc.load_loss_guarantee
+    && (frm.doc.lwa || frm.doc.lpa)
+  ){
+
+    //Start of item creation
+    frappe.msgprint(__('The item is being created. Please wait a moment.'));
+    //Calling the create_item_from_design_beta api
+    frappe.call({
+      method: "create_item_from_design_beta",
+      args: { design: frm.doc.name },
+      callback: function (response) {
+        if (response.message) {
+
+          //after successfull creation
+          //an alert message
+          frappe.show_alert(
+            { message: __("Item Created"), indicator: "green" },
+            5
+          );
+          //setting the item field
+          frm.set_value("item", response.message.item_code);
+          frm.set_value("status", "Item Created");
+          frm.refresh_fields();
+          //pdf creation is enabled for
+          //is design SGBCZ transformer
+          frm.save().then(() => {
+            if (frm.doc.is_design === 1) {
+              frappe.show_progress(
+                __("Creating with Pdf.."),
+                50,
+                100,
+                __("Please wait")
+              );
+              //get the languange and separator
+              //from gitra settings
+              frappe.call({
+                method: "frappe.client.get",
+                args: { doctype: "Gitra Settings" },
+                callback: function (gitraResponse) {
+                  if (gitraResponse.message) {
+                    const LD_DATASHEETLANGUAGES =
+                      gitraResponse.message.datasheet_languages;
+                    const LA_LANGUAGES = LD_DATASHEETLANGUAGES.map(
+                      (lang) => lang.language
+                    );
+                    //the filename is generated using the argument
+                    // im_file_name, which takes a string 
+                    //that includes a placeholder for language.
+                    // Example:'Datasheet_${l_title}_${frm.doc.name}_{language}'
+                    // Here, {language} is the placeholder, 
+                    //ensuring the language appears at the end.
+                                        
+                    // The design title will be used as the filename.
+                    let lTitle = frm.doc.title;
+                    if (lTitle) {
+                      // Find the position of the first space
+                      let lSpaceIndex = lTitle.indexOf(" ");
+                      if (lSpaceIndex !== -1) {
+                        // Remove everything up to the first space
+                        lTitle = lTitle.substring(lSpaceIndex + 1);
+                      }
+                       // Replace slashes with gitra separator
+                      lTitle = lTitle.replace(
+                        /\//g,
+                        gitraResponse.message.naming_separator
+                      );
+                    }
+
+                    //calling the custom fn_doc_pdf_source_to_target
+                    //developed inside the framework
+                    frappe.call({
+                      method: "pdf_on_submit.api.fn_doc_pdf_source_to_target",
+                      args: {
+                        im_source_doc_type: frm.doc.doctype,
+                        im_source_doc_name: frm.doc.name,
+                        im_languages: LA_LANGUAGES,
+                        im_letter_head: "Data Sheet",
+                        im_target_doc_type: "Item",
+                        im_target_doc_name: response.message.item_code,
+                        im_file_name: `Datasheet_${lTitle}_${frm.doc.name}_{language}`,
+                      },
+                      callback: function (pdfResponse) {
+                        if (pdfResponse.message) {
+                          //update the status
+                          frappe.hide_progress();
+                          frm.set_value('status', 'Item Created');
+                          frm.save().then(() => {
+                            fnUpdateButtonGroup(frm);
+                          });
+                        }
+                      },
+                    });
+                  }
+                },
+              });
+            } else {
+              fnUpdateButtonGroup(frm);
+            }
+          });
+        } else {
+          frappe.show_alert(
+            { message: __("Error Creating Item"), 
+              indicator: "red" },
+            5
+          );
+        }
+      },
+    });
+  }else{
+    frappe.msgprint(__("No Load Loss and Load Loss Guarantee cannot be empty for creating an item"));
+  }
 }
 
 function fncreateDesign(frm) {
