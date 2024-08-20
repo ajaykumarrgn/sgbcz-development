@@ -226,7 +226,7 @@ is_design: function(frm) {
         'Yd5','Yd7','Yd11','YD1','Yz1','Yz5','YZ5','Yz7','Yz11','Dzn0']);
         frm.set_df_property('climatic_class', 'options', ['C2', 'C3', 'C4', 'C5']);
         frm.set_df_property('environmental_class', 'options', ['E2', 'E3', 'E4', 'E5']);
-        
+        fnResetValues(frm);
     }
 },
 
@@ -280,7 +280,7 @@ validate: function(frm) {
         //other than sgbcz, check if either 
         //lv_rated_voltage or lv_2 is empty
         if(frm.doc.factory !== 'SGBCZ' && 
-            (!!frm.doc.lv_rated_voltage || !frm.doc.lv_2)){
+            (!frm.doc.lv_rated_voltage && !frm.doc.lv_2)){
             frappe.msgprint(__('LV Value is mandatory'));
             frappe.validated = false; 
             return;
@@ -358,8 +358,15 @@ function fnResetValues(frm) {
     function fnResetItemTabFields(iFields) {
         for (let field of iFields) {
             frm.set_value(field, '');
-            if (!frm.doc.is_design) {
+            if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
+                // If factory is 'SGBCZ' and not is_design, 
+                //make the field visible and editable
+                frm.set_df_property(field, "hidden", field !== 'direct_material_cost');
                 frm.set_df_property(field, "read_only", false);
+            } else {
+                // Otherwise, hide the field and make it read-only
+                frm.set_df_property(field, "hidden", true);
+                frm.set_df_property(field, "read_only", true);
             }
         }
     }
@@ -386,10 +393,13 @@ function fnResetValues(frm) {
 
     if (frm.doc.status === 'Draft') {
         // Resetting specific fields to empty
-        fnResetFields([
-            'lv_rated_voltage', 'hv_rated_voltage', 'highest_operation_voltage_hv', 
-            'ac_phase_hv', 'li_phase_hv', 'lv1', 'lv_2', 'hv1', 'hv2'
-        ]);
+        if (frm.doc.is_design && frm.doc.hv2 && 
+            frm.doc.lv_2 || !frm.doc.is_design) {
+            fnResetFields([
+                'lv_rated_voltage', 'hv_rated_voltage', 'highest_operation_voltage_hv', 
+                'ac_phase_hv', 'li_phase_hv', 'lv1', 'lv_2', 'hv1', 'hv2'
+            ]);
+        }
 
         // Resetting item tab fields
         fnResetItemTabFields([
