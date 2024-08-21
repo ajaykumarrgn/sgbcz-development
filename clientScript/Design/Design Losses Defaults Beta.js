@@ -101,10 +101,15 @@ frappe.ui.form.on('Design', {
                 var formattedField = iFieldForValidation.replace(/_/g, ' ').replace(/\b\w/g, function(match){
                     return match.toUpperCase();
                 });
-                const MESSAGE_STRING = 'Value higher than (' + lRatingLosses[iSettingsField] +')' + ' Not Allowed';
+                //the message content is updated as per the requirement below
+                // const MESSAGE_STRING = 'Value higher than (' + lRatingLosses[iSettingsField] +')' + ' Not Allowed';
+                const MESSAGE_STRING = 'The value is higher than ' + lRatingLosses[iSettingsField] ;
                 frappe.msgprint(MESSAGE_STRING, formattedField);
+                // The line below is commented out because other factories may have higher noise rates.
+                // Therefore,requested to only display a message (as updated above) 
+                // and allow the user to change the value without automatically reverting it.
                 //Restore back the field to maximum value
-                frm.doc[iFieldForValidation]=lRatingLosses[iSettingsField];
+                // frm.doc[iFieldForValidation]=lRatingLosses[iSettingsField];
             }
           
           frm.refresh_fields();
@@ -144,25 +149,23 @@ frappe.ui.form.on('Design', {
   },
   //onchange of lwa field
   lwa(frm) {
-      if (frm.doc.is_design) {
-          frm.events.fnGetStandardLosses(frm, false, 'lwa', 'lwa');
-
-          // Logic to set LPA to 0 if LWA is present
-          if (frm.doc.lwa && frm.doc.lwa !== 0) {
-              frm.set_value('lpa', 0);
-          }
+    frm.events.fnGetStandardLosses(frm, false, 'lwa', 'lwa');
+    if (frm.doc.is_design) {
+      // Logic to set LPA to 0 if LWA is present
+      if (frm.doc.lwa && frm.doc.lwa !== 0) {
+          frm.set_value('lpa', 0);
       }
+    }
   },
   //onchange of lpa field
   lpa(frm) {
-      if (frm.doc.is_design) {
-          frm.events.fnGetStandardLosses(frm, false);
-
-          // Logic to set LWA to 0 if LPA is present
-          if (frm.doc.lpa && frm.doc.lpa !== 0) {
-              frm.set_value('lwa', 0);
-          }
+    frm.events.fnGetStandardLosses(frm, false);
+    if (frm.doc.is_design) {
+      // Logic to set LWA to 0 if LPA is present
+      if (frm.doc.lpa && frm.doc.lpa !== 0) {
+          frm.set_value('lwa', 0);
       }
+    }
   },
   
 });

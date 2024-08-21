@@ -5,28 +5,28 @@ frappe.ui.form.on('Design', {
 //onchange of factory select field event
 factory: function(frm) {
   
-        fnResetValues(frm);
-        
-        //setting the default transformer type
-        //based on factory
-        switch (frm.doc.factory) {
-            case 'SGBCZ':
-                frm.set_df_property('lv_rated_voltage', 'reqd', true);
-                frm.set_value('transformer_type', 'DTTHZ2N');
-                break;
-            case 'RGB':
-                frm.set_df_property('lv_rated_voltage', 'reqd', false);
-                frm.set_value('transformer_type', 'DTTH2N');
-                break;
-            case 'NEU':
-                frm.set_df_property('lv_rated_voltage', 'reqd', false);
-                frm.set_value('transformer_type', 'DOTML');
-                break;
-        }
-        
-        frm.trigger('fnToggleFields');
-        frm.trigger('fnUpdateInsulationClass');
-        frm.trigger('fnSetTappingsOption');
+    fnResetValues(frm);
+    
+    //setting the default transformer type
+    //based on factory
+    switch (frm.doc.factory) {
+        case 'SGBCZ':
+            frm.set_df_property('lv_rated_voltage', 'reqd', true);
+            frm.set_value('transformer_type', 'DTTHZ2N');
+            break;
+        case 'RGB':
+            frm.set_df_property('lv_rated_voltage', 'reqd', false);
+            frm.set_value('transformer_type', 'DTTH2N');
+            break;
+        case 'NEU':
+            frm.set_df_property('lv_rated_voltage', 'reqd', false);
+            frm.set_value('transformer_type', 'DOTML');
+            break;
+    }
+    
+    frm.trigger('fnToggleFields');
+    frm.trigger('fnUpdateInsulationClass');
+    frm.trigger('fnSetTappingsOption');
     
 },
 
@@ -74,121 +74,121 @@ refresh: function(frm) {
 // Set the options for the insulation class varying for the factory
 fnUpdateInsulationClass: function(frm) {
   
-        let laOptions = [];
-        switch (frm.doc.factory) {
-            case 'RGB':
-                laOptions = ['F', 'H'];
-                break;
-            case 'NEU':
-                laOptions = ['A', 'B', 'C', 'F', 'H'];
-                break;
-        }
-        frm.set_df_property('insulation_class', 'options', laOptions);
+    let laOptions = [];
+    switch (frm.doc.factory) {
+        case 'RGB':
+            laOptions = ['F', 'H'];
+            break;
+        case 'NEU':
+            laOptions = ['A', 'B', 'C', 'F', 'H'];
+            break;
+    }
+    frm.set_df_property('insulation_class', 'options', laOptions);
     
 },
 // Set the options for the Tappings is varying based on factory
 fnSetTappingsOption: function(frm) {
   
-        let laTappings = [];
-        switch (frm.doc.factory) {
-            case 'SGBCZ':
-                laTappings = ['2', '3'];
-                break;
-            case 'RGB':
-                laTappings = ['2', '3', '4', '5', '6', '7', '8'];
-                break;
-            case 'NEU':
-                laTappings = ['2', '3', '4', '5', '6', '7', '8'];
-                break;
-        }
-        frm.set_df_property('tapping_plus', 'options', laTappings);
-        frm.set_df_property('tapping_minus', 'options', laTappings);
+    let laTappings = [];
+    switch (frm.doc.factory) {
+        case 'SGBCZ':
+            laTappings = ['2', '3'];
+            break;
+        case 'RGB':
+            laTappings = ['2', '3', '4', '5', '6', '7', '8'];
+            break;
+        case 'NEU':
+            laTappings = ['2', '3', '4', '5', '6', '7', '8'];
+            break;
+    }
+    frm.set_df_property('tapping_plus', 'options', laTappings);
+    frm.set_df_property('tapping_minus', 'options', laTappings);
     
 },
 // This function is used to hide and show fields 
 //based on the factory by controlling here.
 fnToggleFields: function(frm) {
    
-        const FIELDS = [
-            'vector_html', 'power_lv', 'uk_lv', 'uk_hv_lv', 'lv_html',
-            'insulation_class', 'winding_material', 'cooling_method',
-            'type_cooling', 'impedance', 'lv_rated_voltage', 'bushing_hv',
-            'cooling_method', 'type_cooling', 'temperature_rise',
-            'temperature_rise_oil', 'temperature_rise_winding',
-            'climatic_class', 'environmental_class',
-            'temperature_rise_datasheet', 'temperature_rise_gitra',
-            'parallel_coil','ip_protection','type_lv'
-        ];
+    const FIELDS = [
+        'vector_html', 'power_lv', 'uk_lv', 'uk_hv_lv', 'lv_html',
+        'insulation_class', 'winding_material', 'cooling_method',
+        'type_cooling', 'impedance', 'lv_rated_voltage', 'bushing_hv',
+        'cooling_method', 'type_cooling', 'temperature_rise',
+        'temperature_rise_oil', 'temperature_rise_winding',
+        'climatic_class', 'environmental_class',
+        'temperature_rise_datasheet', 'temperature_rise_gitra',
+        'parallel_coil','ip_protection','type_lv'
+    ];
 
-        FIELDS.forEach(field => frm.toggle_display(field, false));
+    FIELDS.forEach(field => frm.toggle_display(field, false));
 
-        let laShowFields = [];
-        switch (frm.doc.factory) {
-            //the mentioned fields will be hide from display
-            case 'SGBCZ':
-                laShowFields = ['vector_group', 'impedance', 
-                                'lv_rated_voltage', 'temperature_rise',
-                                'climatic_class', 'environmental_class',
-                                'temperature_rise_datasheet',
-                                'ip_protection',
-                                'temperature_rise_gitra',
-                                'parallel_coil','type_lv'];
-                break;
-            case 'RGB':
-                laShowFields = FIELDS.filter(field => ![
-                            'lv_rated_voltage', 'bushing_hv',
-                            'cooling_method', 'type_cooling',
-                            'uk_hv_lv', 'temperature_rise_oil',
-                            'temperature_rise_winding',
+    let laShowFields = [];
+    switch (frm.doc.factory) {
+        //the mentioned fields will be hide from display
+        case 'SGBCZ':
+            laShowFields = ['vector_group', 'impedance', 
+                            'lv_rated_voltage', 'temperature_rise',
+                            'climatic_class', 'environmental_class',
                             'temperature_rise_datasheet',
+                            'ip_protection',
                             'temperature_rise_gitra',
-                            'parallel_coil'].includes(field));
-                laShowFields.push('temperature_rise');
-                break;
-            case 'NEU':
-                laShowFields = FIELDS.filter(field => ![
-                            'lv_rated_voltage', 'uk_lv',
-                            'temperature_rise', 'climatic_class',
-                            'environmental_class','ip_protection',
-                            'temperature_rise_datasheet','type_lv',
-                            'temperature_rise_gitra',
-                            'parallel_coil'].includes(field));
-                laShowFields.push('temperature_rise_oil', 
-                                  'temperature_rise_winding');
-                break;
-        }
+                            'parallel_coil','type_lv'];
+            break;
+        case 'RGB':
+            laShowFields = FIELDS.filter(field => ![
+                        'lv_rated_voltage', 'bushing_hv',
+                        'cooling_method', 'type_cooling',
+                        'uk_hv_lv', 'temperature_rise_oil',
+                        'temperature_rise_winding',
+                        'temperature_rise_datasheet',
+                        'temperature_rise_gitra',
+                        'parallel_coil'].includes(field));
+            laShowFields.push('temperature_rise');
+            break;
+        case 'NEU':
+            laShowFields = FIELDS.filter(field => ![
+                        'lv_rated_voltage', 'uk_lv',
+                        'temperature_rise', 'climatic_class',
+                        'environmental_class','ip_protection',
+                        'temperature_rise_datasheet','type_lv',
+                        'temperature_rise_gitra',
+                        'parallel_coil'].includes(field));
+            laShowFields.push('temperature_rise_oil', 
+                              'temperature_rise_winding');
+            break;
+    }
 
-        laShowFields.forEach(field => frm.toggle_display(field, true));
+    laShowFields.forEach(field => frm.toggle_display(field, true));
+    
+    
+    //at RGB hide parallel_coil
+    //hide uk_hv_lv, impedance based on the presence of lv 2 value
+    if (frm.doc.factory === 'RGB') {
+        frm.toggle_display('uk_hv_lv', frm.doc.lv_2 ? false : true);
+        frm.toggle_display('impedance', frm.doc.lv_2 ? false : true);
+        frm.toggle_display('parallel_coil', false);
+    }
+    
+    //at RGB hide parallel_coil
+    //hide impedance based on the presence of lv 2 value
+    if (frm.doc.factory === 'NEU') {
+        frm.toggle_display('impedance', frm.doc.lv_2 ? false : true);
+        frm.toggle_display('parallel_coil', false);
+    }
+    
+    if (frm.doc.factory === 'SGBCZ') {
         
-        
-        //at RGB hide parallel_coil
-        //hide uk_hv_lv, impedance based on the presence of lv 2 value
-        if (frm.doc.factory === 'RGB') {
-            frm.toggle_display('uk_hv_lv', frm.doc.lv_2 ? false : true);
-            frm.toggle_display('impedance', frm.doc.lv_2 ? false : true);
+        //for is_design or lv 2 value present 
+        //hide the parallel coil
+        if (frm.doc.is_design || frm.doc.hv2 > 0) {
             frm.toggle_display('parallel_coil', false);
         }
         
-        //at RGB hide parallel_coil
-        //hide impedance based on the presence of lv 2 value
-        if (frm.doc.factory === 'NEU') {
-            frm.toggle_display('impedance', frm.doc.lv_2 ? false : true);
-            frm.toggle_display('parallel_coil', false);
+        //for is_design hide the type of lv
+        if (frm.doc.is_design) {
+            frm.toggle_display('type_lv', false);
         }
-        
-        if (frm.doc.factory === 'SGBCZ') {
-            
-            //for is_design or lv 2 value present 
-            //hide the parallel coil
-            if (frm.doc.is_design || frm.doc.hv2 > 0) {
-                frm.toggle_display('parallel_coil', false);
-            }
-            
-            //for is_design hide the type of lv
-            if (frm.doc.is_design) {
-                frm.toggle_display('type_lv', false);
-            }
-        }   
+    }   
 },
 
 // Set the default value for the THDi is 5 when designing the transformer
@@ -226,7 +226,7 @@ is_design: function(frm) {
         'Yd5','Yd7','Yd11','YD1','Yz1','Yz5','YZ5','Yz7','Yz11','Dzn0']);
         frm.set_df_property('climatic_class', 'options', ['C2', 'C3', 'C4', 'C5']);
         frm.set_df_property('environmental_class', 'options', ['E2', 'E3', 'E4', 'E5']);
-        
+        fnResetValues(frm);
     }
 },
 
@@ -280,7 +280,7 @@ validate: function(frm) {
         //other than sgbcz, check if either 
         //lv_rated_voltage or lv_2 is empty
         if(frm.doc.factory !== 'SGBCZ' && 
-            (!!frm.doc.lv_rated_voltage || !frm.doc.lv_2)){
+            (!frm.doc.lv_rated_voltage && !frm.doc.lv_2)){
             frappe.msgprint(__('LV Value is mandatory'));
             frappe.validated = false; 
             return;
@@ -358,8 +358,15 @@ function fnResetValues(frm) {
     function fnResetItemTabFields(iFields) {
         for (let field of iFields) {
             frm.set_value(field, '');
-            if (!frm.doc.is_design) {
+            if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
+                // If factory is 'SGBCZ' and not is_design, 
+                //make the field visible and editable
+                frm.set_df_property(field, "hidden", field !== 'direct_material_cost');
                 frm.set_df_property(field, "read_only", false);
+            } else {
+                // Otherwise, hide the field and make it read-only
+                frm.set_df_property(field, "hidden", true);
+                frm.set_df_property(field, "read_only", true);
             }
         }
     }
@@ -386,10 +393,14 @@ function fnResetValues(frm) {
 
     if (frm.doc.status === 'Draft') {
         // Resetting specific fields to empty
-        fnResetFields([
-            'lv_rated_voltage', 'hv_rated_voltage', 'highest_operation_voltage_hv', 
-            'ac_phase_hv', 'li_phase_hv', 'lv1', 'lv_2', 'hv1', 'hv2'
-        ]);
+        if ((frm.doc.is_design && frm.doc.hv2 && 
+            frm.doc.lv_2) || (!frm.doc.is_design && frm.doc.hv2 && 
+            frm.doc.lv_2) || frm.doc.factory != 'SGBCZ') {
+            fnResetFields([
+                'lv_rated_voltage', 'hv_rated_voltage', 'highest_operation_voltage_hv', 
+                'ac_phase_hv', 'li_phase_hv', 'lv1', 'lv_2', 'hv1', 'hv2'
+            ]);
+        }
 
         // Resetting item tab fields
         fnResetItemTabFields([
@@ -399,10 +410,13 @@ function fnResetValues(frm) {
 
         // Resetting rating and High Voltage tab section to default values
         fnResetToDefault(['rating', 'tapping_plus', 'tapping_minus', 'tapping_plus_step', 
-            'vector_group', 'ip_protection']);
-
-        // Clearing HTML fields
-        fnResetHtmlFields(['hv_html', 'lv_html']);
+            'vector_group', 'ip_protection', 'vector_group_lv1', 'vector_group_lv2']);
+        if (frm.doc.hv2 || 
+           (frm.doc.factory != 'SGBCZ' && frm.doc.lv_2) || 
+           (frm.doc.factory != 'SGBCZ' && frm.doc.hv2)) {
+            // Clearing HTML fields
+            fnResetHtmlFields(['hv_html', 'lv_html']);
+        }
     }
 }
 
