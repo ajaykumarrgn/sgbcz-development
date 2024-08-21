@@ -410,12 +410,12 @@ function fnResetValues(frm) {
 
         // Resetting rating and High Voltage tab section to default values
         fnResetToDefault(['rating', 'tapping_plus', 'tapping_minus', 'tapping_plus_step', 
-            'vector_group', 'ip_protection']);
-
-        if ((!frm.doc.is_design && frm.doc.hv2 && 
-            frm.doc.lv_2) || frm.doc.factory != 'SGBCZ') {
-        // Clearing HTML fields
-        fnResetHtmlFields(['hv_html', 'lv_html']);
+            'vector_group', 'ip_protection', 'vector_group_lv1', 'vector_group_lv2']);
+        if (frm.doc.hv2 || 
+           (frm.doc.factory != 'SGBCZ' && frm.doc.lv_2) || 
+           (frm.doc.factory != 'SGBCZ' && frm.doc.hv2)) {
+            // Clearing HTML fields
+            fnResetHtmlFields(['hv_html', 'lv_html']);
         }
     }
 }
