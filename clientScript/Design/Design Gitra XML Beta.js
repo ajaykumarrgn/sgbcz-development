@@ -91,12 +91,6 @@ frappe.ui.form.on("Design", {
                 lValue = lThdi;
                 break;
         
-              case "frm.doc.li_phase_lv":
-                // here 0 is treated as falsy in xml
-                // so that it is converted to string here
-                lValue = String(frm.doc.li_phase_lv);
-                break;
-        
               case "frm.doc.vector_group":
                   
                 //Trim the Number from Vector group
@@ -106,7 +100,9 @@ frappe.ui.form.on("Design", {
                 break;
         
               default:
-                lValue = eval(iVariable);
+                //inorder to prevent falsy in xml
+                //convert it into string
+                lValue = String(eval(iVariable));
                 break;
             }
             return lValue || "";
