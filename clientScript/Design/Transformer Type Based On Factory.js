@@ -34,6 +34,7 @@ frappe.ui.form.on('Design', {
         }
         fnFetchTransformerType(frm);
         fnDirectMaterial(frm);
+        fnUpdateButtonGroup(frm);
     },
 
     refresh(frm) { 
