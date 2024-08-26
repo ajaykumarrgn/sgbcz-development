@@ -244,7 +244,7 @@ for ld_attribute in la_template_attributes:
             design.transformer_type, ld_attribute.attribute, attribute_value
         ))
 
-   # Converting HV, HV 1, HV 2 from V to kV
+  # Converting HV, HV 1, HV 2 from V to kV
     elif ld_attribute.attribute in ['HV (kV)', 'HV 1 (kV)', 'HV 2 (kV)']:
         hv_value_map = {
             'HV (kV)': design.hv_rated_voltage,
@@ -274,12 +274,26 @@ for ld_attribute in la_template_attributes:
 # Append other attributes
 item_new.item_technical_name = design.rating + ' [kVA]'
 
-hv_in_kv = hv_in_kv_str.replace('.', ',')
+#update technical name 
+if design.hv_rated_voltage:
+    hv_in_kv = fn_convert_to_kv(design.hv_rated_voltage).replace('.', ',')
+    item_new.item_technical_name = item_new.item_technical_name + ', HV ' + remove_trailing_zeros(hv_in_kv) + ' [kV]'
+    
+if design.hv1 and design.hv2:
+    hv1_in_kv = fn_convert_to_kv(design.hv1).replace('.', ',')
+    hv2_in_kv = fn_convert_to_kv(design.hv2).replace('.', ',')
+    
+    item_new.item_technical_name = item_new.item_technical_name + ', HV₁ ' + remove_trailing_zeros(hv1_in_kv) + ' [kV]'
+    item_new.item_technical_name = item_new.item_technical_name + ', HV₂ ' + remove_trailing_zeros(hv2_in_kv) + ' [kV]'
 
-item_new.item_technical_name = item_new.item_technical_name + ', HV ' + remove_trailing_zeros(hv_in_kv) + ' [kV]'
-
-item_new.item_technical_name = item_new.item_technical_name + ', LV ' + str(design.lv_rated_voltage) + ' [V]'
-
+if design.lv_rated_voltage:
+    item_new.item_technical_name = item_new.item_technical_name + ', LV ' + str(design.lv_rated_voltage) + ' [V]'
+    
+if design.lv1 and design.lv_2:
+   
+    item_new.item_technical_name = item_new.item_technical_name + ', LV₁ ' + str(design.lv1) + ' [V]'
+    item_new.item_technical_name = item_new.item_technical_name + ', LV₂ ' + str(design.lv_2) + ' [V]'
+    
 item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + remove_trailing_zeros(str(design.impedance)) + ' [%]'
 
 item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(design.no_load_loss_guarantee) + ' [W]'

@@ -1,5 +1,18 @@
 frappe.ui.form.on('Design', {
 
+    onload(frm){
+        //readonly was given at refresh
+        //but at some point it is not
+        //working as expected so done the
+        //same in onload event
+        if(frm.doc.status != 'Draft'){
+            setTimeout(function() {
+            fnSetHTMLFieldsToReadOnly();
+        }, 500);
+            frm.set_read_only();
+            frm.disable_save();
+        }
+    },
 // When factory is changed, fields also changed for that dependent request.
 
 //onchange of factory select field event
@@ -217,6 +230,7 @@ is_design: function(frm) {
     } else {
         // Display hv_html field
         frm.toggle_display('hv_html', true);
+        frm.set_df_property('hv_rated_voltage', 'reqd', false);
         // Hide hv_rated_voltage field
         frm.toggle_display('hv_rated_voltage', false);
         frm.set_df_property('type_lv', 'hidden', false);
@@ -263,7 +277,17 @@ hv2(frm){
     //should be hidden for SGBCZ.
     
     if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
-        frm.set_df_property('parallel_coil', 'hidden', frm.doc.hv2 > 0);
+        const SHOULD_HIDE_PARALLEL_COIL = frm.doc.hv2 > 0;
+        
+        // Set the 'parallel_coil' field to hidden or 
+        //visible based on hv2 value
+        frm.set_df_property('parallel_coil', 'hidden', SHOULD_HIDE_PARALLEL_COIL);
+        
+        // If hidden, set the 'parallel_coil' 
+        //field value to 0
+        if (SHOULD_HIDE_PARALLEL_COIL) {
+            frm.set_value('parallel_coil', 0);
+        }
      }
 },
 
@@ -393,13 +417,17 @@ function fnResetValues(frm) {
 
     if (frm.doc.status === 'Draft') {
         // Resetting specific fields to empty
-        if ((frm.doc.is_design && frm.doc.hv2 && 
-            frm.doc.lv_2) || (!frm.doc.is_design && frm.doc.hv2 && 
-            frm.doc.lv_2) || frm.doc.factory != 'SGBCZ') {
+        if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             fnResetFields([
-                'lv_rated_voltage', 'hv_rated_voltage', 'highest_operation_voltage_hv', 
-                'ac_phase_hv', 'li_phase_hv', 'lv1', 'lv_2', 'hv1', 'hv2'
+                'hv_rated_voltage', 'highest_operation_voltage_hv', 
+                'ac_phase_hv', 'li_phase_hv', 'hv1', 'hv2'
             ]);
+        }
+        
+        //clear only if two lv are there for SGBCZ
+        if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
+            fnResetFields([
+                'lv_rated_voltage', 'lv1', 'lv_2']);
         }
 
         // Resetting item tab fields
@@ -410,12 +438,27 @@ function fnResetValues(frm) {
 
         // Resetting rating and High Voltage tab section to default values
         fnResetToDefault(['rating', 'tapping_plus', 'tapping_minus', 'tapping_plus_step', 
-            'vector_group', 'ip_protection', 'vector_group_lv1', 'vector_group_lv2']);
-        if (frm.doc.hv2 || 
-           (frm.doc.factory != 'SGBCZ' && frm.doc.lv_2) || 
-           (frm.doc.factory != 'SGBCZ' && frm.doc.hv2)) {
+            'vector_group', 'ip_protection', 'vector_group_lv1', 'vector_group_lv2',
+            'type_lv']);
+            
+        if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             // Clearing HTML fields
+            fnResetHtmlFields(['hv_html']);
+        }
+        
+        if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
+            // Clearing HTML fields
+            fnResetHtmlFields(['lv_html']);
+        }
+
+        //onchange of factory clear every field
+        if(frm.doc.factory != 'SGBCZ'){
             fnResetHtmlFields(['hv_html', 'lv_html']);
+            fnResetFields([
+                'hv_rated_voltage', 'highest_operation_voltage_hv', 
+                'ac_phase_hv', 'li_phase_hv', 'hv1', 'hv2',
+                'lv_rated_voltage', 'lv1', 'lv_2'
+            ]);
         }
     }
 }
