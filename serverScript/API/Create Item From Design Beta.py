@@ -309,7 +309,7 @@ if design.lv1 and design.lv_2:
     item_new.item_technical_name = item_new.item_technical_name + ', LV₁ ' + str(design.lv1) + ' [V]'
     item_new.item_technical_name = item_new.item_technical_name + ', LV₂ ' + str(design.lv_2) + ' [V]'
 
-if design.impedance and (design.uk_lv1 and ukhv_lv2 == 0):    
+if design.impedance and (design.uk_lv2 == 0 and design.ukhv_lv2 == 0):  
     item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + remove_trailing_zeros(str(design.impedance)) + ' [%]'
 
 if design.uk_lv1 and design.uk_lv2:
