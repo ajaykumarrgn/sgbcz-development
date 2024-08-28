@@ -9,7 +9,7 @@ frappe.ui.form.on('Sales Order', {
 	   //frm.reload_doc();
 	},
 	get_pos(frm, item){
-	    var prev_item = frm.doc.items[item.idx-2];
+	    var ldPrevItem = frm.doc.items[item.idx-2];
         // If Previous Item is available(eg DTTZ2N-1600/10/6/75)
 	    // Then find the item group
 	    // If parent item group is Accessories or item group is Servies then add .1 to the pos(eg from 10 to 10.1 or 10.1 to 10.2)
@@ -17,28 +17,32 @@ frappe.ui.form.on('Sales Order', {
 	    // and add 10 to it( eg 10.4 will become 20)
 	    // Carry forward the Main item Quantity(Items with whole 10s ie item groups other than Accessories and Services)
 	    // to sub items.
-	    if(prev_item){
+	    if(ldPrevItem){
 	        frappe.call({
 	         	"method": "frappe.client.get",
         		"args": {"doctype": "Item", "name": item.item_code, async: false, fields:['item_group']},
         		"callback": function(response) { 
         		    frappe.db.get_value("Item Group", {"name":response.message.item_group}, "old_parent", function(itemgroup){
         		        if(itemgroup.old_parent=='Accessories' || response.message.item_group=='Services'){
-            	            item.pos = prev_item.pos + 1/10;
-            	            item.qty = prev_item.qty;
+            	            item.pos = ldPrevItem.pos + 1/10;
+            	            item.qty = ldPrevItem.qty;
+            	            item.custom_parent_item_group = ldPrevItem.custom_parent_item_group;
             	            frm.refresh_fields();
     	                }else {
-        	                item.pos = Math.floor(prev_item.pos) + 10;
+        	                item.pos = Math.floor(ldPrevItem.pos) + 10;
+        	                item.custom_parent_item_group = item.item_group;
             	            frm.refresh_fields();
     	                }
         		    });
         		}});  
 	        
 	    } else{
-	        return 10;
+	       // return 10;
+	       item.pos = 10;
+	       item.custom_parent_item_group = item.item_group;
 	    }
 	   /* // Previous item from the items array
-	    var prev_item = frm.doc.items[item.idx-2];
+	    var ldPrevItem = frm.doc.items[item.idx-2];
 	    // If Previous Item is available(eg DTTZ2N-1600/10/6/75)
 	    // Then find the item group
 	    // If Accessories or Servies then add .1 to the pos(eg from 10 to 10.1 or 10.1 to 10.2)
@@ -46,17 +50,17 @@ frappe.ui.form.on('Sales Order', {
 	    // and add 10 to it( eg 10.4 will become 20)
 	    // Carry forward the Main item Quantity(Items with whole 10s ie item groups other than Accessories and Services)
 	    // to sub items.
-	    if(prev_item){
+	    if(ldPrevItem){
 	        frappe.call({
 	         	"method": "frappe.client.get",
         		"args": {"doctype": "Item", "name": item.item_code, async: false, fields:['item_group']},
         		"callback": function(response) { 
             		if(response.message.item_group=='Accessories' || response.message.item_group=='Services'){
-        	            item.pos = prev_item.pos + 1/10;
-        	            item.qty = prev_item.qty;
+        	            item.pos = ldPrevItem.pos + 1/10;
+        	            item.qty = ldPrevItem.qty;
         	            frm.refresh_fields();
     	            }else {
-    	                item.pos = Math.floor(prev_item.pos) + 10;
+    	                item.pos = Math.floor(ldPrevItem.pos) + 10;
         	            frm.refresh_fields();
     	            }
         		}
@@ -72,9 +76,11 @@ frappe.ui.form.on('Sales Order Item', {
 
     item_code(frm, cdt, cdn) {
 	     var item = locals[cdt][cdn];
-		if (!item.pos ){
-		    frm.events.get_pos(frm, item);
-		    item.pos = frm.events.get_pos(frm, item);
+		if (!item.pos || !item.custom_parent_item_group){
+		   frm.events.get_pos(frm, item);
+		   //commented this line because we are 
+		   //setting the pos and custom_parent_item_group
+		  //  item.pos = frm.events.get_pos(frm, item);
 		    frm.refresh_fields();
 		}
 	},

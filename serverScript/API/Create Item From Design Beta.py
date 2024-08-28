@@ -243,6 +243,21 @@ for ld_attribute in la_template_attributes:
         item_new.append("attributes", get_attribute(
             design.transformer_type, ld_attribute.attribute, attribute_value
         ))
+    
+    elif ld_attribute.attribute in ['Uk (%)', 'Uk LV 1 (%)', 'Uk LV 2 (%)', 'Uk HV LV 1 (%)', 'Uk HV LV 2 (%)']:
+        if ld_attribute.attribute == 'Uk (%)':
+            attribute_value = design.impedance if design.uk_lv2 == 0 and design.ukhv_lv2 == 0  else 0
+        elif ld_attribute.attribute == 'Uk LV 1 (%)':
+            attribute_value = design.uk_lv1 if design.uk_lv2 != 0 else 0
+        elif ld_attribute.attribute == 'Uk LV 2 (%)':
+            attribute_value = design.uk_lv2 if design.uk_lv2 != 0 else 0
+        elif ld_attribute.attribute == 'Uk HV LV 1 (%)':
+            attribute_value = design.ukhv_lv1 if design.ukhv_lv2 != 0 else 0
+        elif ld_attribute.attribute == 'Uk HV LV 2 (%)':
+            attribute_value = design.ukhv_lv2 if design.ukhv_lv2 != 0 else 0
+        item_new.append("attributes", get_attribute(
+            design.transformer_type, ld_attribute.attribute, attribute_value
+        ))
 
   # Converting HV, HV 1, HV 2 from V to kV
     elif ld_attribute.attribute in ['HV (kV)', 'HV 1 (kV)', 'HV 2 (kV)']:
@@ -293,8 +308,18 @@ if design.lv1 and design.lv_2:
    
     item_new.item_technical_name = item_new.item_technical_name + ', LV₁ ' + str(design.lv1) + ' [V]'
     item_new.item_technical_name = item_new.item_technical_name + ', LV₂ ' + str(design.lv_2) + ' [V]'
-    
-item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + remove_trailing_zeros(str(design.impedance)) + ' [%]'
+
+if design.impedance and (design.uk_lv2 == 0 and design.ukhv_lv2 == 0):  
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + remove_trailing_zeros(str(design.impedance)) + ' [%]'
+
+if design.uk_lv1 and design.uk_lv2:
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + remove_trailing_zeros(str(design.uk_lv1)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(design.uk_lv2)) + ' [%]'
+
+if design.ukhv_lv1 and design.ukhv_lv2:
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk HV LV₁ ' + remove_trailing_zeros(str(design.ukhv_lv1)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk HV LV₂ ' + remove_trailing_zeros(str(design.ukhv_lv2)) + ' [%]'
+
 
 item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(design.no_load_loss_guarantee) + ' [W]'
 
