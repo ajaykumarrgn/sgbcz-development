@@ -55,8 +55,8 @@ def fn_get_parameter_mapping_def():
     la_param_map_def = lfn_add_param_map('Vector Group LV 1', 'vector_group_lv1', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Vector Group LV 2', 'vector_group_lv2', la_param_map_def)
     la_param_map_def = lfn_add_param_map('HV LI (kV)', 'li_phase_hv', la_param_map_def)
-    la_param_map_def = lfn_add_param_map('Power LV 1 (KV)', 'power_lv1', la_param_map_def)
-    la_param_map_def = lfn_add_param_map('Power LV 2 (KV)', 'power_lv2', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('Rating LV1 (kVA)', 'power_lv1', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('Rating LV2 (kVA)', 'power_lv2', la_param_map_def)
     la_param_map_def = lfn_add_param_map('HV Um (kV)', 'highest_operation_voltage_hv', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Insulation Class', 'insulation_class', la_param_map_def)
     la_param_map_def = lfn_add_param_map('LV AC (kV)', 'ac_phase_lv', la_param_map_def)
@@ -71,7 +71,7 @@ def fn_get_parameter_mapping_def():
     la_param_map_def = lfn_add_param_map('Tappings - values (%)', 'tapping_plus_step', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Temperature rise (K)', 'temperature_rise', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Ambient max. temperature (°C)', 'ambient_max_temperature', la_param_map_def)
-    la_param_map_def = lfn_add_param_map('THDi (%)', 'thdi_value', la_param_map_def)
+    la_param_map_def = lfn_add_param_map('THDi (%)', 'thdi', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Winding Material', 'winding_material', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Transformer IP', 'ip_protection', la_param_map_def)
     la_param_map_def = lfn_add_param_map('Type of LV', 'type_lv', la_param_map_def)
@@ -105,13 +105,6 @@ def append_attribute(attribute_name, attribute_value):
             item_new.append("attributes", get_attribute(design.transformer_type, attribute_name, str(attribute_value)))
         existing_attributes.add(attribute_name)
 
-def get_lwa_attribute_value(design):
-    
-    return design.get('lwa', 0)
-
-def get_lpa_attribute_value(design):
-   
-    return design.get('lpa', 0)
 #function to convert volt ti kV
 def fn_convert_to_kv(value):
     return str(int(value) / 1000)
@@ -210,14 +203,7 @@ for ld_attribute in la_template_attributes:
         else:
             item_new.append("attributes", get_attribute(
                 design.transformer_type, ld_attribute.attribute, 'NO'))
-    elif ld_attribute.attribute == 'THDi (%)':
-        if design.k4_factor == 'Yes':
-            item_new.append("attributes", get_attribute(
-                design.transformer_type, ld_attribute.attribute, 20))
-        else:
-            item_new.append("attributes", get_attribute(
-                design.transformer_type, ld_attribute.attribute, 5))
-
+    
     #Tappings - number of tappings (+/-) should take greater value in 
     #either design's tapping_plus or tapping_minus
     elif ld_attribute.attribute == 'Tappings - number of tappings (+/-)':
@@ -309,7 +295,7 @@ if design.lv1 and design.lv_2:
     item_new.item_technical_name = item_new.item_technical_name + ', LV₁ ' + str(design.lv1) + ' [V]'
     item_new.item_technical_name = item_new.item_technical_name + ', LV₂ ' + str(design.lv_2) + ' [V]'
 
-if design.impedance and (design.uk_lv2 == 0 and design.ukhv_lv2 == 0):  
+if design.impedance and (design.uk_lv2 == 0 and design.ukhv_lv2 == 0):    
     item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + remove_trailing_zeros(str(design.impedance)) + ' [%]'
 
 if design.uk_lv1 and design.uk_lv2:
