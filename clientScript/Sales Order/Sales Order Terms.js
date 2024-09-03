@@ -1,39 +1,40 @@
 frappe.ui.form.on('Sales Order', {
-    refresh : function(frm) {
-       // Set terms and conditions when the form is new
-       if (frm.is_new()) {
+    // Event triggered when the form is refreshed
+    refresh: function(frm) {
+        // If the form is new, set the terms and conditions
+        if (frm.is_new()) {
             frm.events.fnSetTermsandConditions(frm);
         }
     },
-    
+ 
+    // Function to determine and set the terms and conditions 
+    // based on language and factory
     fnSetTermsandConditions(frm) {
-        let language = frm.doc.language;
-
-        // Set terms and conditions name based on factory and language
+        let lLanguage = frm.doc.language;  // Get the selected language
+        let lTcName;  // Variable to hold the terms and conditions name
+ 
+        // Determine the terms and conditions name based on the factory
         if (frm.doc.custom_factory === "SGB RGB") {
-            frm.doc.tc_name = `RGB Order Ack_${language}`; // eslint-disable-line
+            lTcName = `RGB Order Terms_${lLanguage}`;
         } else {
-            frm.doc.tc_name = `Order Ack_${language}`; // eslint-disable-line
+            lTcName = `Order Terms_${lLanguage}`;
         }
-
-        // Fetch and set the terms and conditions
-        frappe.db.get_value("Terms and Conditions", {"name":frm.doc.tc_name}, "terms", function(tc){
-            if (tc){
-                frm.doc.terms = tc.terms;
-            }
-        });
-
-        // Refresh the form fields
-        frm.refresh_fields();
+ 
+        // Set the tc_name field
+        if (frm.doc.customer){
+            frm.set_value('tc_name', lTcName);
+        }
     },
-    
-    // Update terms and conditions on customer change
-    customer_name(frm) { // eslint-disable-line
+ 
+    // Event triggered when the customer field is changed
+    customer_name(frm) { //eslint-disable-line
+        // Update the terms and conditions based on the new customer value
         frm.events.fnSetTermsandConditions(frm);
     },
-    
-    // Update terms and conditions on factory change
-    custom_factory(frm) { // eslint-disable-line
+ 
+    // Event triggered when the custom_factory field is changed
+    custom_factory(frm) { //eslint-disable-line
+        // Update the terms and conditions based on the new factory value
         frm.events.fnSetTermsandConditions(frm);
     },
 });
