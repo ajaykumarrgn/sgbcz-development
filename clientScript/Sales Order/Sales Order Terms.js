@@ -23,6 +23,7 @@ frappe.ui.form.on('Sales Order', {
         // Set the tc_name field
         if (frm.doc.customer){
             frm.set_value('tc_name', lTcName);
+            frm.refresh_fields(); 
         }
     },
  
