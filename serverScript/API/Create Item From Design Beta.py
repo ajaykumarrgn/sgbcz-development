@@ -107,7 +107,15 @@ def append_attribute(attribute_name, attribute_value):
 
 #function to convert volt ti kV
 def fn_convert_to_kv(value):
-    return str(int(value) / 1000)
+    # Convert value to integer and divide by 1000
+    result = int(value) / 1000
+    # Check if result is a whole number
+    if result.is_integer():
+        # Return as integer string if whole number
+        return str(int(result))
+    else:
+        # Return as string with decimal part if not a whole number
+        return str(result)
 
 # Fetch the design details from the request
 design_id = frappe.form_dict.get('design')
@@ -176,9 +184,20 @@ for ld_attribute in la_template_attributes:
                 ld_docvalue_temp = int(ld_docvalue_temp)
             ld_docvalue = ld_docvalue_temp
     else:
-        # If the attribute does not have numeric values
-        # keep the original value
-        ld_docvalue = ld_docvalue_temp
+        
+        if ld_docvalue_temp:
+            #get the abbreviation for the attribute value
+            ld_doc_abbr = frappe.db.get_value(
+                'Item Attribute Value',
+                {'parent': ld_attribute.attribute, 'attribute_value':ld_docvalue_temp },  
+                'abbr'
+            )
+            if ld_doc_abbr:
+                ld_docvalue = ld_doc_abbr
+            else:
+                # If the attribute does not have numeric values or abbr
+                # keep the original value
+                ld_docvalue = ld_docvalue_temp
 
     # Conditionally append attributes
     if ld_attribute.attribute == 'Electrostatic screen':
@@ -303,8 +322,12 @@ if design.uk_lv1 and design.uk_lv2:
     item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(design.uk_lv2)) + ' [%]'
 
 if design.ukhv_lv1 and design.ukhv_lv2:
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk HV LV₁ ' + remove_trailing_zeros(str(design.ukhv_lv1)) + ' [%]'
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk HV LV₂ ' + remove_trailing_zeros(str(design.ukhv_lv2)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + remove_trailing_zeros(str(design.ukhv_lv1)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(design.ukhv_lv2)) + ' [%]'
+
+if design.power_lv1 and design.power_lv2:
+    item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₁ ' + str(design.power_lv1) + ' [KVA]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₂ ' + str(design.power_lv2) + ' [KVA]'
 
 
 item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(design.no_load_loss_guarantee) + ' [W]'

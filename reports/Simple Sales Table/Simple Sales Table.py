@@ -16,9 +16,14 @@
 # Improve the sales table report performance (Task#: TASK-2024-00216)
 # wrong accessories displayed  -relay issue# ISS-2024-00061
 
+#Development
+#Simple Sales Table  (Task: US-2024-0060)
+
 def get_columns(filters):
     la_columns = []
     # >>ISS-2024-00020
+    #>>US-2024-0060
+
     la_columns = [
         {"fieldname": "sales_order", "label": _(
             "Sales<br>Order"), "fieldtype": "Link", "options": "Sales Order", "width": 140},
@@ -106,6 +111,7 @@ def get_columns(filters):
     ]
     if filters.include_all_fields:
         la_accessories_columns = [
+            #single row to display all the accessories
             {"fieldname": "accessories", "label": _(
                 "Accessories"), "fieldtype": "Data", "width": 300},
             {"fieldname": "agent", "label": _(
@@ -124,6 +130,8 @@ def get_columns(filters):
             {"fieldname": "prepayment2_status", "label": _(
                 "Prepayment2<br>Status"), "fieldtype": "Select", "width": 100},
         ]
+
+    #<<US-2024-0060
     # <<ISS-2024-00020
         la_columns.extend(la_accessories_columns)
     return la_columns
@@ -310,6 +318,7 @@ def get_result(filters):
             'docstatus': ("!=", 2),
             
         }
+        #>>US-2024-0060
         ld_sos_details = frappe.get_all(
             'Sales Order',
             fields=(
@@ -333,6 +342,9 @@ def get_result(filters):
                 # "is_reservation", #<< Commented for the change request
                 # for moving reservation from sales order to delivery note (#TASK-2024-00155)
                 "`tabSales Order Item`.item_code",
+                # included custom_parent_item_group field
+                # in sales order for filtering DTTHZ2N item
+                # and its accessories
                 "`tabSales Order Item`.custom_parent_item_group",
                 "`tabSales Order Item`.qty",
                 "`tabSales Order Item`.pos",
@@ -355,9 +367,11 @@ def get_result(filters):
         # Sort the 'et_delivery_items' list based on 'parent' and 'pos' fields in ascending order
         # et_sos_details = sorted(et_delivery_items, key=lambda x: (x['parent'], x['pos']) )
         # Return the sorted 'et_delivery_items' list
+        #filtering DTTHZ2N items in ld_sos_details
         filtered_ld_sos_details = [d for d in ld_sos_details if d.get("custom_parent_item_group") not in ["DTTHZ2N", None]]
         return filtered_ld_sos_details
-    
+        #<<US-2024-0060
+
 # >> ISS-2024-00002
 #   Get Unique record based on key
 
@@ -529,23 +543,27 @@ def get_result(filters):
                 # po_item_row['hv'] = attribute.attribute_value.replace('.', ',')
             elif attribute.attribute == 'LV (V)':
                 po_item_row['lv'] = attribute.attribute_value
+            #>>US-2024-0060
             elif attribute.attribute == 'LV 1 (V)':
                 po_item_row['lv1'] = attribute.attribute_value
             elif attribute.attribute == 'LV 2 (V)':
                 po_item_row['lv_2'] = attribute.attribute_value
-
+            #<<US-2024-0060
             elif attribute.attribute == 'Vector Group':
                 po_item_row['vector_group'] = attribute.attribute_value
+            #>>US-2024-0060
             elif attribute.attribute == 'Vector Group LV 1':
                 po_item_row['vector_group_lv1'] = attribute.attribute_value
             elif attribute.attribute == 'Vector Group LV 2':
                 po_item_row['vector_group_lv2'] = attribute.attribute_value
-                
+            #<<US-2024-0060    
             elif attribute.attribute == 'Uk (%)':
                 po_item_row['uk'] = attribute.attribute_value
+            #>>US-2024-0060
             elif attribute.attribute == 'Uk LV 1 (%)':
                 po_item_row['uk_lv1'] = attribute.attribute_value
             elif attribute.attribute == 'Uk LV 2 (%)':
+            #<<US-2024-0060
                 po_item_row['uk_lv2'] = attribute.attribute_value
             elif attribute.attribute == 'HV LI (kV)':
                 po_item_row['li'] = attribute.attribute_value
@@ -572,8 +590,10 @@ def get_result(filters):
         item_row['pos'] = 0
         item_row['item_code'] = item_row['id_number'] = item_row['rdg_number'] = item_row['item_group'] = ''
         item_row['power'] = item_row['hv'] = item_row['lv'] = item_row['vector_group'] = item_row['uk'] = ''
+        #>>US-2024-0060
         item_row['lv1'] = item_row['lv_2'] = item_row['vector_group_lv1'] = item_row['vector_group_lv2'] = ''
         item_row['uk_lv1'] = item_row['uk_lv2'] = ''
+        #<<US-2024-0060
         item_row['thdi'] = item_row['ip_protection'] = item_row['electrostatic_screen'] = item_row['hv1'] = item_row['hv2'] = ''
         item_row['tappings'] = '+ - 2 * 2,5%'
         item_row['no_load_loss'] = item_row['load_loss'] = item_row['li'] = ''
@@ -657,7 +677,9 @@ def get_result(filters):
 #   Map Accessories
 #   In general if an accessory is found then display the quantity in braces in the output of the report
 #   Few accessories need prefix - refer to individual accessories section for the prefix logic
-
+    #>>US-2024-0060
+    # displaying all the accessories in single column
+    # Accessories, separated by commas
     def map_accessories(item, po_item_row, ima_items):
         # Default values for item master
         ld_item_master = {
@@ -716,7 +738,7 @@ def get_result(filters):
         # Update po_item_row with the final accessories string
         po_item_row['accessories'] = accessory_str
         return po_item_row
-
+    #<<US-2024-0060
         
     def fn_find_rows_by_key_value(i_dict_array, key, value):
         rows = []
@@ -762,11 +784,13 @@ def get_result(filters):
         # Filter the records for the current Sales Order number
         ld_sales_order_items = [
             item for item in ld_sos_details if item['name'] == ld_sales_order]
-          
+        #>>US-2024-0060
+        #if any sales order doesn't have other factory item
+        #skip them
         if not ld_sales_order_items:
-            # Handle the case where the sales order is not found in ld_sos_details
+            # the case where the sales order is not found in ld_sos_details
             continue  # Skip to the next sales order
-        
+        #<<US-2024-0060
             
         ld_sales_order_header = ld_sales_order_items[0]
         
