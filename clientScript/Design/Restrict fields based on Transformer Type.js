@@ -4,7 +4,7 @@ frappe.ui.form.on('Design', {
         //readonly was given at refresh
         //but at some point it is not
         //working as expected so done the
-        //same in onload event    
+        //same in onload event
         if(frm.doc.status != 'Draft'){
             setTimeout(function() {
             fnSetHTMLFieldsToReadOnly();
@@ -438,9 +438,13 @@ function fnResetValues(frm) {
         ]);
 
         // Resetting rating and High Voltage tab section to default values
-        fnResetToDefault(['rating', 'tapping_plus', 'tapping_minus', 'tapping_plus_step', 
+        fnResetToDefault(['tapping_plus', 'tapping_minus', 'tapping_plus_step', 
             'vector_group', 'ip_protection', 'vector_group_lv1', 'vector_group_lv2',
             'type_lv']);
+            
+        if(!frm.doc.is_design){
+            fnResetToDefault(['rating']);
+        }
             
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             // Clearing HTML fields

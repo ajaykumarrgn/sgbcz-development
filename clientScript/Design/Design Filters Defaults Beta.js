@@ -44,9 +44,15 @@ frappe.ui.form.on('Design', {
                 }
             }
             
+            //If ldAttribute has a default value,
+            //set it to the field
+            if(ldAttribute && ldAttribute.default){
+                frm.set_value(iAttribute_name, ldAttribute.default);
+            }
+            
         });
     },
-
+    
     //onchange of rating field event
     rating(frm){
          frm.events.fnValidateAttributeRange(frm, 'Rating', 'rating', frm.doc.transformer_type);
@@ -135,7 +141,12 @@ frappe.ui.form.on('Design', {
         frm.events.fnValidateAttributeRange(frm, 'Tapping Plus Step', 'tapping_plus_step', frm.doc.transformer_type);
         frm.set_value('tapping_minus_step', frm.doc.tapping_plus_step);
     },
-    
+     
+    //onchange of transformer type field
+    transformer_type(frm){
+        frm.events.fnValidateAttributeRange(frm, 'Reference Temperature(°C)', 'reference_temperature',frm.doc.transformer_type);
+    },
+   
     //commented this because this field will
     //take value from tapping_plus_step
     // //onchange of tapping_minus_step field event

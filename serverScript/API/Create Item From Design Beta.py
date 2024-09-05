@@ -275,19 +275,6 @@ for ld_attribute in la_template_attributes:
         item_new.append("attributes", get_attribute(
             design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
 
-    elif ld_designdoc_field in ['lwa', 'lpa']:
-        ld_target_attribute_value = design.get(ld_designdoc_field)
-        if ld_target_attribute_value is not None:
-            try:
-                ld_target_attribute_value = int(ld_target_attribute_value)
-                if 30 <= ld_target_attribute_value <= 70:
-                    append_attribute(ld_attribute.attribute, ld_target_attribute_value)
-                else:
-                    append_attribute(ld_attribute.attribute, 0)
-            except (ValueError, TypeError):
-                append_attribute(ld_attribute.attribute, 0)
-        else:
-            append_attribute(ld_attribute.attribute, 0)
     else:
         item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ld_docvalue))
 

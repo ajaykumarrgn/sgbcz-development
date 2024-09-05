@@ -79,6 +79,10 @@ def get_columns(filters):
             "PO"), "fieldtype": "Data", "width": 100},
         {"fieldname": "po_date", "label": _(
             "PO Date"), "fieldtype": "Date", "width": 100},
+        #the Quotation Reference Number field is added in Quoation 
+        # and Sales Order
+        {"fieldname": "custom_quotation_reference_number", "label": _(
+            "Quotation Reference Number"), "fieldtype": "Data", "width": 100},
         {"fieldname": "serial_number", "label": _(
             "Serial<br>Number"), "fieldtype": "Data", "width": 80},
         {"fieldname": "oa_confirmed_date", "label": _(
@@ -332,6 +336,7 @@ def get_result(filters):
                 # "comments", #<<commented this line in sales order
                 # for Note section (#TASK-2024-00221)
                 "incoterms",
+                "custom_quotation_reference_number",
                 "prepayment_invoice",
                 "prepayment_status",
                 "prepayment_invoice2",
@@ -806,7 +811,7 @@ def get_result(filters):
         # Fill sales order header details
         po_item_row = dict({  # Fill Detail from Sales Order header
             'sales_order': ld_sales_order_header.name, 'customer': ld_sales_order_header.customer, 'incoterms': ld_sales_order_header.incoterms,
-
+            'custom_quotation_reference_number': ld_sales_order_header.custom_quotation_reference_number,
             'customer_group': ld_customer_data.customer_group, 'territory': ld_sales_order_header.territory,
             # 'is_reservation': "Yes" if sales_order_header.is_reservation == 1 else " ", #<<Commented for the
             # change request in sales order level (#TASK-2024-00155)
