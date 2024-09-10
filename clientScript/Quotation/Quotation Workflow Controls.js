@@ -11,21 +11,17 @@ frappe.ui.form.on('Quotation', {
                 // along with translation compatibility
                 $("button[data-original-title=" + __("Print") + "]").hide();
                 
-                //removing email option 
+                //removing print and email option 
                 //in Menu (standard button group)
                 $('a.grey-link').each(function() {
                   
                     // Comparing data-label instead of Button Text
                     var id = $(this).children(':first-child').attr('data-label'); 
-                  
-                    switch(id){
-                        case __("Email"):
-                             $(this).remove();
-                             break;
-                        default:
-                            break;
-                            
-                    }
+                    
+                    //remove Email option from menu 
+                    if(id === "Email"){
+                        $(this).remove();
+                    }   
                 });
 		    }
         }, 10);
