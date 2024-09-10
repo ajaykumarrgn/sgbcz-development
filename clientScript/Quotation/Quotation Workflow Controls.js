@@ -7,8 +7,11 @@ frappe.ui.form.on('Quotation', {
                     frm.doc.workflow_state)) {
                 //clearing all the custom buttons on the form
     			frm.clear_custom_buttons();
-               
-                //removing print and email option 
+                // DOM manipulation on the print icon using its ID
+                // along with translation compatibility
+                $("button[data-original-title=" + __("Print") + "]").hide();
+                
+                //removing email option 
                 //in Menu (standard button group)
                 $('a.grey-link').each(function() {
                   
@@ -16,9 +19,6 @@ frappe.ui.form.on('Quotation', {
                     var id = $(this).children(':first-child').attr('data-label'); 
                   
                     switch(id){
-                        case __("Print"):
-                             $(this).remove();
-                             break;
                         case __("Email"):
                              $(this).remove();
                              break;
