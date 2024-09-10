@@ -7,12 +7,7 @@ frappe.ui.form.on('Quotation', {
                     frm.doc.workflow_state)) {
                 //clearing all the custom buttons on the form
     			frm.clear_custom_buttons();
-                // DOM manipulation on the print icon using its ID
-                // along with translation compatibility
-                // commented this line because print review is required
-                // in forward the print option should be disabled in print preview
-                // $("button[data-original-title=" + __("Print") + "]").hide();
-                
+               
                 //removing print and email option 
                 //in Menu (standard button group)
                 $('a.grey-link').each(function() {
