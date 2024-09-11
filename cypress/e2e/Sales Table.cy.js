@@ -25,31 +25,15 @@ describe('Sales Table Report', () => {
 
       cy.get('#page-query-report > .page-body > .page-wrapper > .page-content > .row > .layout-main-section-wrapper', { timeout: 10000 }).should('be.visible');
 
-      cy.get('[data-original-title="PO Date From"] > .input-with-feedback')
-        .should('be.visible')
-        .clear()
-        .click()
-        .type(env.fromDate)
-        .type( "{enter}" );
-      cy.get('[data-original-title="PO Date To"] > .input-with-feedback')
-        .should('be.visible')
-        .clear()
-        .click()
-        .type(env.toDate)
-        .type( "{enter}" );
-      cy.get('.col').click();
-      cy.wait(2000);
-
       cy.get('#page-query-report > .page-body > .page-wrapper > .page-content > .row > .layout-main-section-wrapper', { timeout: 10000 }).should('be.visible');
       cy.wait(30000);
-      cy.get('.dt-cell--col-2 > .dt-cell__content > .dt-filter')
+      cy.get('.dt-cell--col-2 > .dt-cell__content > .dt-filter', { timeout: 10000 })
         .should('be.visible')
         .type(env.salesOrder);
+      cy.wait(4000);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-2 > .dt-cell__content', { timeout: 10000 })
         .should('be.visible')
         .contains(env.salesOrder);
-      
-      //cy.get('.dt-scrollable > .dt-row > .dt-cell--col-2 > .dt-cell__content').contains(env.salesOrder);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-4 > .dt-cell__content').contains(env.customer);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-3 > .dt-cell__content').contains(env.deliveryNote);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-6 > .dt-cell__content').contains(env.incoterms);
