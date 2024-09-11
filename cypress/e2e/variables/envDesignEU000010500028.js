@@ -1,3 +1,4 @@
+/* eslint-disable */
 export const source = 'https://qsgbcz.lmnas.com/login#login';
 export const target = 'https://qsgbcz.lmnas.com/app/design/new-design-1';
 // export const source = '/login#login';
