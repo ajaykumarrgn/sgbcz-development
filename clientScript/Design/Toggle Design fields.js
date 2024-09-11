@@ -15,8 +15,6 @@ frappe.ui.form.on('Design', {
             }
         }
         
-        
-        
         // If any field is invalid, mark form as not validated
         if (!lValid) {
             frappe.validated = false;
@@ -83,51 +81,64 @@ frappe.ui.form.on('Design', {
        
     },
     
+    // this function responsible for visibility of html fields
     fnRenderTemplates: function(frm) {
+       // Get all the HTML fields to be rendered
         let laFields = fnGetHtmlfields();
- 
         laFields.forEach(function (lField) {
+            // Get the template for the current field
             let laTemplate = fnGetTemplate(frm, lField);
+            // Create data object with form and current field
             let ldData = { frm: frm, field: lField };
+            // Initialize flag to track 
+            // visibility of HTML fields
+            let isHidden = false;
             
-            //Check the LV2 is present, show all both HTML and 
-            //Docfields otherwise hide the some dependent 
-            //fields based on the LV2
             if (frm.doc.lv_2) {
-                // Show all fields when LV2 is present
-                frm.set_df_property(lField.fieldname, 'hidden', false);
-                frm.set_df_property(lField.fieldname, 'options', frappe.render(laTemplate, ldData));
- 
+                // `lv_2` is present, fields should generally be visible
+                isHidden = false;
                 if (frm.doc.factory == "RGB") {
                     // Show power_lv and uk_lv, hide uk_hv_lv
                     if (lField.fieldname === 'power_lv' || 
                         lField.fieldname === 'uk_lv') {
-                        frm.set_df_property(lField.fieldname, 'hidden', false);
-                        
+                        // Keep power_lv and uk_lv fields visible
+                        isHidden = false;  
                     } else if (lField.fieldname === 'uk_hv_lv') {
-                        frm.set_df_property(lField.fieldname, 'hidden', true);
+                        isHidden = true; // Hide `uk_hv_lv`
                     }
                 } else if (frm.doc.factory == "NEU") {
                     // Show power_lv and uk_hv_lv, hide uk_lv
                     if (lField.fieldname === 'power_lv' || 
                         lField.fieldname === 'uk_hv_lv') {
-                        frm.set_df_property(lField.fieldname, 'hidden', false);
+                        // Keep power_lv and uk_hv_lv fields visible
+                        isHidden = false;
                         
                     } else if (lField.fieldname === 'uk_lv') {
-                        frm.set_df_property(lField.fieldname, 'hidden', true);
+                        isHidden = true; // Hide uk_lv fields
                     }
                 }
             } else {
+                 
                 // Hide power_lv, uk_lv, uk_hv_lv, and 
                 //vector_html lFields if lv_2 is not present
                 if (['power_lv', 'uk_lv', 'uk_hv_lv', 
                     'vector_html'].includes(lField.fieldname)) {
-                    frm.set_df_property(lField.fieldname, 'hidden', true);
+                    isHidden = true; // Hide all these fields
                     
-                } else {
-                    frm.set_df_property(lField.fieldname, 'options', frappe.render(laTemplate, ldData));
                 }
             }
+            // If the field is not hidden, render the template based on the ldData
+            if(isHidden === false){
+                frm.set_df_property(lField.fieldname, 'options', frappe.render(laTemplate, ldData));
+            } else {
+                // empty the html doc field first and then render the template
+                var lTemplate = `<form>
+                <div class="frappe-control input-max-width" data-fieldtype="Data" data-fieldname="{{field.fieldname}}">
+                
+            </div></form>`
+                frm.set_df_property(lField.fieldname, 'options', frappe.render(lTemplate, ldData));
+            }
+            frm.refresh_fields();
         });
         
         //Check if the Vector group is set to visible or not based on the LV2
@@ -179,10 +190,11 @@ frappe.ui.form.on('Design', {
             frm.set_value('uk_hv_lv', null);
         }
     },
-    
-    // fnGetSelectOptions(fieldname, frm){
-    //     return ['', '1','5','7','11'];
-    // },
+
+    factory(frm) 
+    { frm.events.fnRenderTemplates(frm); },
+    transformer_type(frm) 
+    { frm.events.fnRenderTemplates(frm); },
     
     //The function is used to get the vector 
     //group options dynamically from the Docfield
@@ -277,10 +289,6 @@ function fnTransposeHtmlToDocField(frm, iValue, iHtmlField, iDocument) {
                 frappe.msgprint('Enter the ' + label2 + ' value after the slash.');
                 return;
             }  
-            // if (parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
-            //     frappe.throw(__(label2 + " should be lesser than " + label1));
-            //     return;
-            // }
             if (iHtmlField !== 'power_lv' && iHtmlField !== 'uk_lv' && 
             iHtmlField !== 'uk_hv_lv' && 
             parseFloat(lSplit[0]) < parseFloat(lSplit[1])) {
