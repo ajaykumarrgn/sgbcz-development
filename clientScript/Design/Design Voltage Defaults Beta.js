@@ -67,15 +67,15 @@ frappe.ui.form.on("Design", {
 
 // Generic function to set options for LV and HV settings
 fnSetOptions(frm, iOnSettingsField, iOnField, iToSettingsField, iToField, iOnChange, type) {
-  const DOCTYPE= "Gitra Settings";
+  const DOCTYPE = "Gitra Settings";
   
   // Determine the settings field based on type (hv or lv)
-  const GITRA_SETTING= type === "hv" ? "hv_voltage_setting" : "lv_voltage_setting";
+  const GITRA_SETTING = type === "hv" ? "hv_voltage_setting" : "lv_voltage_setting";
 
   // Load the document for Gitra Settings
   frappe.model.with_doc(DOCTYPE, DOCTYPE, function () {
     // Get the list of settings
-    const LA_VALUE= frappe.model.get_list(DOCTYPE);
+    const LA_VALUE = frappe.model.get_list(DOCTYPE);
     //initializing set to avoid duplicate option
     const LA_OPTIONS = new Set();
 
@@ -90,7 +90,7 @@ fnSetOptions(frm, iOnSettingsField, iOnField, iToSettingsField, iToField, iOnCha
     });
 
     // Convert Set to Array and set field options
-    const LA_OPTIONS_ARRAY= Array.from(LA_OPTIONS);
+    const LA_OPTIONS_ARRAY = Array.from(LA_OPTIONS);
     set_field_options(iToField, LA_OPTIONS_ARRAY);
 
     // Automatically set the first option if onChange is true and options are available
@@ -105,9 +105,9 @@ fnSetOptions(frm, iOnSettingsField, iOnField, iToSettingsField, iToField, iOnCha
 
 // Combined function to set defaults for both LV and HV
 fnSetDefaults(frm, iField, type) {
-  const OPERATION_VOLTAGE= type === "hv" ? "highest_operation_voltage_hv" : "highest_operation_voltage_lv";
-  const AC_PHASE= type === "hv" ? "ac_phase_hv" : "ac_phase_lv";
-  const LI_PHASE= type === "hv" ? "li_phase_hv" : "li_phase_lv";
+  const OPERATION_VOLTAGE = type === "hv" ? "highest_operation_voltage_hv" : "highest_operation_voltage_lv";
+  const AC_PHASE = type === "hv" ? "ac_phase_hv" : "ac_phase_lv";
+  const LI_PHASE = type === "hv" ? "li_phase_hv" : "li_phase_lv";
 
   frm.events.fnSetOptions(frm, "voltage_to", iField, "um", OPERATION_VOLTAGE, true, type);
   frm.events.fnSetOptions(frm, "um", OPERATION_VOLTAGE, "ac_phase", AC_PHASE, true, type);
