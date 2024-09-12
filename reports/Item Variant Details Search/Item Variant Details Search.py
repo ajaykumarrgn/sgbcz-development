@@ -44,7 +44,7 @@ def fn_get_data(filters):
             # use replace function to replace (.) in attribute values to (,)
             # hence all the attribute value are in same format
             ld_attr_val_map[l_name][l_row.get("attribute")] = l_row.get("attribute_value").replace('.', ',') if l_row.get("attribute_value") is not None else None
-
+            # <<ISS-2024-00068
         return ld_attr_val_map
     def fn_scrub_string(i_input_string):
         # Convert the string to lowercase
