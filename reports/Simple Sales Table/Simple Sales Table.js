@@ -1,8 +1,3 @@
-// Change References
-// Saved Column:(Issue# : ISS-2024-00005)
-// Remove the columns filter when there is no data for the filter(Issue# : ISS-2024-00008)
-// Some Columns not visible using Saved Column (Issue# : ISS-2024-00020)
-// User session defaults functionality is not working (Issue# : ISS-2024-00085)
 
 frappe.query_reports['Simple Sales Table'] = {
     "filters": [
@@ -117,11 +112,9 @@ frappe.query_reports['Simple Sales Table'] = {
 		
         return value;
     },
-    // >> ISS-2024-00005
-    //Uncomment this section lines of code
+
     "onload": function (report) {
 
-        // << ISS-2024-00085
         // Fetch from and to date from User Session Defaults Document
         //during onload event using a synchronous call.
         frappe.call({
@@ -140,17 +133,16 @@ frappe.query_reports['Simple Sales Table'] = {
                             }
                     }
         });
-        // >> ISS-2024-00085
 
         // Add inner button to the report page
         report.page.add_inner_button(__("Save Columns"), function() {
             // Get the values of the report
             var lFilters = report.get_values();
             var laTextArray=[];
-            // >> ISS-2024-00020
+         
             // Iterate through header columns (assuming a maximum of 69 columns)
             for (let i = 0; i <= 69; i++) {
-            // <<ISS-2024-00020
+         
                 // Find the header element in the report
                 const CLASSNAME = `dt-cell__content--header-${i}`;
                 const ELEMENT = document.querySelector(`.${CLASSNAME}`);
@@ -200,7 +192,7 @@ frappe.query_reports['Simple Sales Table'] = {
             });
     
     }
-    //<< ISS-2024-00005
+    
         
 };
 
@@ -210,7 +202,7 @@ frappe.query_reports['Simple Sales Table'] = {
 //easy identification of the remaining data.
 //Column filters do not work when no filter data is found in the list.
 // Then set the width for the scroll bar.
-//>> ISS-2024-00008
+
 const style = document.createElement('style');
 style.innerHTML = `
     .dt-row--highlight .dt-cell {
@@ -251,4 +243,4 @@ style.innerHTML = `
 
 `;
 document.head.appendChild(style); 
-//>>ISS-2024-00008
+

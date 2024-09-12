@@ -58,7 +58,7 @@ refresh: function(frm) {
     //restriction
     if(frm.doc.is_design){
       
-        fnUpdateFieldBasedOnIsDesign(frm)
+        fnUpdateFieldBasedOnIsDesign(frm);
     }
      
     if (frm.is_new()) {
@@ -241,6 +241,7 @@ is_design: function(frm) {
         frm.set_df_property('climatic_class', 'options', ['C2', 'C3', 'C4', 'C5']);
         frm.set_df_property('environmental_class', 'options', ['E2', 'E3', 'E4', 'E5']);
         fnResetValues(frm);
+        frm.trigger('fnToggleFields');
     }
 },
 
@@ -437,9 +438,13 @@ function fnResetValues(frm) {
         ]);
 
         // Resetting rating and High Voltage tab section to default values
-        fnResetToDefault(['rating', 'tapping_plus', 'tapping_minus', 'tapping_plus_step', 
+        fnResetToDefault(['tapping_plus', 'tapping_minus', 'tapping_plus_step', 
             'vector_group', 'ip_protection', 'vector_group_lv1', 'vector_group_lv2',
             'type_lv']);
+            
+        if(!frm.doc.is_design){
+            fnResetToDefault(['rating']);
+        }
             
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             // Clearing HTML fields
@@ -453,11 +458,11 @@ function fnResetValues(frm) {
 
         //onchange of factory clear every field
         if(frm.doc.factory != 'SGBCZ'){
-            fnResetHtmlFields(['hv_html', 'lv_html']);
+            fnResetHtmlFields(['hv_html', 'lv_html', 'power_lv']);
             fnResetFields([
                 'hv_rated_voltage', 'highest_operation_voltage_hv', 
                 'ac_phase_hv', 'li_phase_hv', 'hv1', 'hv2',
-                'lv_rated_voltage', 'lv1', 'lv_2'
+                'lv_rated_voltage', 'lv1', 'lv_2', 'power_lv1', 'power_lv2'
             ]);
         }
     }

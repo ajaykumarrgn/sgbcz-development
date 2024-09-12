@@ -1,3 +1,4 @@
+/* eslint-disable */
 export const source = 'https://qsgbcz.lmnas.com/login#login';
 export const target = 'https://qsgbcz.lmnas.com/app/query-report/Sales%20Table';
 export const fromDate = '01.07.2024';

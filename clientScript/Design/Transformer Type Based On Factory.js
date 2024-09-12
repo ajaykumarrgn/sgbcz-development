@@ -207,7 +207,8 @@ function fnDirectMaterial(frm){
 
 function fncreateItem(frm) {
     if(frm.doc.no_load_loss_guarantee && frm.doc.load_loss_guarantee
-        && (frm.doc.lwa || frm.doc.lpa)
+        && parseInt(frm.doc.lwa) >= 0 && parseInt(frm.doc.lpa) >= 0 && 
+        !(parseInt(frm.doc.lwa) === 0 && parseInt(frm.doc.lpa) === 0)
       ){
         frappe.msgprint(__('The item is being created. Please wait a moment.'));
         frappe.call({
@@ -304,7 +305,10 @@ function fncreateItem(frm) {
                 }, 5); }
             }}); 
     }else{
-       frappe.msgprint(__("No Load Loss and Load Loss Guarantee cannot be empty for creating an item"));
+        frappe.msgprint(__((!frm.doc.no_load_loss_guarantee ? "No Load Loss Guarantee " : "") + 
+        (!frm.doc.load_loss_guarantee ? "Load Loss Guarantee " : "") + (!(parseInt(frm.doc.lwa) >= 0) ? "Lwa " : "") + 
+        (!(parseInt(frm.doc.lpa) >= 0) ? "Lpa " : "") + 
+        (parseInt(frm.doc.lwa) === 0 && parseInt(frm.doc.lpa) === 0 ? "Lpa (0) and Lwa (0) " : "")  + "cannot be empty for creating an item"));
     }   
 }
 

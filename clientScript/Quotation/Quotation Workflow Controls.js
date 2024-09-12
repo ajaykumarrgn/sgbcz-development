@@ -17,18 +17,11 @@ frappe.ui.form.on('Quotation', {
                   
                     // Comparing data-label instead of Button Text
                     var id = $(this).children(':first-child').attr('data-label'); 
-                  
-                    switch(id){
-                        case __("Print"):
-                             $(this).remove();
-                             break;
-                        case __("Email"):
-                             $(this).remove();
-                             break;
-                        default:
-                            break;
-                            
-                    }
+                    
+                    //remove Email option from menu 
+                    if(id === "Email"){
+                        $(this).remove();
+                    }   
                 });
 		    }
         }, 10);

@@ -1,3 +1,4 @@
+/* eslint-disable */
 export const source = 'https://qsgbcz.lmnas.com/login';
 export const target = 'https://qsgbcz.lmnas.com/app/quotation';
 export const date = new Date().toLocaleDateString('en-GB', {

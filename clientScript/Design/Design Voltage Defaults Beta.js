@@ -1,5 +1,6 @@
 //Setting the default dependent value for either HV Rated Voltage
 // or HV1  #(Story: US-2024-0044)
+//the LV Rated Voltage should have same logic has HV Rated Voltage
 frappe.ui.form.on("Design", {
   refresh(frm) {
     var lDoctype = "Gitra Settings";
@@ -25,31 +26,35 @@ frappe.ui.form.on("Design", {
       frm.events.highest_operation_voltage_lv(frm);
       frm.events.ac_phase_lv(frm);
 
-      // Initialize HV settings
-      frm.events.fnSetHvOptions(
+    //   Initialize HV settings
+      frm.events.fnSetOptions(
         frm,
         "voltage_to",
         "hv_rated_voltage",
         "um",
         "highest_operation_voltage_hv",
-        false
+        false,
+        'hv'
       );
-      frm.events.fnSetHvOptions(
+      frm.events.fnSetOptions(
         frm,
         "um",
         "highest_operation_voltage_hv",
         "ac_phase",
         "ac_phase_hv",
-        false
+        false,
+        'hv'
       );
-      frm.events.fnSetHvOptions(
+      frm.events.fnSetOptions(
         frm,
         "ac_phase",
         "ac_phase_hv",
         "li",
         "li_phase_hv",
-        false
+        false,
+        'hv'
       );
+
 
       // Set defaults if new document
       if (frm.is_new()) {
@@ -60,106 +65,103 @@ frappe.ui.form.on("Design", {
     });
   },
 
-  // Function to set HV options based on selected criteria
-  fnSetHvOptions(
-    frm,
-    iOnSettingsField,
-    iOnField,
-    iToSettingsField,
-    iToField,
-    iOnChange
-  ) {
-    // Local variable for the Gitra Settings doctype
-    var lDoctype = "Gitra Settings";
+// Generic function to set options for LV and HV settings
+fnSetOptions(frm, iOnSettingsField, iOnField, iToSettingsField, iToField, iOnChange, type) {
+  const DOCTYPE = "Gitra Settings";
+  
+  // Determine the settings field based on type (hv or lv)
+  const GITRA_SETTING = type === "hv" ? "hv_voltage_setting" : "lv_voltage_setting";
 
-    // Fetch Gitra Settings document asynchronously
-    frappe.model.with_doc(lDoctype, lDoctype, function () {
-      // Get list of documents for Gitra Settings
-      var laValues = frappe.model.get_list(lDoctype);
-      var laOptions = [];
+  // Load the document for Gitra Settings
+  frappe.model.with_doc(DOCTYPE, DOCTYPE, function () {
+    // Get the list of settings
+    const LA_VALUE = frappe.model.get_list(DOCTYPE);
+    //initializing set to avoid duplicate option
+    const LA_OPTIONS = new Set();
 
-      // Iterate through HV voltage settings
-      laValues[0].hv_voltage_setting.forEach((ldHvRow) => {   
-        if(ldHvRow.transformer_type === frm.doc.transformer_type){ 
-        // Filter options based on specified criteria
-          if (ldHvRow[iOnSettingsField] >= frm.doc[iOnField]) {
-            laOptions.push(ldHvRow[iToSettingsField]);
-          }
+    // Loop through the settings
+    LA_VALUE[0][GITRA_SETTING].forEach((ldRow) => {
+      // Match the transformer type and compare the OnSettings field value
+      if (ldRow.transformer_type === frm.doc.transformer_type) {
+        if (ldRow[iOnSettingsField] >= frm.doc[iOnField]) {
+          LA_OPTIONS.add(ldRow[iToSettingsField]);  // Add the valid options
+        }
       }
-      });
-
-      // Set field options and handle change event
-      set_field_options(iToField, laOptions);
-      if (iOnChange && laOptions.length > 0) {
-        frm.set_value(iToField, laOptions[0]);
-      }
-      frm.refresh_fields();
     });
-  },
 
-  // Function to set HV defaults based on selected field
-  fnSetHvDefaults(frm, iHvField) {
-    frm.events.fnSetHvOptions(
-      frm,
-      "voltage_to",
-      iHvField,
-      "um",
-      "highest_operation_voltage_hv",
-      true
-    );
-    frm.events.fnSetHvOptions(
-      frm,
-      "um",
-      "highest_operation_voltage_hv",
-      "ac_phase",
-      "ac_phase_hv",
-      true
-    );
-    frm.events.fnSetHvOptions(
-      frm,
-      "ac_phase",
-      "ac_phase_hv",
-      "li",
-      "li_phase_hv",
-      true
-    );
-  },
+    // Convert Set to Array and set field options
+    const LA_OPTIONS_ARRAY = Array.from(LA_OPTIONS);
+    set_field_options(iToField, LA_OPTIONS_ARRAY);
+
+    // Automatically set the first option if onChange is true and options are available
+    if (iOnChange && LA_OPTIONS_ARRAY.length > 0) {
+      frm.set_value(iToField, LA_OPTIONS_ARRAY[0]);
+    }
+
+    // Refresh the form fields after setting the options
+    frm.refresh_fields();
+  });
+},
+
+// Combined function to set defaults for both LV and HV
+fnSetDefaults(frm, iField, type) {
+  const OPERATION_VOLTAGE = type === "hv" ? "highest_operation_voltage_hv" : "highest_operation_voltage_lv";
+  const AC_PHASE = type === "hv" ? "ac_phase_hv" : "ac_phase_lv";
+  const LI_PHASE = type === "hv" ? "li_phase_hv" : "li_phase_lv";
+
+  frm.events.fnSetOptions(frm, "voltage_to", iField, "um", OPERATION_VOLTAGE, true, type);
+  frm.events.fnSetOptions(frm, "um", OPERATION_VOLTAGE, "ac_phase", AC_PHASE, true, type);
+  frm.events.fnSetOptions(frm, "ac_phase", AC_PHASE, "li", LI_PHASE, true, type);
+},
+
 
   // Function to handle change in HV rated voltage field
   hv_rated_voltage(frm) {
     if (!frm.doc.hv_rated_voltage) return;
-    frm.events.fnSetHvDefaults(frm, "hv_rated_voltage");
+    frm.events.fnSetDefaults(frm, "hv_rated_voltage", 'hv');
   },
 
   // Function to handle change in HV1 field
   hv1(frm) {
     if (!frm.doc.hv1) return;
-    frm.events.fnSetHvDefaults(frm, "hv1");
+    frm.events.fnSetDefaults(frm, "hv1", 'hv');
+  },
+  //onchange of lv_rated_voltage
+  lv_rated_voltage(frm){
+    if (!frm.doc.lv_rated_voltage) return;
+    frm.events.fnSetDefaults(frm, "lv_rated_voltage", 'lv');
+  },
+  //onchange of lv1
+  lv1(frm){
+      if (!frm.doc.lv1) return;
+      frm.events.fnSetDefaults(frm, "lv1", 'lv');
   },
 
   // Function to handle change in highest operation voltage HV field
   highest_operation_voltage_hv(frm) {
     if (!frm.doc.highest_operation_voltage_hv) return;
-    frm.events.fnSetHvOptions(
+    frm.events.fnSetOptions(
       frm,
       "um",
       "highest_operation_voltage_hv",
       "ac_phase",
       "ac_phase_hv",
-      true
+      true,
+      'hv'
     );
   },
 
   // Function to handle change in AC phase HV field
   ac_phase_hv(frm) {
     if (!frm.doc.ac_phase_hv) return;
-    frm.events.fnSetHvOptions(
+    frm.events.fnSetOptions(
       frm,
       "ac_phase",
       "ac_phase_hv",
       "li",
       "li_phase_hv",
-      true
+      true,
+      'hv'
     );
   },
 
@@ -247,7 +249,9 @@ frappe.ui.form.on("Design", {
         []
       );
         set_field_options("highest_operation_voltage_lv", laLvUniqueArray);
-        fnSetLvDefaults(frm, laValues[0]);
+        if(!frm.doc.lv_rated_voltage && !frm.doc.lv_2){
+            fnSetLvDefaults(frm, laValues[0]);
+        }
         fnSetHvDefaults(frm, laValues[0]);
     });
 }

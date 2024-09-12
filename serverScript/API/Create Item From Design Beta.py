@@ -106,36 +106,44 @@ def append_attribute(attribute_name, attribute_value):
         existing_attributes.add(attribute_name)
 
 #function to convert volt ti kV
-def fn_convert_to_kv(value):
-    return str(int(value) / 1000)
+def fn_convert_to_kv(i_value):
+    # Convert value to integer and divide by 1000
+    l_result = int(i_value) / 1000
+    # Check if result is a whole number
+    if l_result.is_integer():
+        # Return as integer string if whole number
+        return str(int(l_result))
+    else:
+        # Return as string with decimal part if not a whole number
+        return str(l_result)
 
 # Fetch the design details from the request
-design_id = frappe.form_dict.get('design')
-design = frappe.get_doc('Design', design_id)  # Define design here
+l_design_id = frappe.form_dict.get('design')
+ld_design = frappe.get_doc('Design', l_design_id)  # Define design here
 
 la_parameter_map_def = fn_get_parameter_mapping_def()
 
 # Determine item group and variant based on transformer type
-if design.transformer_type == 'DTTHZ2N':
+if ld_design.transformer_type == 'DTTHZ2N':
     item_group = 'DTTHZ2N'
     variant_of = 'DTTHZ2N'
-elif design.transformer_type in ['DTTH2N', 'DTTHK2NG', 'DTTHDG', 'DTTH2NG']:
+elif ld_design.transformer_type in ['DTTH2N', 'DTTHK2NG', 'DTTHDG', 'DTTH2NG']:
     item_group = 'RGB'
-    variant_of = design.transformer_type
-elif design.transformer_type in ['DOTML', 'DMTML', 'DSTML', 'DOTDG']:
+    variant_of = ld_design.transformer_type
+elif ld_design.transformer_type in ['DOTML', 'DMTML', 'DSTML', 'DOTDG']:
     item_group = 'NEU'
-    variant_of = design.transformer_type
+    variant_of = ld_design.transformer_type
 else:
     frappe.response['message'] = 'Unsupported transformer type.'
     # frappe.throw('Unsupported transformer type.')
 
 # Create a new item document
 item_new = frappe.new_doc('Item')
-item_new.item_name = design.title
+item_new.item_name = ld_design.title
 item_new = fill_item_basic_details(item_new, item_group, variant_of)
 item_new = fill_item_description(item_new, variant_of)
-item_new.standard_rate = design.total_cost
-item_new.design = design.name
+item_new.standard_rate = ld_design.total_cost
+item_new.design = ld_design.name
 
 # Initialize a flag to check if either 'lwa' or 'lpa' has been set
 lwa_set = False
@@ -144,7 +152,7 @@ lpa_set = False
 # Append attributes while avoiding duplicates
 existing_attributes = set()
 
-la_template_attributes = frappe.get_doc('Item', design.transformer_type).attributes
+la_template_attributes = frappe.get_doc('Item', ld_design.transformer_type).attributes
 if not la_template_attributes:
     frappe.msgprint("Template attributes not found")
 
@@ -159,7 +167,7 @@ for ld_attribute in la_template_attributes:
     ld_docvalue = 0
 
     # Get the value from the design document
-    ld_docvalue_temp = design.get(ld_designdoc_field)
+    ld_docvalue_temp = ld_design.get(ld_designdoc_field)
 
     # If the attribute has numeric values
     if ld_doc_attr:
@@ -176,140 +184,142 @@ for ld_attribute in la_template_attributes:
                 ld_docvalue_temp = int(ld_docvalue_temp)
             ld_docvalue = ld_docvalue_temp
     else:
-        # If the attribute does not have numeric values
-        # keep the original value
-        ld_docvalue = ld_docvalue_temp
+        
+        if ld_docvalue_temp:
+            #get the abbreviation for the attribute value
+            ld_doc_abbr = frappe.db.get_value(
+                'Item Attribute Value',
+                {'parent': ld_attribute.attribute, 'attribute_value':ld_docvalue_temp },  
+                'abbr'
+            )
+            if ld_doc_abbr:
+                ld_docvalue = ld_doc_abbr
+            else:
+                # If the attribute does not have numeric values or abbr
+                # keep the original value
+                ld_docvalue = ld_docvalue_temp
 
     # Conditionally append attributes
     if ld_attribute.attribute == 'Electrostatic screen':
-        if design.electrostatic_screen == 0:
+        if ld_design.electrostatic_screen == 0:
             item_new.append("attributes", get_attribute(
-                design.transformer_type, ld_attribute.attribute, 'NO'))
+                ld_design.transformer_type, ld_attribute.attribute, 'NO'))
         else:
              item_new.append("attributes", get_attribute(
-                 design.transformer_type, ld_attribute.attribute, 'YES'))
+                 ld_design.transformer_type, ld_attribute.attribute, 'YES'))
     elif ld_attribute.attribute == 'Parallel coil':
-        if design.parallel_coil == 0:
+        if ld_design.parallel_coil == 0:
             item_new.append("attributes", get_attribute(
-                design.transformer_type, ld_attribute.attribute, 'NO'))
+                ld_design.transformer_type, ld_attribute.attribute, 'NO'))
         else:
              item_new.append("attributes", get_attribute(
-                 design.transformer_type, ld_attribute.attribute, 'YES'))
+                 ld_design.transformer_type, ld_attribute.attribute, 'YES'))
     elif ld_attribute.attribute == 'Special parameters':
-        if design.specifics:
+        if ld_design.specifics:
             item_new.append("attributes", get_attribute(
-                design.transformer_type, ld_attribute.attribute, 'YES'))
-            item_new.custom_specifics = design.specifics
+                ld_design.transformer_type, ld_attribute.attribute, 'YES'))
+            item_new.custom_specifics = ld_design.specifics
         else:
             item_new.append("attributes", get_attribute(
-                design.transformer_type, ld_attribute.attribute, 'NO'))
+                ld_design.transformer_type, ld_attribute.attribute, 'NO'))
     
     #Tappings - number of tappings (+/-) should take greater value in 
     #either design's tapping_plus or tapping_minus
     elif ld_attribute.attribute == 'Tappings - number of tappings (+/-)':
-        l_tapping_plus = int(design.tapping_plus)
-        l_tapping_minus = int(design.tapping_minus)
+        l_tapping_plus = int(ld_design.tapping_plus)
+        l_tapping_minus = int(ld_design.tapping_minus)
         
         if l_tapping_plus > l_tapping_minus:
             item_new.append("attributes", get_attribute(
-                design.transformer_type, ld_attribute.attribute, l_tapping_plus))
+                ld_design.transformer_type, ld_attribute.attribute, l_tapping_plus))
         else:
             item_new.append("attributes", get_attribute(
-                design.transformer_type, ld_attribute.attribute, l_tapping_minus))
+                ld_design.transformer_type, ld_attribute.attribute, l_tapping_minus))
 
     #if lv_2 has a value then vector group should be 0
     #if not vector group lv1 and lv2 should be 0
     elif ld_attribute.attribute in ['Vector Group', 'Vector Group LV 1', 'Vector Group LV 2']:
         if ld_attribute.attribute == 'Vector Group':
-            attribute_value = design.vector_group if design.lv_2 == 0 else 0
+            attribute_value = ld_design.vector_group if ld_design.lv_2 == 0 else 0
         elif ld_attribute.attribute == 'Vector Group LV 1':
-            attribute_value = design.vector_group_lv1 if design.lv_2 != 0 else 0
+            attribute_value = ld_design.vector_group_lv1 if ld_design.lv_2 != 0 else 0
         elif ld_attribute.attribute == 'Vector Group LV 2':
-            attribute_value = design.vector_group_lv2 if design.lv_2 != 0 else 0
+            attribute_value = ld_design.vector_group_lv2 if ld_design.lv_2 != 0 else 0
         item_new.append("attributes", get_attribute(
-            design.transformer_type, ld_attribute.attribute, attribute_value
+            ld_design.transformer_type, ld_attribute.attribute, attribute_value
         ))
     
     elif ld_attribute.attribute in ['Uk (%)', 'Uk LV 1 (%)', 'Uk LV 2 (%)', 'Uk HV LV 1 (%)', 'Uk HV LV 2 (%)']:
         if ld_attribute.attribute == 'Uk (%)':
-            attribute_value = design.impedance if design.uk_lv2 == 0 and design.ukhv_lv2 == 0  else 0
+            attribute_value = ld_design.impedance if ld_design.uk_lv2 == 0 and ld_design.ukhv_lv2 == 0  else 0
         elif ld_attribute.attribute == 'Uk LV 1 (%)':
-            attribute_value = design.uk_lv1 if design.uk_lv2 != 0 else 0
+            attribute_value = ld_design.uk_lv1 if ld_design.uk_lv2 != 0 else 0
         elif ld_attribute.attribute == 'Uk LV 2 (%)':
-            attribute_value = design.uk_lv2 if design.uk_lv2 != 0 else 0
+            attribute_value = ld_design.uk_lv2 if ld_design.uk_lv2 != 0 else 0
         elif ld_attribute.attribute == 'Uk HV LV 1 (%)':
-            attribute_value = design.ukhv_lv1 if design.ukhv_lv2 != 0 else 0
+            attribute_value = ld_design.ukhv_lv1 if ld_design.ukhv_lv2 != 0 else 0
         elif ld_attribute.attribute == 'Uk HV LV 2 (%)':
-            attribute_value = design.ukhv_lv2 if design.ukhv_lv2 != 0 else 0
+            attribute_value = ld_design.ukhv_lv2 if ld_design.ukhv_lv2 != 0 else 0
         item_new.append("attributes", get_attribute(
-            design.transformer_type, ld_attribute.attribute, attribute_value
+            ld_design.transformer_type, ld_attribute.attribute, attribute_value
         ))
 
   # Converting HV, HV 1, HV 2 from V to kV
     elif ld_attribute.attribute in ['HV (kV)', 'HV 1 (kV)', 'HV 2 (kV)']:
         hv_value_map = {
-            'HV (kV)': design.hv_rated_voltage,
-            'HV 1 (kV)': design.hv1,
-            'HV 2 (kV)': design.hv2
+            'HV (kV)': ld_design.hv_rated_voltage,
+            'HV 1 (kV)': ld_design.hv1,
+            'HV 2 (kV)': ld_design.hv2
         }
         hv_in_kv_str = fn_convert_to_kv(hv_value_map[ld_attribute.attribute])
         item_new.append("attributes", get_attribute(
-            design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
+            ld_design.transformer_type, ld_attribute.attribute, hv_in_kv_str))
 
-    elif ld_designdoc_field in ['lwa', 'lpa']:
-        ld_target_attribute_value = design.get(ld_designdoc_field)
-        if ld_target_attribute_value is not None:
-            try:
-                ld_target_attribute_value = int(ld_target_attribute_value)
-                if 30 <= ld_target_attribute_value <= 70:
-                    append_attribute(ld_attribute.attribute, ld_target_attribute_value)
-                else:
-                    append_attribute(ld_attribute.attribute, 0)
-            except (ValueError, TypeError):
-                append_attribute(ld_attribute.attribute, 0)
-        else:
-            append_attribute(ld_attribute.attribute, 0)
     else:
-        item_new.append("attributes", get_attribute(design.transformer_type, ld_attribute.attribute, ld_docvalue))
+        item_new.append("attributes", get_attribute(ld_design.transformer_type, ld_attribute.attribute, ld_docvalue))
 
 # Append other attributes
-item_new.item_technical_name = design.rating + ' [kVA]'
+item_new.item_technical_name = ld_design.rating + ' [kVA]'
 
 #update technical name 
-if design.hv_rated_voltage:
-    hv_in_kv = fn_convert_to_kv(design.hv_rated_voltage).replace('.', ',')
+if ld_design.hv_rated_voltage:
+    hv_in_kv = fn_convert_to_kv(ld_design.hv_rated_voltage).replace('.', ',')
     item_new.item_technical_name = item_new.item_technical_name + ', HV ' + remove_trailing_zeros(hv_in_kv) + ' [kV]'
     
-if design.hv1 and design.hv2:
-    hv1_in_kv = fn_convert_to_kv(design.hv1).replace('.', ',')
-    hv2_in_kv = fn_convert_to_kv(design.hv2).replace('.', ',')
+if ld_design.hv1 and ld_design.hv2:
+    hv1_in_kv = fn_convert_to_kv(ld_design.hv1).replace('.', ',')
+    hv2_in_kv = fn_convert_to_kv(ld_design.hv2).replace('.', ',')
     
     item_new.item_technical_name = item_new.item_technical_name + ', HV₁ ' + remove_trailing_zeros(hv1_in_kv) + ' [kV]'
     item_new.item_technical_name = item_new.item_technical_name + ', HV₂ ' + remove_trailing_zeros(hv2_in_kv) + ' [kV]'
 
-if design.lv_rated_voltage:
-    item_new.item_technical_name = item_new.item_technical_name + ', LV ' + str(design.lv_rated_voltage) + ' [V]'
+if ld_design.lv_rated_voltage:
+    item_new.item_technical_name = item_new.item_technical_name + ', LV ' + str(ld_design.lv_rated_voltage) + ' [V]'
     
-if design.lv1 and design.lv_2:
+if ld_design.lv1 and ld_design.lv_2:
    
-    item_new.item_technical_name = item_new.item_technical_name + ', LV₁ ' + str(design.lv1) + ' [V]'
-    item_new.item_technical_name = item_new.item_technical_name + ', LV₂ ' + str(design.lv_2) + ' [V]'
+    item_new.item_technical_name = item_new.item_technical_name + ', LV₁ ' + str(ld_design.lv1) + ' [V]'
+    item_new.item_technical_name = item_new.item_technical_name + ', LV₂ ' + str(ld_design.lv_2) + ' [V]'
 
-if design.impedance and (design.uk_lv2 == 0 and design.ukhv_lv2 == 0):    
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + remove_trailing_zeros(str(design.impedance)) + ' [%]'
+if ld_design.impedance and (ld_design.uk_lv2 == 0 and ld_design.ukhv_lv2 == 0):    
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + remove_trailing_zeros(str(ld_design.impedance)) + ' [%]'
 
-if design.uk_lv1 and design.uk_lv2:
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + remove_trailing_zeros(str(design.uk_lv1)) + ' [%]'
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(design.uk_lv2)) + ' [%]'
+if ld_design.uk_lv1 and ld_design.uk_lv2:
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + remove_trailing_zeros(str(ld_design.uk_lv1)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(ld_design.uk_lv2)) + ' [%]'
 
-if design.ukhv_lv1 and design.ukhv_lv2:
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk HV LV₁ ' + remove_trailing_zeros(str(design.ukhv_lv1)) + ' [%]'
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk HV LV₂ ' + remove_trailing_zeros(str(design.ukhv_lv2)) + ' [%]'
+if ld_design.ukhv_lv1 and ld_design.ukhv_lv2:
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + remove_trailing_zeros(str(ld_design.ukhv_lv1)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(ld_design.ukhv_lv2)) + ' [%]'
+
+if ld_design.power_lv1 and ld_design.power_lv2:
+    item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₁ ' + str(ld_design.power_lv1) + ' [KVA]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₂ ' + str(ld_design.power_lv2) + ' [KVA]'
 
 
-item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(design.no_load_loss_guarantee) + ' [W]'
+item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(ld_design.no_load_loss_guarantee) + ' [W]'
 
-item_new.item_technical_name = item_new.item_technical_name + ', P(k) ' + str(design.load_loss_guarantee) + ' [W]'
+item_new.item_technical_name = item_new.item_technical_name + ', P(k) ' + str(ld_design.load_loss_guarantee) + ' [W]'
 
 item_new.item_code = get_item_code_from_attributes(item_new).replace('.',',')
 
