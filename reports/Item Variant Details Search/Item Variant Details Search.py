@@ -1,6 +1,8 @@
 # Change References
 # two item variant available but only 1 variant is shown in report: (Issue# : ISS-2024-00068)
 
+# Define the columns that will be shown in the report,
+# including the Add button, variant name, and design fields.
 def fn_get_columns(i_item):
     la_columns = [
         {
@@ -16,6 +18,7 @@ def fn_get_columns(i_item):
             "Design"), "fieldtype": "Link", "options": "Design", "width": 200,}
         ]
 
+    # Fetch item attributes and dynamically add them as columns
     ld_item_doc = frappe.get_doc("Item", i_item)
     for l_entry in ld_item_doc.attributes:
         l_scrubbed_string = l_entry.attribute.lower()
@@ -25,7 +28,9 @@ def fn_get_columns(i_item):
         la_columns.append(l_column)
     return la_columns
 
+# Fetch data based on the provided filters
 def fn_get_data(filters):
+    # Inner function to map attribute values for item variants
     def fn_get_attribute_values_map(i_variant_list):
         la_attribute_list = frappe.db.get_all(
             "Item Variant Attribute",
@@ -46,6 +51,8 @@ def fn_get_data(filters):
             ld_attr_val_map[l_name][l_row.get("attribute")] = l_row.get("attribute_value").replace('.', ',') if l_row.get("attribute_value") is not None else None
             # <<ISS-2024-00068
         return ld_attr_val_map
+
+    # Function to clean strings by removing spaces and special characters
     def fn_scrub_string(i_input_string):
         # Convert the string to lowercase
         l_scrubbed_string = i_input_string.lower()
@@ -60,12 +67,15 @@ def fn_get_data(filters):
         return []
     la_item_dicts = []
 
+    # Set up query filters
     ld_query_filters = {}
     if filters.catalog_designs:
         ld_query_filters = {"variant_of": ["=", filters.item], "disabled": 0,
                             "is_catalog_item": filters.catalog_designs}
     else:
         ld_query_filters = {"variant_of": ["=", filters.item], "disabled": 0}
+
+    # Fetch variants based on the filters
     la_variant_results = frappe.db.get_all(
         "Item", fields=["name","design"], filters=ld_query_filters
     )
@@ -75,8 +85,10 @@ def fn_get_data(filters):
     else:
         i_variant_list = [l_variant["name"] for l_variant in la_variant_results]
 
+    # Map attribute values for the variants
     ld_attr_val_map = fn_get_attribute_values_map(i_variant_list)
 
+    # Get unique attributes for the variants
     la_attributes = frappe.db.get_all(
         "Item Variant Attribute",
         fields=["attribute"],
@@ -86,13 +98,13 @@ def fn_get_data(filters):
 
     la_attribute_list = [l_row.get("attribute") for l_row in la_attributes]
 
-    # Prepare dicts
+    # Prepare the dictionary of variants with attribute values
     la_variant_dicts = [{"variant_name": d["name"],
                             "design": d["design"]} for d in la_variant_results]
     for l_item_dict in la_variant_dicts:
         l_name = l_item_dict.get("variant_name")
 
-
+        # Populate each attribute value for the item variant
         for l_attribute in la_attribute_list:
             ld_attr_dict = ld_attr_val_map.get(l_name)
             if ld_attr_dict and ld_attr_dict.get(l_attribute):
