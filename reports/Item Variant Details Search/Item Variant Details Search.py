@@ -23,9 +23,9 @@ def fn_get_columns(i_item):
     for l_entry in ld_item_doc.attributes:
         l_scrubbed_string = l_entry.attribute.lower()
         l_scrubbed_string = ''.join(c if c.isalnum() or c == '' else '' for c in l_scrubbed_string)
-        l_column = {"fieldname": l_scrubbed_string, "label": l_entry.attribute,
+        ld_column = {"fieldname": l_scrubbed_string, "label": l_entry.attribute,
                      "fieldtype": "Data", "width": 100,}
-        la_columns.append(l_column)
+        la_columns.append(ld_column)
     return la_columns
 
 # Fetch data based on the provided filters
@@ -39,16 +39,16 @@ def fn_get_data(filters):
         )
 
         ld_attr_val_map = {}
-        for l_row in la_attribute_list:
-            l_name = l_row.get("parent")
+        for ld_row in la_attribute_list:
+            l_name = ld_row.get("parent")
             if not ld_attr_val_map.get(l_name):
                 ld_attr_val_map[l_name] = {}
             # >>ISS-2024-00068
             # Comment the below line for the issue ISS-2024-00068
-            #ld_attr_val_map[l_name][l_row.get("attribute")] = l_row.get("attribute_value")
+            #ld_attr_val_map[l_name][ld_row.get("attribute")] = ld_row.get("attribute_value")
             # use replace function to replace (.) in attribute values to (,)
             # hence all the attribute value are in same format
-            ld_attr_val_map[l_name][l_row.get("attribute")] = l_row.get("attribute_value").replace('.', ',') if l_row.get("attribute_value") is not None else None
+            ld_attr_val_map[l_name][ld_row.get("attribute")] = ld_row.get("attribute_value").replace('.', ',') if ld_row.get("attribute_value") is not None else None
             # <<ISS-2024-00068
         return ld_attr_val_map
 
@@ -96,7 +96,7 @@ def fn_get_data(filters):
         group_by="attribute",
     )
 
-    la_attribute_list = [l_row.get("attribute") for l_row in la_attributes]
+    la_attribute_list = [ld_row.get("attribute") for ld_row in la_attributes]
 
     # Prepare the dictionary of variants with attribute values
     la_variant_dicts = [{"variant_name": d["name"],
@@ -113,8 +113,8 @@ def fn_get_data(filters):
         la_item_dicts.append(l_item_dict)
 
     # Add button element and register button Event
-    for l_row in la_item_dicts:
-        l_row["button"] = f'<button class="btn btn-sm" onclick="frappe.open_dialog(\'{l_row["variant_name"]}\')">Add</button>'
+    for ld_row in la_item_dicts:
+        ld_row["button"] = f'<button class="btn btn-sm" onclick="frappe.open_dialog(\'{ld_row["variant_name"]}\')">Add</button>'
     return la_item_dicts
 
     #return data
