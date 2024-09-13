@@ -83,16 +83,16 @@ def fn_get_data(filters):
         frappe.msgprint(_("There aren't any item variants for the selected item"))
         return []
     else:
-        i_variant_list = [l_variant["name"] for l_variant in la_variant_results]
+        la_variant_list = [ld_variant["name"] for ld_variant in la_variant_results]
 
     # Map attribute values for the variants
-    ld_attr_val_map = fn_get_attribute_values_map(i_variant_list)
+    ld_attr_val_map = fn_get_attribute_values_map(la_variant_list)
 
     # Get unique attributes for the variants
     la_attributes = frappe.db.get_all(
         "Item Variant Attribute",
         fields=["attribute"],
-        filters={"parent": ["in", i_variant_list]},
+        filters={"parent": ["in", la_variant_list]},
         group_by="attribute",
     )
 
@@ -101,16 +101,16 @@ def fn_get_data(filters):
     # Prepare the dictionary of variants with attribute values
     la_variant_dicts = [{"variant_name": d["name"],
                             "design": d["design"]} for d in la_variant_results]
-    for l_item_dict in la_variant_dicts:
-        l_name = l_item_dict.get("variant_name")
+    for ld_item_dict in la_variant_dicts:
+        l_name = ld_item_dict.get("variant_name")
 
         # Populate each attribute value for the item variant
         for l_attribute in la_attribute_list:
             ld_attr_dict = ld_attr_val_map.get(l_name)
             if ld_attr_dict and ld_attr_dict.get(l_attribute):
-                l_item_dict[fn_scrub_string(l_attribute)] = ld_attr_val_map.get(l_name).get(l_attribute)
+                ld_item_dict[fn_scrub_string(l_attribute)] = ld_attr_val_map.get(l_name).get(l_attribute)
 
-        la_item_dicts.append(l_item_dict)
+        la_item_dicts.append(ld_item_dict)
 
     # Add button element and register button Event
     for ld_row in la_item_dicts:
