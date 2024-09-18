@@ -29,7 +29,7 @@ def fn_amend_cancelled_delivery_note(i_cancelled_delivery_note, id_doc):
         # Now sort the spliced schedule lines by planned_production_end_date and move the ouput to
         # target_lines
         la_target_lines = sorted(
-            la_target_line_with_date, key=lambda l_date: l_date.planned_production_end_date
+            la_target_line_with_date, key=lambda ld_date: ld_date.planned_production_end_date
         )
 
         # then add the records without dates to the target_lines
@@ -77,10 +77,10 @@ def fn_amend_cancelled_delivery_note(i_cancelled_delivery_note, id_doc):
             la_target_lines = la_target_lines[: int(id_item.qty)]
         return la_target_lines
 
-    def fn_get_source_schedule_lines_for_the_item(id_item, id_source_schedule_lines):
+    def fn_get_source_schedule_lines_for_the_item(id_item, ia_source_schedule_lines):
         la_item_schedule_lines = [
             ld_source_schedule_line
-            for ld_source_schedule_line in id_source_schedule_lines
+            for ld_source_schedule_line in ia_source_schedule_lines
             if ((ld_source_schedule_line.get("item_code") == id_item.item_code) 
                 and (ld_source_schedule_line.get("pos") == id_item.pos)) #<< ISS-2024-00093
         ]
@@ -92,7 +92,7 @@ def fn_amend_cancelled_delivery_note(i_cancelled_delivery_note, id_doc):
     # used to copy the follow up document
     # refer https://gist.github.com/revant/c2198c53673119e7020409764cf54a8c
     # refer https://github.com/frappe/erpnext/blob/develop/erpnext/selling/doctype/sales_order/sales_order.py#L867
-    la_target_del_note = frappe.call(
+    ld_target_del_note = frappe.call(
         "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
         source_name = id_doc.name,
     )
@@ -119,13 +119,13 @@ def fn_amend_cancelled_delivery_note(i_cancelled_delivery_note, id_doc):
 
         ld_child_doc = frappe.new_doc("Delivery Schedule")
         ld_child_doc = ld_target_line
-        la_target_del_note.append("delivery_schedule", ld_child_doc)
+        ld_target_del_note.append("delivery_schedule", ld_child_doc)
 
     # Pass the amended_from reference
-    la_target_del_note.amended_from = ld_cancelled_del_doc.name
+    ld_target_del_note.amended_from = ld_cancelled_del_doc.name
 
     # Save the new document
-    la_target_del_note.insert()
+    ld_target_del_note.insert()
 
 
 # begin of the server run_script
