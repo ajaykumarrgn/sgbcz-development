@@ -313,8 +313,8 @@ if ld_design.ukhv_lv1 and ld_design.ukhv_lv2:
     item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(ld_design.ukhv_lv2)) + ' [%]'
 
 if ld_design.power_lv1 and ld_design.power_lv2:
-    item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₁ ' + str(ld_design.power_lv1) + ' [KVA]'
-    item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₂ ' + str(ld_design.power_lv2) + ' [KVA]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₁ ' + str(ld_design.power_lv1) + ' [kVA]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₂ ' + str(ld_design.power_lv2) + ' [kVA]'
 
 
 item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(ld_design.no_load_loss_guarantee) + ' [W]'

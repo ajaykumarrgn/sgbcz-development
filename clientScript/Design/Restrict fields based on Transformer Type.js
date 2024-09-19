@@ -98,6 +98,10 @@ fnUpdateInsulationClass: function(frm) {
     }
     frm.set_df_property('insulation_class', 'options', laOptions);
     
+    if(!frm.doc.insulation_class){
+        frm.set_value('insulation_class', laOptions[0]);
+    }
+      
 },
 // Set the options for the Tappings is varying based on factory
 fnSetTappingsOption: function(frm) {
@@ -108,14 +112,19 @@ fnSetTappingsOption: function(frm) {
             laTappings = ['2', '3'];
             break;
         case 'RGB':
-            laTappings = ['2', '3', '4', '5', '6', '7', '8'];
+            laTappings = ['1', '2', '3', '4', '5', '6', '7', '8'];
             break;
         case 'NEU':
-            laTappings = ['2', '3', '4', '5', '6', '7', '8'];
+            laTappings = ['1', '2', '3', '4', '5', '6', '7', '8'];
             break;
     }
     frm.set_df_property('tapping_plus', 'options', laTappings);
     frm.set_df_property('tapping_minus', 'options', laTappings);
+    
+    if(!frm.doc.tapping_plus && !frm.doc.tapping_minus){
+        frm.set_value('tapping_plus', laTappings[0]);
+        frm.set_value('tapping_minus', laTappings[0]);
+    }
     
 },
 // This function is used to hide and show fields 
@@ -310,7 +319,12 @@ validate: function(frm) {
             frappe.validated = false; 
             return;
         }
-        
+        //if lpa is present, lpa distance is mandotory
+        if(frm.doc.lpa > 0 && !frm.doc.lpa_distance){
+            frappe.msgprint(__('LPA Distance cannot be empty'));
+            frappe.validated = false; 
+            return;
+        }
         //For RGB if lv_2 is given rating lv1, rating lv2 and
         //uk_lv1 and uk_lv2 are mandatory
         if (frm.doc.factory === 'RGB' && frm.doc.lv_2 && 
@@ -417,6 +431,8 @@ function fnResetValues(frm) {
     }
 
     if (frm.doc.status === 'Draft') {
+        
+        fnResetFields(['insulation_class', 'tapping_plus', 'tapping_minus'])
         // Resetting specific fields to empty
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             fnResetFields([
