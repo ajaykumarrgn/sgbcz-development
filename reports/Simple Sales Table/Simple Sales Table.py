@@ -89,30 +89,26 @@ def get_columns(filters):
             "GTASerial<br>Number"), "fieldtype": "Data", "width": 100},
         {"fieldname": "company_guarantee", "label": _(
             "Company<br>Gurantee"), "fieldtype": "Date", "width": 100},
+        #single row to display all the accessories
+        {"fieldname": "accessories", "label": _(
+            "Accessories"), "fieldtype": "Data", "width": 300},
+        {"fieldname": "agent", "label": _(
+            "SGB Account"), "fieldtype": "Link",  "options": "Sales Person", "width": 100},
+        {"fieldname": "sales_team", "label": _(
+            "Agent"), "fieldtype": "Data", "width": 100},
+        {"fieldname": "comments", "label": _(
+            "Notes"), "fieldtype": "Small Text", "width": 200},
+        {"fieldname": "prepayment_invoice", "label": _(
+            "Prepayment<br>Invoice"), "fieldtype": "Data", "width": 100},
+        {"fieldname": "prepayment_status", "label": _(
+            "Prepayment<br>Status"), "fieldtype": "Select", "width": 100},
+        {"fieldname": "prepayment_invoice2", "label": _(
+            "Prepayment<br>Invoice2"), "fieldtype": "Data", "width": 100},
+        {"fieldname": "prepayment2_status", "label": _(
+            "Prepayment2<br>Status"), "fieldtype": "Select", "width": 100},
 
     ]
-    if filters.include_all_fields:
-        la_accessories_columns = [
-            #single row to display all the accessories
-            {"fieldname": "accessories", "label": _(
-                "Accessories"), "fieldtype": "Data", "width": 300},
-            {"fieldname": "agent", "label": _(
-                "SGB Account"), "fieldtype": "Link",  "options": "Sales Person", "width": 100},
-            {"fieldname": "sales_team", "label": _(
-                "Agent"), "fieldtype": "Data", "width": 100},
-            {"fieldname": "comments", "label": _(
-                "Notes"), "fieldtype": "Small Text", "width": 200},
-            {"fieldname": "prepayment_invoice", "label": _(
-                "Prepayment<br>Invoice"), "fieldtype": "Data", "width": 100},
-            {"fieldname": "prepayment_status", "label": _(
-                "Prepayment<br>Status"), "fieldtype": "Select", "width": 100},
-            {"fieldname": "prepayment_invoice2", "label": _(
-                "Prepayment<br>Invoice2"), "fieldtype": "Data", "width": 100},
-            {"fieldname": "prepayment2_status", "label": _(
-                "Prepayment2<br>Status"), "fieldtype": "Select", "width": 100},
-        ]
-
-        la_columns.extend(la_accessories_columns)
+    
     return la_columns
 
 
@@ -908,8 +904,8 @@ data = []
 user_session_default = set_session_defaults(filters)
 data_table = get_result(filters)
 data_table = get_filtered_records_for_date_type(data_table, filters)
-if filters.open == 1:
-    data_table = filter_invoiced_records(data_table, filters)
+#if filters.open == 1:
+    #data_table = filter_invoiced_records(data_table, filters)
 
 columns = get_columns(filters)
 
