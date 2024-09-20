@@ -124,13 +124,13 @@ ld_design = frappe.get_doc('Design', l_design_id)  # Define design here
 la_parameter_map_def = fn_get_parameter_mapping_def()
 
 # Determine item group and variant based on transformer type
-if ld_design.transformer_type == 'DTTHZ2N':
+if ld_design.factory == 'SGBCZ':
     item_group = 'DTTHZ2N'
     variant_of = 'DTTHZ2N'
-elif ld_design.transformer_type in ['DTTH2N', 'DTTHK2NG', 'DTTHDG', 'DTTH2NG']:
+elif ld_design.factory == 'RGB':
     item_group = 'RGB'
     variant_of = ld_design.transformer_type
-elif ld_design.transformer_type in ['DOTML', 'DMTML', 'DSTML', 'DOTDG']:
+elif ld_design.factory == 'NEU':
     item_group = 'NEU'
     variant_of = ld_design.transformer_type
 else:
