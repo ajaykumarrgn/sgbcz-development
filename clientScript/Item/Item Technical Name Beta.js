@@ -124,22 +124,34 @@ frappe.ui.form.on('Item', {
         	        // Add "Pk (W)" attribute to the item technical name
                     lItemTechnicalName   = lItemTechnicalName + ',' + ' P(k) ' + (frm.doc.attributes[lIndex].attribute_value).toString() + ' [W]';
         	    }
+                cur_frm.set_value("item_technical_name", lItemTechnicalName ); 
     	    } 
             // Set the calculated value to the field "item_technical_name"
-    	    cur_frm.set_value("item_technical_name", lItemTechnicalName );  
+    	     
+    	    
+    	     var laItemGroups = ["RGB", "NEU"];
+    	     let laTemplate = [];
+            // Call the API to get items
+            frappe.call({
+                "method": "get_item_template",
+                "args": {
+                    "i_item_groups": laItemGroups
+                },
+                "callback": function(response) {
+                    //console.log(response)
+                    if(response.message){
+                        // Set options for transformer_type field
+                        laTemplate = response.message.name
+                        
+                    }
+                  
+                }
+            });
 
             //>> TASK-2024-0582
-            // Item Techinacal Name for Template " DTTH2N, DTTH2NG, DTTHDG, DTTHK2NG, DOTML, DOTDG, DSTML, DMTML"
-
-            switch(frm.doc.variant_of) {
-                case "DTTH2N":
-                case "DTTH2NG":
-                case "DTTHDG":
-                case "DTTHK2NG":
-                case "DOTML":
-                case "DOTDG":
-                case "DSTML":
-                case "DMTML":
+            // Item Techinacal Name for Template with item group  RGB , NEU
+           if (laTemplate.includes(frm.doc.variant_of)) {
+                
                     // Find the index of the attribute "Power (kVA)"
                     let lIndex = frm.doc.attributes.findIndex(element => element.attribute=="Power (kVA)");
                     // Check if "Power (kVA)" attribute is present
@@ -195,11 +207,8 @@ frappe.ui.form.on('Item', {
                     }
 
                     // Set the calculated value to the field "item_technical_name"
-    	            cur_frm.set_value("item_technical_name", lItemTechnicalName );
-                    
-                    break;
-                default:
-            }
+    	            cur_frm.set_value("item_technical_name", lItemTechnicalName );           
+            }      
             //<< TASK-2024-0582
               
 	    }

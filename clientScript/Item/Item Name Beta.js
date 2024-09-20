@@ -31,7 +31,7 @@ cur_frm.cscript.custom_validate = function(doc) {
         return lItemName;
     }
     // Only for new documents
-    if(cur_frm.is_new()) {
+    if(cur_frm.is_new() && !cur_frm.doc.has_variants) {
         
         var lItemCode  = '';
         // Split the item code using '-' as a separator and store the resulting array in attribute_values

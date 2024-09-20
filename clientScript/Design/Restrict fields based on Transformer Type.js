@@ -456,7 +456,7 @@ function fnResetValues(frm) {
         // Resetting rating and High Voltage tab section to default values
         fnResetToDefault(['tapping_plus', 'tapping_minus', 'tapping_plus_step', 
             'vector_group', 'ip_protection', 'vector_group_lv1', 'vector_group_lv2',
-            'type_lv']);
+            'type_lv', 'impedance']);
             
         if(!frm.doc.is_design){
             fnResetToDefault(['rating']);
