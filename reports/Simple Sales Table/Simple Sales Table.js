@@ -65,19 +65,6 @@ frappe.query_reports['Simple Sales Table'] = {
                 return laMonths;
             }
         },
-        {
-            "fieldname": "include_all_fields",
-            "label": __("Include All Fields"),
-            "fieldtype": "Check",
-            "default": true
-        },
-        {
-            "fieldname": "open",
-            "label": __("Open"),
-            "fieldtype": "Check",
-            "default": true
-        }
-        
     ],
     get_datatable_options: function(options) {
         return Object.assign(options, {
@@ -133,64 +120,6 @@ frappe.query_reports['Simple Sales Table'] = {
                             }
                     }
         });
-
-        // Add inner button to the report page
-        report.page.add_inner_button(__("Save Columns"), function() {
-            // Get the values of the report
-            var lFilters = report.get_values();
-            var laTextArray=[];
-         
-            // Iterate through header columns (assuming a maximum of 69 columns)
-            for (let i = 0; i <= 69; i++) {
-         
-                // Find the header element in the report
-                const CLASSNAME = `dt-cell__content--header-${i}`;
-                const ELEMENT = document.querySelector(`.${CLASSNAME}`);
-                if (ELEMENT) {
-                    // Get the text content of all the header elements 
-                    // and store it in TextArray.
-                    const TEXT = ELEMENT.innerText;
-                    laTextArray.push(TEXT);
-                   }
-                }
-                // Whenever empty spaces appear in the header element, use the <br> tag
-                // to prevent text skipping
-                var laColumnArray = laTextArray.map(function(ELEMENT) {
-                    return ELEMENT.replace(/\n/g, '<br>');
-                });
-                // Convert the array values into a JSON string to store them as
-                // a single value in the database
-                const COLUMN_ORDER_ARRAY=JSON.stringify(laColumnArray);
-                //Set the modified columns as the report columns for the specific user
-                frappe.call({
-                    "method":"frappe.client.set_value",
-                     "args":{
-                        "doctype":"User Session Defaults",
-                        "name":frappe.session.user,
-                        "fieldname":"report_columns",
-                        "value":COLUMN_ORDER_ARRAY
-                    },
-                // Display a success message when the columns are successfully 
-                // updated otherwise shows the error mesaage.
-                "callback": (r)=> {
-                if(r.message){
-                        frappe.show_alert({
-                                    message:__('Column Preference Saved'),
-                                    indicator:'green'
-                                }, 5);
-                            }
-                    },
-                "error": (r)=>{
-                        if(r.message){
-                           frappe.show_alert({
-                                    message:__('Failed to Save'),
-                                    indicator:'Red'
-                                }, 5);
-                        }
-                    }
-                })
-            });
-    
     }
     
         
