@@ -22,6 +22,24 @@ cur_frm.cscript.custom_validate = function (doc) {
       : "";
   }
 
+  // Determine the impedance or uk values based on factory and LV1 and LV2 fields
+  function fnPutImpedanceOrUK() {
+    if (doc.lv1 && doc.lv_2) {
+      // If both LV1 and LV2 are present
+      if (doc.factory === 'RGB') {
+        return fnGetCleanString(doc.uk_lv1, false) + "/" + fnGetCleanString(doc.uk_lv2, false);
+      } else if (doc.factory === 'NEU') {
+        return fnGetCleanString(doc.ukhv_lv1, false) + "/" + fnGetCleanString(doc.ukhv_lv2, false);
+      } else {
+        // If factory is neither RGB nor NEU, return empty string
+        return ""; 
+      }
+    } else {
+      // If LV1 and LV2 are not both present, return impedance
+      return doc.impedance || "";
+    }
+  }
+
   // Generate document title based on field values
   var docTitle =
     doc.transformer_type +
@@ -32,7 +50,7 @@ cur_frm.cscript.custom_validate = function (doc) {
     "/" +
     fnCombineVoltageValues(doc.lv_rated_voltage, doc.lv1, doc.lv_2, false) +
     "/" +
-    doc.impedance +
+    fnPutImpedanceOrUK() +
     "/" +
     doc.li_phase_hv;
 

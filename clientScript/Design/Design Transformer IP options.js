@@ -4,6 +4,9 @@ frappe.ui.form.on('Design', {
     },
     transformer_type(frm){
         fnFetchTransformerIpValues(frm);
+    },
+    is_design(frm){
+        fnFetchTransformerIpValues(frm);
     }
 });
 
