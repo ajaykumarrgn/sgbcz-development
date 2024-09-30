@@ -19,15 +19,45 @@ def fill_item_description(item, template_item_code):
     item.description = template_item.description
     return item
 
+def fn_update_or_append_item_code_format(i_attribute, i_attribute_value):
+    l_b_found = False
+
+    # Iterate directly over the list and update if a match is found
+    for item in l_a_item_code_format:
+        if item['attribute'] == i_attribute:
+            # Initially, l_a_item_code_format captures the default value for the Vector Group,
+            # as well as defaults for Vector Group LV1 and Vector Group LV2 in case LV2 is absent.
+            # However, if LV2 is present, we must override the default and set the Vector Group to 0.
+            # Additionally, if LV2 is not present, both Vector Group LV1 and Vector Group LV2
+            # should be set to 0
+            if i_attribute_value == 0:
+                # Update the attribute_value if attribute_value is 0
+                item['attribute_value'] = i_attribute_value
+            l_b_found = True
+            break
+
+    # If no match was found, append the new attribute and value
+    if not l_b_found:
+        l_a_item_code_format.append({'attribute': i_attribute, 'attribute_value': i_attribute_value})
+
  # Remove trailing zeros from a number string
-def remove_trailing_zeros(number_str):
+def fn_remove_trailing_zeros(number_str):
     return number_str.rstrip('0').rstrip('.') if '.' in number_str else number_str
 
 # Generate item code from its attributes
-def get_item_code_from_attributes(item):
-    item_code = item.variant_of
-    for attribute in item.attributes:
-        item_code = item_code + '/' + remove_trailing_zeros(str(attribute.attribute_value))
+def fn_get_item_code_from_attributes(i_d_item):
+    item_code = i_d_item.variant_of
+  # Create a lookup dictionary for item_code_format to access attribute_value by attribute
+    ld_item_code_format_dict = {a['attribute']: a['attribute_value'] for a in l_a_item_code_format}
+
+    for attribute in i_d_item.attributes:
+        # Check if the current attribute is present in ld_item_code_format_dict
+        if attribute.attribute in ld_item_code_format_dict:
+            # Use the attribute_value from item_code_format
+            item_code = item_code + '/' + fn_remove_trailing_zeros(str(ld_item_code_format_dict[attribute.attribute]))
+        else:
+            # Use the attribute's own attribute_value if not found in item_code_format
+            item_code = item_code + '/' + fn_remove_trailing_zeros(str(attribute.attribute_value))
     return item_code
 
  # Define the parameter mapping definitions
@@ -145,6 +175,9 @@ item_new = fill_item_description(item_new, variant_of)
 item_new.standard_rate = ld_design.total_cost
 item_new.design = ld_design.name
 
+#initialize an empty array
+l_a_item_code_format = []
+
 # Initialize a flag to check if either 'lwa' or 'lpa' has been set
 lwa_set = False
 lpa_set = False
@@ -166,6 +199,8 @@ for ld_attribute in la_template_attributes:
     # Initialize ld_docvalue to 0
     ld_docvalue = 0
 
+    ld_docAbb = 0
+
     # Get the value from the design document
     ld_docvalue_temp = ld_design.get(ld_designdoc_field)
 
@@ -184,45 +219,50 @@ for ld_attribute in la_template_attributes:
                 ld_docvalue_temp = int(ld_docvalue_temp)
             ld_docvalue = ld_docvalue_temp
     else:
-        
-        if ld_docvalue_temp:
-            #get the abbreviation for the attribute value
-            ld_doc_abbr = frappe.db.get_value(
+        #get the abbreviation for the attribute value
+        ld_doc_abbr = frappe.db.get_value(
                 'Item Attribute Value',
-                {'parent': ld_attribute.attribute, 'attribute_value':ld_docvalue_temp },  
+                {'parent': ld_attribute.attribute, 'attribute_value':ld_docvalue_temp },
                 'abbr'
             )
-            if ld_doc_abbr:
-                ld_docvalue = ld_doc_abbr
-            else:
-                # If the attribute does not have numeric values or abbr
-                # keep the original value
-                ld_docvalue = ld_docvalue_temp
+        if ld_doc_abbr:
+            l_a_item_code_format.append({'attribute': ld_attribute.attribute, 'attribute_value': ld_doc_abbr})
+        ld_docvalue = ld_docvalue_temp
 
     # Conditionally append attributes
     if ld_attribute.attribute == 'Electrostatic screen':
         if ld_design.electrostatic_screen == 0:
             item_new.append("attributes", get_attribute(
                 ld_design.transformer_type, ld_attribute.attribute, 'NO'))
+            fn_update_or_append_item_code_format(ld_attribute.attribute, 0)
+
         else:
-             item_new.append("attributes", get_attribute(
+            item_new.append("attributes", get_attribute(
                  ld_design.transformer_type, ld_attribute.attribute, 'YES'))
+            fn_update_or_append_item_code_format(ld_attribute.attribute, 1)
+
     elif ld_attribute.attribute == 'Parallel coil':
         if ld_design.parallel_coil == 0:
             item_new.append("attributes", get_attribute(
                 ld_design.transformer_type, ld_attribute.attribute, 'NO'))
+            fn_update_or_append_item_code_format(ld_attribute.attribute, 0)
+
         else:
-             item_new.append("attributes", get_attribute(
+            item_new.append("attributes", get_attribute(
                  ld_design.transformer_type, ld_attribute.attribute, 'YES'))
+            fn_update_or_append_item_code_format(ld_attribute.attribute, 1)
+
     elif ld_attribute.attribute == 'Special parameters':
         if ld_design.specifics:
             item_new.append("attributes", get_attribute(
                 ld_design.transformer_type, ld_attribute.attribute, 'YES'))
             item_new.custom_specifics = ld_design.specifics
+            fn_update_or_append_item_code_format(ld_attribute.attribute, 1)
         else:
             item_new.append("attributes", get_attribute(
                 ld_design.transformer_type, ld_attribute.attribute, 'NO'))
-    
+            fn_update_or_append_item_code_format(ld_attribute.attribute, 0)
+
     #Tappings - number of tappings (+/-) should take greater value in 
     #either design's tapping_plus or tapping_minus
     elif ld_attribute.attribute == 'Tappings - number of tappings (+/-)':
@@ -232,9 +272,11 @@ for ld_attribute in la_template_attributes:
         if l_tapping_plus > l_tapping_minus:
             item_new.append("attributes", get_attribute(
                 ld_design.transformer_type, ld_attribute.attribute, l_tapping_plus))
+            fn_update_or_append_item_code_format(ld_attribute.attribute, l_tapping_plus)
         else:
             item_new.append("attributes", get_attribute(
                 ld_design.transformer_type, ld_attribute.attribute, l_tapping_minus))
+            fn_update_or_append_item_code_format(ld_attribute.attribute, l_tapping_minus)
 
     #if lv_2 has a value then vector group should be 0
     #if not vector group lv1 and lv2 should be 0
@@ -248,6 +290,7 @@ for ld_attribute in la_template_attributes:
         item_new.append("attributes", get_attribute(
             ld_design.transformer_type, ld_attribute.attribute, attribute_value
         ))
+        fn_update_or_append_item_code_format(ld_attribute.attribute, attribute_value)
     
     elif ld_attribute.attribute in ['Uk (%)', 'Uk LV 1 (%)', 'Uk LV 2 (%)', 'Uk HV LV 1 (%)', 'Uk HV LV 2 (%)']:
         if ld_attribute.attribute == 'Uk (%)':
@@ -284,14 +327,14 @@ item_new.item_technical_name = ld_design.rating + ' [kVA]'
 #update technical name 
 if ld_design.hv_rated_voltage:
     hv_in_kv = fn_convert_to_kv(ld_design.hv_rated_voltage).replace('.', ',')
-    item_new.item_technical_name = item_new.item_technical_name + ', HV ' + remove_trailing_zeros(hv_in_kv) + ' [kV]'
+    item_new.item_technical_name = item_new.item_technical_name + ', HV ' + fn_remove_trailing_zeros(hv_in_kv) + ' [kV]'
     
 if ld_design.hv1 and ld_design.hv2:
     hv1_in_kv = fn_convert_to_kv(ld_design.hv1).replace('.', ',')
     hv2_in_kv = fn_convert_to_kv(ld_design.hv2).replace('.', ',')
     
-    item_new.item_technical_name = item_new.item_technical_name + ', HV₁ ' + remove_trailing_zeros(hv1_in_kv) + ' [kV]'
-    item_new.item_technical_name = item_new.item_technical_name + ', HV₂ ' + remove_trailing_zeros(hv2_in_kv) + ' [kV]'
+    item_new.item_technical_name = item_new.item_technical_name + ', HV₁ ' + fn_remove_trailing_zeros(hv1_in_kv) + ' [kV]'
+    item_new.item_technical_name = item_new.item_technical_name + ', HV₂ ' + fn_remove_trailing_zeros(hv2_in_kv) + ' [kV]'
 
 if ld_design.lv_rated_voltage:
     item_new.item_technical_name = item_new.item_technical_name + ', LV ' + str(ld_design.lv_rated_voltage) + ' [V]'
@@ -301,16 +344,16 @@ if ld_design.lv1 and ld_design.lv_2:
     item_new.item_technical_name = item_new.item_technical_name + ', LV₁ ' + str(ld_design.lv1) + ' [V]'
     item_new.item_technical_name = item_new.item_technical_name + ', LV₂ ' + str(ld_design.lv_2) + ' [V]'
 
-if ld_design.impedance and (ld_design.uk_lv2 == 0 and ld_design.ukhv_lv2 == 0):    
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + remove_trailing_zeros(str(ld_design.impedance)) + ' [%]'
+if ld_design.impedance and (ld_design.uk_lv2 == 0 and ld_design.ukhv_lv2 == 0):
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + fn_remove_trailing_zeros(str(ld_design.impedance)) + ' [%]'
 
 if ld_design.uk_lv1 and ld_design.uk_lv2:
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + remove_trailing_zeros(str(ld_design.uk_lv1)) + ' [%]'
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(ld_design.uk_lv2)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + fn_remove_trailing_zeros(str(ld_design.uk_lv1)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + fn_remove_trailing_zeros(str(ld_design.uk_lv2)) + ' [%]'
 
 if ld_design.ukhv_lv1 and ld_design.ukhv_lv2:
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + remove_trailing_zeros(str(ld_design.ukhv_lv1)) + ' [%]'
-    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + remove_trailing_zeros(str(ld_design.ukhv_lv2)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₁ ' + fn_remove_trailing_zeros(str(ld_design.ukhv_lv1)) + ' [%]'
+    item_new.item_technical_name = item_new.item_technical_name + ', Uk LV₂ ' + fn_remove_trailing_zeros(str(ld_design.ukhv_lv2)) + ' [%]'
 
 if ld_design.power_lv1 and ld_design.power_lv2:
     item_new.item_technical_name = item_new.item_technical_name + ', Rating LV₁ ' + str(ld_design.power_lv1) + ' [kVA]'
@@ -321,7 +364,7 @@ item_new.item_technical_name = item_new.item_technical_name + ', P(0) ' + str(ld
 
 item_new.item_technical_name = item_new.item_technical_name + ', P(k) ' + str(ld_design.load_loss_guarantee) + ' [W]'
 
-item_new.item_code = get_item_code_from_attributes(item_new).replace('.',',')
+item_new.item_code = fn_get_item_code_from_attributes(item_new).replace('.', ',')
 
 item_new.insert()
 frappe.response['message'] = item_new
