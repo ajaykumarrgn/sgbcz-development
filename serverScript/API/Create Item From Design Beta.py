@@ -19,21 +19,26 @@ def fill_item_description(item, template_item_code):
     item.description = template_item.description
     return item
 
-def fn_update_or_append_item_code_format(attribute, attribute_value):
+def fn_update_or_append_item_code_format(i_attribute, i_attribute_value):
     l_b_found = False
 
     # Iterate directly over the list and update if a match is found
     for item in l_a_item_code_format:
-        if item['attribute'] == attribute:
-            if attribute_value == 0:
+        if item['attribute'] == i_attribute:
+            # Initially, l_a_item_code_format captures the default value for the Vector Group,
+            # as well as defaults for Vector Group LV1 and Vector Group LV2 in case LV2 is absent.
+            # However, if LV2 is present, we must override the default and set the Vector Group to 0.
+            # Additionally, if LV2 is not present, both Vector Group LV1 and Vector Group LV2 
+            # should be set to 0
+            if i_attribute_value == 0:
                 # Update the attribute_value if attribute_value is 0
-                item['attribute_value'] = attribute_value
+                item['attribute_value'] = i_attribute_value
             l_b_found = True
             break
 
     # If no match was found, append the new attribute and value
     if not l_b_found:
-        l_a_item_code_format.append({'attribute': attribute, 'attribute_value': attribute_value})
+        l_a_item_code_format.append({'attribute': i_attribute, 'attribute_value': i_attribute_value})
 
  # Remove trailing zeros from a number string
 def fn_remove_trailing_zeros(number_str):
