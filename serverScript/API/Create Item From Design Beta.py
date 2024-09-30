@@ -28,7 +28,7 @@ def fn_update_or_append_item_code_format(i_attribute, i_attribute_value):
             # Initially, l_a_item_code_format captures the default value for the Vector Group,
             # as well as defaults for Vector Group LV1 and Vector Group LV2 in case LV2 is absent.
             # However, if LV2 is present, we must override the default and set the Vector Group to 0.
-            # Additionally, if LV2 is not present, both Vector Group LV1 and Vector Group LV2 
+            # Additionally, if LV2 is not present, both Vector Group LV1 and Vector Group LV2
             # should be set to 0
             if i_attribute_value == 0:
                 # Update the attribute_value if attribute_value is 0
@@ -49,7 +49,7 @@ def fn_get_item_code_from_attributes(i_d_item):
     item_code = i_d_item.variant_of
   # Create a lookup dictionary for item_code_format to access attribute_value by attribute
     ld_item_code_format_dict = {a['attribute']: a['attribute_value'] for a in l_a_item_code_format}
-    
+
     for attribute in i_d_item.attributes:
         # Check if the current attribute is present in ld_item_code_format_dict
         if attribute.attribute in ld_item_code_format_dict:
@@ -222,36 +222,36 @@ for ld_attribute in la_template_attributes:
         #get the abbreviation for the attribute value
         ld_doc_abbr = frappe.db.get_value(
                 'Item Attribute Value',
-                {'parent': ld_attribute.attribute, 'attribute_value':ld_docvalue_temp },  
+                {'parent': ld_attribute.attribute, 'attribute_value':ld_docvalue_temp },
                 'abbr'
             )
         if ld_doc_abbr:
             l_a_item_code_format.append({'attribute': ld_attribute.attribute, 'attribute_value': ld_doc_abbr})
         ld_docvalue = ld_docvalue_temp
-                
+
     # Conditionally append attributes
     if ld_attribute.attribute == 'Electrostatic screen':
         if ld_design.electrostatic_screen == 0:
             item_new.append("attributes", get_attribute(
                 ld_design.transformer_type, ld_attribute.attribute, 'NO'))
             fn_update_or_append_item_code_format(ld_attribute.attribute, 0)
-           
+
         else:
             item_new.append("attributes", get_attribute(
                  ld_design.transformer_type, ld_attribute.attribute, 'YES'))
             fn_update_or_append_item_code_format(ld_attribute.attribute, 1)
-           
+
     elif ld_attribute.attribute == 'Parallel coil':
         if ld_design.parallel_coil == 0:
             item_new.append("attributes", get_attribute(
                 ld_design.transformer_type, ld_attribute.attribute, 'NO'))
             fn_update_or_append_item_code_format(ld_attribute.attribute, 0)
-           
+
         else:
             item_new.append("attributes", get_attribute(
                  ld_design.transformer_type, ld_attribute.attribute, 'YES'))
             fn_update_or_append_item_code_format(ld_attribute.attribute, 1)
-           
+
     elif ld_attribute.attribute == 'Special parameters':
         if ld_design.specifics:
             item_new.append("attributes", get_attribute(
@@ -344,7 +344,7 @@ if ld_design.lv1 and ld_design.lv_2:
     item_new.item_technical_name = item_new.item_technical_name + ', LV₁ ' + str(ld_design.lv1) + ' [V]'
     item_new.item_technical_name = item_new.item_technical_name + ', LV₂ ' + str(ld_design.lv_2) + ' [V]'
 
-if ld_design.impedance and (ld_design.uk_lv2 == 0 and ld_design.ukhv_lv2 == 0):    
+if ld_design.impedance and (ld_design.uk_lv2 == 0 and ld_design.ukhv_lv2 == 0):
     item_new.item_technical_name = item_new.item_technical_name + ', Uk ' + fn_remove_trailing_zeros(str(ld_design.impedance)) + ' [%]'
 
 if ld_design.uk_lv1 and ld_design.uk_lv2:
