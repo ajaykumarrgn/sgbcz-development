@@ -295,8 +295,8 @@ def get_filtered_records_for_trafo_type(it_data_table, filters):
         l_item_group = it_data['item_group']
 
         # Check each condition based on selected trafo_types
-        # 'DTTHZ2N' condition: exclude 'RGB' and 'NEU' item groups
-        if 'DTTHZ2N' in l_a_trafo_types and l_item_group not in {'RGB', 'NEU'}:
+        # 'SGBCZ' condition: exclude 'RGB' and 'NEU' item groups
+        if 'SGBCZ' in l_a_trafo_types and l_item_group not in {'RGB', 'NEU'}:
             la_filtered_table.append(it_data)
 
         # 'RGB' condition: include only 'RGB' item group

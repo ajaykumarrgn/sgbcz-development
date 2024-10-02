@@ -82,7 +82,7 @@ frappe.query_reports['Sales Table'] = {
             "options": "Trafo Type",
             "get_data": function(iTxt) {
                 var laTrafoTypes = [
-                    {'description': 'SGBCZ', 'value': 'DTTHZ2N'},
+                    {'description': 'SGBCZ', 'value': 'SGBCZ'},
                     {'description': 'RGB', 'value': 'RGB'},
                     {'description': 'NEU', 'value': 'NEU'}
                 ];
@@ -149,7 +149,7 @@ frappe.query_reports['Sales Table'] = {
         if (l_d_status_filter) {
             // Ensure the UI is fully initialized
             setTimeout(() => {
-                l_d_status_filter.set_value(['DTTHZ2N']);
+                l_d_status_filter.set_value(['SGBCZ']);
             }, 200);
         }
         //<<US-2024-0141
