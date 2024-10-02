@@ -15,6 +15,7 @@
 # Transfer Reservation field from Sales order to Delivery Schedule (Task#: TASK-2024-00155)
 # Improve the sales table report performance (Task#: TASK-2024-00216)
 # wrong accessories displayed  -relay issue# ISS-2024-00061
+#filters for trafo type, uncheck open on load and remove month and date filter (US-2024-0141)
 
 def get_columns(filters):
     la_columns = []
@@ -250,29 +251,64 @@ def reorder_columns_for_user_preference(ima_columns, imd_user_session_default):
 
     return la_reordered_columns
 
+#>>US-2024-0141
+#comment this function for US-2024-0141
+#def get_filtered_records_for_date_type(it_data_table, filters):
 
-def get_filtered_records_for_date_type(it_data_table, filters):
+    #if not filters.date_type or len(filters.months) == 0:
+        #return it_data_table
+    #else:
+        #if filters.date_type == 'PO Date':
+            #date_field = 'po_date'
+        #elif filters.date_type == 'OA Confirmed Date':
+            #date_field = 'oa_confirmed_date'
+        #elif filters.date_type == 'Planned Production End Date':
+            #date_field = 'planned_production_end_date'
+        #elif filters.date_type == 'Delivery Date':
+            #date_field = 'delivery_date'
+        #elif filters.date_type == 'Invoice Date':
+            #date_field = 'invoice_date'
 
-    if not filters.date_type or len(filters.months) == 0:
+        #la_filtered_table = []
+        #for it_data in it_data_table:
+            #if (frappe.utils.formatdate(it_data[date_field], format_string="MMM") in filters.months):
+                #la_filtered_table.append(it_data)
+
+        #return la_filtered_table
+        
+#<<US-2024-0141
+
+#>>US-2024-0141
+#function for filtering trafo type
+
+def get_filtered_records_for_trafo_type(it_data_table, filters):
+    # If no trafo_type filter is applied, return the entire table
+    if not filters.trafo_type:
         return it_data_table
-    else:
-        if filters.date_type == 'PO Date':
-            date_field = 'po_date'
-        elif filters.date_type == 'OA Confirmed Date':
-            date_field = 'oa_confirmed_date'
-        elif filters.date_type == 'Planned Production End Date':
-            date_field = 'planned_production_end_date'
-        elif filters.date_type == 'Delivery Date':
-            date_field = 'delivery_date'
-        elif filters.date_type == 'Invoice Date':
-            date_field = 'invoice_date'
 
-        la_filtered_table = []
-        for it_data in it_data_table:
-            if (frappe.utils.formatdate(it_data[date_field], format_string="MMM") in filters.months):
-                la_filtered_table.append(it_data)
+    # Convert the filter to a set for faster lookups
+    l_a_trafo_types = set(filters.trafo_type)
+    la_filtered_table = []
 
-        return la_filtered_table
+    # Loop through the records in the table
+    for it_data in it_data_table:
+        l_item_group = it_data['item_group']
+
+        # Check each condition based on selected trafo_types
+        # 'DTTHZ2N' condition: exclude 'RGB' and 'NEU' item groups
+        if 'DTTHZ2N' in l_a_trafo_types and l_item_group not in {'RGB', 'NEU'}:
+            la_filtered_table.append(it_data)
+
+        # 'RGB' condition: include only 'RGB' item group
+        elif 'RGB' in l_a_trafo_types and l_item_group == 'RGB':
+            la_filtered_table.append(it_data)
+
+        # 'NEU' condition: include only 'NEU' item group
+        elif 'NEU' in l_a_trafo_types and l_item_group == 'NEU':
+            la_filtered_table.append(it_data)
+
+    return la_filtered_table
+#<<US-2024-0141
 
 # Filter invoiced and expedited records from the list
 # the condition is for the transformer that are invoiced and with status "Done - Expedited"
@@ -997,7 +1033,12 @@ def get_result(filters):
 data = []
 user_session_default = set_session_defaults(filters)
 data_table = get_result(filters)
-data_table = get_filtered_records_for_date_type(data_table, filters)
+#>>US-2024-0141
+#commented this line for US-2024-0141
+#data_table = get_filtered_records_for_date_type(data_table, filters)
+#filtering the data based on trafo type selected in filter
+data_table = get_filtered_records_for_trafo_type(data_table, filters)
+#<<US-2024-0141
 if filters.open == 1:
     data_table = filter_invoiced_records(data_table, filters)
 

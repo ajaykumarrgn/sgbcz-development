@@ -3,6 +3,7 @@
 // Remove the columns filter when there is no data for the filter(Issue# : ISS-2024-00008)
 // Some Columns not visible using Saved Column (Issue# : ISS-2024-00020)
 // User session defaults functionality is not working (Issue# : ISS-2024-00085)
+//filters for trafo type, uncheck open on load and remove month and date filter (US-2024-0141)
 
 frappe.query_reports['Sales Table'] = {
     "filters": [
@@ -18,58 +19,77 @@ frappe.query_reports['Sales Table'] = {
             "fieldtype": "Date",
             "width": "80"
         },
+        //>>US-2024-0141
+        //commented this filter for US-2024-0141
+        // {
+        //     "fieldname": "date_type",
+        //     "label": __("Date Type"),
+        //     "fieldtype": "Select",
+        //     "options": [
+        //         "",
+        //         {
+        //             "label": __("PO Date"),
+        //             "value": "PO Date"
+        //         },
+        //         {
+        //             "label": __("OA Confirmed Date"),
+        //             "value": "OA Confirmed Date"
+        //         },
+        //         {
+        //             "label": __("Delivery Date"),
+        //             "value": "Delivery Date"
+        //         },
+        //         {
+        //             "label": __("Planned Production End Date"),
+        //             "value": "Planned Production End Date"
+        //         },
+        //         {
+        //             "label": __("Invoice Date"),
+        //             "value": "Invoice Date"
+        //         }
+        //     ],
+        //     "default": ""
+        // },
+        // {
+        //     "fieldname": "months",
+        //     "label": __("Months"),
+        //     "fieldtype": "MultiSelectList",
+        //     "options": "Months",
+        //     "get_data": function(iTxt) {
+        //         var laMonths = [
+        //             {'description': '', 'value': 'Jan'},
+        //             {'description': '', 'value': 'Feb'},
+        //             {'description': '', 'value': 'Mar'},
+        //             {'description': '', 'value': 'Apr'},
+        //             {'description': '', 'value': 'May'},
+        //             {'description': '', 'value': 'Jun'},
+        //             {'description': '', 'value': 'Jul'},
+        //             {'description': '', 'value': 'Aug'},
+        //             {'description': '', 'value': 'Sep'},
+        //             {'description': '', 'value': 'Oct'},
+        //             {'description': '', 'value': 'Nov'},
+        //             {'description': '', 'value': 'Dec'}
+        //         ];
+        //         return laMonths;
+        //     }
+        // },
+        //trafo type filter (US-2024-0141)
         {
-            "fieldname": "date_type",
-            "label": __("Date Type"),
-            "fieldtype": "Select",
-            "options": [
-                "",
-                {
-                    "label": __("PO Date"),
-                    "value": "PO Date"
-                },
-                {
-                    "label": __("OA Confirmed Date"),
-                    "value": "OA Confirmed Date"
-                },
-                {
-                    "label": __("Delivery Date"),
-                    "value": "Delivery Date"
-                },
-                {
-                    "label": __("Planned Production End Date"),
-                    "value": "Planned Production End Date"
-                },
-                {
-                    "label": __("Invoice Date"),
-                    "value": "Invoice Date"
-                }
-            ],
-            "default": ""
-        },
-        {
-            "fieldname": "months",
-            "label": __("Months"),
+            "fieldname": "trafo_type",
+            "label": __("Trafo Type"),
             "fieldtype": "MultiSelectList",
-            "options": "Months",
+            "default": ["DTTHZ2N"],
+            "options": "Trafo Type",
             "get_data": function(iTxt) {
-                var laMonths = [
-                    {'description': '', 'value': 'Jan'},
-                    {'description': '', 'value': 'Feb'},
-                    {'description': '', 'value': 'Mar'},
-                    {'description': '', 'value': 'Apr'},
-                    {'description': '', 'value': 'May'},
-                    {'description': '', 'value': 'Jun'},
-                    {'description': '', 'value': 'Jul'},
-                    {'description': '', 'value': 'Aug'},
-                    {'description': '', 'value': 'Sep'},
-                    {'description': '', 'value': 'Oct'},
-                    {'description': '', 'value': 'Nov'},
-                    {'description': '', 'value': 'Dec'}
+                var laTrafoTypes = [
+                    {'description': 'SGBCZ', 'value': 'DTTHZ2N'},
+                    {'description': 'RGB', 'value': 'RGB'},
+                    {'description': 'NEU', 'value': 'NEU'}
                 ];
-                return laMonths;
+                return laTrafoTypes;
             }
         },
+        //<<US-2024-0141
         {
             "fieldname": "include_all_fields",
             "label": __("Include All Fields"),
@@ -80,7 +100,7 @@ frappe.query_reports['Sales Table'] = {
             "fieldname": "open",
             "label": __("Open"),
             "fieldtype": "Check",
-            "default": true
+            "default": false  //US-2024-0141 unchecked as default
         }
         
     ],
@@ -120,7 +140,19 @@ frappe.query_reports['Sales Table'] = {
     // >> ISS-2024-00005
     //Uncomment this section lines of code
     "onload": function (report) {
-
+        
+        //>>US-2024-0141
+        //default trafo_type filter with ['DTTHZ2N']
+        //since direct mention of default not working in multiselector
+        let l_d_status_filter = report.get_filter('trafo_type');
+    
+        if (l_d_status_filter) {
+            // Ensure the UI is fully initialized
+            setTimeout(() => {
+                l_d_status_filter.set_value(['DTTHZ2N']);
+            }, 200);
+        }
+        //<<US-2024-0141
         // << ISS-2024-00085
         // Fetch from and to date from User Session Defaults Document
         //during onload event using a synchronous call.

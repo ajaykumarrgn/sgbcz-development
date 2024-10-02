@@ -34,7 +34,7 @@ frappe.ui.form.on('Sales Order', {
             	            frm.refresh_fields();
     	                }else {
         	                item.pos = Math.floor(ldPrevItem.pos) + 10;
-        	                item.custom_parent_item_group = item.item_group;
+        	                fn_get_parent_item_group(item);
             	            frm.refresh_fields();
     	                }
         		    });
@@ -43,7 +43,8 @@ frappe.ui.form.on('Sales Order', {
 	    } else{
 	       // return 10;
 	       item.pos = 10;
-	       item.custom_parent_item_group = item.item_group;
+	       fn_get_parent_item_group(item);
+		   frm.refresh_fields();
 	    }
 	   /* // Previous item from the items array
 	    var ldPrevItem = frm.doc.items[item.idx-2];
@@ -91,4 +92,11 @@ frappe.ui.form.on('Sales Order Item', {
 	refresh(frm) {
 		// your code here
 	}
-})
+});
+
+//function to get the parent item group
+function fn_get_parent_item_group(item) {
+    frappe.db.get_value('Item Group', item.item_group, 'parent_item_group', function (value) {
+        item.custom_parent_item_group = value.parent_item_group === 'All Item Groups' ? item.item_group : value.parent_item_group;
+    });
+}
