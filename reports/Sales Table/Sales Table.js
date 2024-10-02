@@ -78,7 +78,7 @@ frappe.query_reports['Sales Table'] = {
             "fieldname": "trafo_type",
             "label": __("Trafo Type"),
             "fieldtype": "MultiSelectList",
-            "default": ["DTTHZ2N"],
+            "default": ["SGBCZ"],
             "options": "Trafo Type",
             "get_data": function(iTxt) {
                 var laTrafoTypes = [
