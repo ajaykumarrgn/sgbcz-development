@@ -7,6 +7,9 @@ frappe.ui.form.on('Design', {
     },
     is_design(frm){
         fnFetchTransformerIpValues(frm);
+    },
+    factory(frm){
+        fnFetchTransformerIpValues(frm);
     }
 });
 
