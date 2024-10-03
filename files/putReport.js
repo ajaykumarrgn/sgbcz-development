@@ -119,7 +119,9 @@ async function processFilesInFolder(folderPath, baseFolder) {
         delete metaContentPut.owner;
         delete metaContentPut.modified;
         delete metaContentPut.modified_by;
+        delete metaContentPut.columns;
         delete metaContentPut.roles;
+        delete metaContentPut.filters;
         delete metaContentPut.creation;
         const encodedFilename = encodeURIComponent(file.replace(new RegExp(`\\${fileExtension}$`), ''));
 
