@@ -69,7 +69,7 @@ async function createNewReport(folderPath, jsContent, pyContent, sqlContent, met
         report_script: pyContent,
         javascript: jsContent,
         query: sqlContent,
-        ...JSON.parse(metaContent),
+        ...metaContent,
       }),
       redirect: 'follow',
     };
@@ -148,11 +148,20 @@ async function processFilesInFolder(folderPath, baseFolder) {
                 const pyFilePath = path.join(baseFolder, folderName, `${folderName}.py`);
                 const sqlFilePath = path.join(baseFolder, folderName, `${folderName}.sql`);
                 const metaContent = fs.readFileSync(metaFilePath, 'utf-8');
+                const metaContentPut = JSON.parse(metaContent);
+                delete metaContentPut.name;
+                delete metaContentPut.owner;
+                delete metaContentPut.modified;
+                delete metaContentPut.modified_by;
+                delete metaContentPut.columns;
+                delete metaContentPut.roles;
+                delete metaContentPut.filters;
+                delete metaContentPut.creation;
                 const jsContent = readContent(jsFilePath);
                 const pyContent = readContent(pyFilePath);
                 const sqlContent = readContent(sqlFilePath);
                 
-                createNewReport(folderPath, jsContent, pyContent, sqlContent, metaContent, folderName);
+                createNewReport(folderPath, jsContent, pyContent, sqlContent, metaContentPut, folderName);
                 errorFile.add(file.replace(new RegExp(`\\${fileExtension}$`), ''));
               } else {
                 throw new Error(`HTTP error! Status: ${response.status}`);
