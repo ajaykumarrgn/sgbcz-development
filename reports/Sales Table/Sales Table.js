@@ -73,7 +73,7 @@ frappe.query_reports['Sales Table'] = {
         //         return laMonths;
         //     }
         // },
-        //trafo type filter (US-2024-0141)
+        //trafo type filter for all factories (US-2024-0141)
         {
             "fieldname": "trafo_type",
             "label": __("Trafo Type"),
@@ -100,7 +100,7 @@ frappe.query_reports['Sales Table'] = {
             "fieldname": "open",
             "label": __("Open"),
             "fieldtype": "Check",
-            "default": false  //US-2024-0141 unchecked as default
+            "default": false  //<<US-2024-0141 unchecked as default
         }
         
     ],
@@ -144,12 +144,12 @@ frappe.query_reports['Sales Table'] = {
         //>>US-2024-0141
         //default trafo_type filter with ['DTTHZ2N']
         //since direct mention of default not working in multiselector
-        let l_d_status_filter = report.get_filter('trafo_type');
+        let ldStatusFilter = report.get_filter('trafo_type');
     
-        if (l_d_status_filter) {
+        if (ldStatusFilter) {
             // Ensure the UI is fully initialized
             setTimeout(() => {
-                l_d_status_filter.set_value(['SGBCZ']);
+                ldStatusFilter.set_value(['SGBCZ']);
             }, 200);
         }
         //<<US-2024-0141

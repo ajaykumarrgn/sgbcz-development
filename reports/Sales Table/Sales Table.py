@@ -281,13 +281,13 @@ def reorder_columns_for_user_preference(ima_columns, imd_user_session_default):
 #>>US-2024-0141
 #function for filtering trafo type
 
-def get_filtered_records_for_trafo_type(it_data_table, filters):
+def fn_get_filtered_records_for_trafo_type(it_data_table, filters):
     # If no trafo_type filter is applied, return the entire table
     if not filters.trafo_type:
         return it_data_table
 
     # Convert the filter to a set for faster lookups
-    l_a_trafo_types = set(filters.trafo_type)
+    la_trafo_types = set(filters.trafo_type)
     la_filtered_table = []
 
     # Loop through the records in the table
@@ -296,15 +296,15 @@ def get_filtered_records_for_trafo_type(it_data_table, filters):
 
         # Check each condition based on selected trafo_types
         # 'SGBCZ' condition: exclude 'RGB' and 'NEU' item groups
-        if 'SGBCZ' in l_a_trafo_types and l_item_group not in {'RGB', 'NEU'}:
+        if 'SGBCZ' in la_trafo_types and l_item_group not in {'RGB', 'NEU'}:
             la_filtered_table.append(it_data)
 
         # 'RGB' condition: include only 'RGB' item group
-        elif 'RGB' in l_a_trafo_types and l_item_group == 'RGB':
+        elif 'RGB' in la_trafo_types and l_item_group == 'RGB':
             la_filtered_table.append(it_data)
 
         # 'NEU' condition: include only 'NEU' item group
-        elif 'NEU' in l_a_trafo_types and l_item_group == 'NEU':
+        elif 'NEU' in la_trafo_types and l_item_group == 'NEU':
             la_filtered_table.append(it_data)
 
     return la_filtered_table
@@ -315,7 +315,7 @@ def get_filtered_records_for_trafo_type(it_data_table, filters):
 # are considered to be sold items. they are no more required in open list
 
 
-def filter_invoiced_records(it_data_table, ifilters):
+def fn_filter_invoiced_records(it_data_table, ifilters):
 
     # Initialize the array
     la_filtered_table = []
@@ -1037,10 +1037,10 @@ data_table = get_result(filters)
 #commented this line for US-2024-0141
 #data_table = get_filtered_records_for_date_type(data_table, filters)
 #filtering the data based on trafo type selected in filter
-data_table = get_filtered_records_for_trafo_type(data_table, filters)
+data_table = fn_get_filtered_records_for_trafo_type(data_table, filters)
 #<<US-2024-0141
 if filters.open == 1:
-    data_table = filter_invoiced_records(data_table, filters)
+    data_table = fn_filter_invoiced_records(data_table, filters)
 
 columns = get_columns(filters)
 
