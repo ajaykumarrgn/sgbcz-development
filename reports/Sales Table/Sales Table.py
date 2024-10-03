@@ -17,7 +17,7 @@
 # wrong accessories displayed  -relay issue# ISS-2024-00061
 #filters for trafo type, uncheck open on load and remove month and date filter (US-2024-0141)
 
-def get_columns(filters):
+def fn_get_columns(filters):
     la_columns = []
     # >>ISS-2024-00020
     la_columns = [
@@ -281,13 +281,13 @@ def reorder_columns_for_user_preference(ima_columns, imd_user_session_default):
 #>>US-2024-0141
 #function for filtering trafo type
 
-def fn_get_filtered_records_for_trafo_type(it_data_table, filters):
+def fn_get_filtered_records_for_trafo_type(it_data_table, id_filters):
     # If no trafo_type filter is applied, return the entire table
-    if not filters.trafo_type:
+    if not id_filters.trafo_type:
         return it_data_table
 
     # Convert the filter to a set for faster lookups
-    la_trafo_types = set(filters.trafo_type)
+    la_trafo_types = set(id_filters.trafo_type)
     la_filtered_table = []
 
     # Loop through the records in the table
@@ -1025,7 +1025,7 @@ def get_result(filters):
 
 # data = []
 # data_table = get_result(filters)
-# columns = get_columns(filters)
+# columns = fn_get_columns(filters)
 # data = columns, data_table
 
 
@@ -1042,7 +1042,7 @@ data_table = fn_get_filtered_records_for_trafo_type(data_table, filters)
 if filters.open == 1:
     data_table = fn_filter_invoiced_records(data_table, filters)
 
-columns = get_columns(filters)
+columns = fn_get_columns(filters)
 
 # if there is   column preference set by the user then use the default settings
 if user_session_default.report_columns:
