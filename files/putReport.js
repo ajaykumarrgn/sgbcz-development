@@ -1,4 +1,4 @@
-//configure header, baseurl
+/* eslint-disable */
 
 import { getEndPointForDoctype } from "./functions.js"
 

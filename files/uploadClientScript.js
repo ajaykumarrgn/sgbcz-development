@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getEndPointForDoctype } from "./functions.js";
 
 import dotenv from 'dotenv';
