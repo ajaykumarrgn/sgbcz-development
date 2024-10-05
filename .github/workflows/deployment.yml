@@ -158,7 +158,8 @@ jobs:
 
       - name: Install Dependencies in Submodule
         working-directory: testAutomate
-        run: npm install cypress --save-dev
+        run: |
+          npm i
 
       - name: Clean Up Existing Cypress Folder in Parent Repo
         run: |
@@ -202,7 +203,7 @@ jobs:
 
       - name: Run Cypress Tests in Submodule
         working-directory: testAutomate
-        run: npx cypress run --spec "cypress/e2e/*.cy.js" --config-file=./cypress.config.cjs
+        run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
   wait_for_approval:
     runs-on: ubuntu-latest
