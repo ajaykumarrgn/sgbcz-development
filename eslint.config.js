@@ -25,7 +25,7 @@ export default [
       }
     },
     rules: {
-      'max-len': ['error', { code: 100, ignorePattern: '\\b(frm|frappe|doc|__|console\\.log)\\b' }],
+      'max-len': ['error', { code: 80, ignorePattern: '\\b(frm|frappe|doc|__|console\\.log)\\b' }],
       'semi': ['error', 'always'],
       'indent': ['off'],
       'camelcase': ['error', { properties: 'always' }],

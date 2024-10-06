@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { getEndPointForDoctype } from "./functions.js";
 import dotenv from 'dotenv';
 import fs from 'fs';
@@ -42,7 +43,7 @@ function createNewReport(folderPath, jsContent, pyContent, sqlContent, metaConte
         report_script: pyContent,
         javascript: jsContent,
         query: sqlContent,
-        ...JSON.parse(metaContent),
+        ...metaContent,
       }),
       redirect: 'follow',
     };
@@ -107,7 +108,17 @@ function processFilesInFolder(folderPath, baseFolder) {
                 const jsFilePath = path.join(baseFolder, folderName, `${folderName}.js`);
                 const pyFilePath = path.join(baseFolder, folderName, `${folderName}.py`);
                 const sqlFilePath = path.join(baseFolder, folderName, `${folderName}.sql`);
-                const metaContent = fs.readFileSync(metaFilePath, 'utf-8');
+                let metaContent = fs.readFileSync(metaFilePath, 'utf-8');
+                metaContent = JSON.parse(metaContent);
+                delete metaContent.name;
+                delete metaContent.owner;
+                delete metaContent.modified;
+                delete metaContent.modified_by;
+                delete metaContent.roles;
+                delete metaContent.creation;
+                delete metaContent.columns;
+                delete metaContent.roles;
+                delete metaContent.filters;
                 const jsContent = readContent(jsFilePath);
                 const pyContent = readContent(pyFilePath);
                 const sqlContent = readContent(sqlFilePath);
