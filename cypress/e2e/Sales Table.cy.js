@@ -4,7 +4,7 @@ describe('Sales Table Report', () => {
 
   before(() => {
   // Read data from the Excel file
-  cy.task('readExcelFile', { filePath: './cypress/e2e/variables/envSales TableEU000010500028.xlsx'}).then((data) => {
+    cy.task('readExcelFile', { filePath: './cypress/e2e/variables/envSales TableEU000010500028.xlsx'}).then((data) => {
           cy.wrap(data).as('testdata');
       });
   });
@@ -72,12 +72,12 @@ describe('Sales Table Report', () => {
       cy.visit(target);
       
       // Clear and type dates in the input fields
+      // cy.wait(3000);
+      
+      cy.get('#page-query-report > .page-body > .page-wrapper > .page-content > .row > .layout-main-section-wrapper', { timeout: 10000 }).should('be.visible');
+      
+      cy.get('#page-query-report > .page-body > .page-wrapper > .page-content > .row > .layout-main-section-wrapper', { timeout: 10000 }).should('be.visible');
       cy.wait(3000);
-      
-      cy.get('#page-query-report > .page-body > .page-wrapper > .page-content > .row > .layout-main-section-wrapper', { timeout: 10000 }).should('be.visible');
-      
-      cy.get('#page-query-report > .page-body > .page-wrapper > .page-content > .row > .layout-main-section-wrapper', { timeout: 10000 }).should('be.visible');
-      cy.wait(30000);
       cy.get('.dt-cell--col-2 > .dt-cell__content > .dt-filter', { timeout: 10000 })
           .should('be.visible')
           .type(salesOrder);
@@ -87,7 +87,7 @@ describe('Sales Table Report', () => {
           .contains(salesOrder);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-4 > .dt-cell__content').contains(customer);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-3 > .dt-cell__content').contains(deliveryNote);
-      cy.get('.dt-scrollable > .dt-row > .dt-cell--col-6 > .dt-cell__content').contains(incoterms);
+      cy.get('.dt-scrollable > .dt-row > .dt-cell--col-13 > .dt-cell__content').contains(incoterms);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-5 > .dt-cell__content').contains(customerGroup);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-7 > .dt-cell__content').contains(territory);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-8 > .dt-cell__content').contains(documentationLanguage);
@@ -104,7 +104,7 @@ describe('Sales Table Report', () => {
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-10 > .dt-cell__content').contains(itemCode);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-11 > .dt-cell__content').contains(idNumber);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-12 > .dt-cell__content').contains(rdgNumber);
-      cy.get('.dt-scrollable > .dt-row > .dt-cell--col-13 > .dt-cell__content').contains(trafoType);
+      cy.get('.dt-scrollable > .dt-row > .dt-cell--col-6 > .dt-cell__content').contains(trafoType);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-14 > .dt-cell__content').contains(rating);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-15 > .dt-cell__content').contains(hvVolt);
       cy.get('.dt-scrollable > .dt-row > .dt-cell--col-16 > .dt-cell__content').contains(lvVolt);
@@ -387,6 +387,40 @@ describe('Sales Table Report', () => {
         : '';
         expect(normalizedText).to.equal(expectedText);
         });
+
+      cy.wait(2000);
+      cy.get('.dt-cell--col-2 > .dt-cell__content > .dt-filter', { timeout: 10000 })
+          .should('be.visible')
+          .clear();
+      cy.wait(3000);
+      cy.get('.dt-cell--col-6 > .dt-cell__content > .dt-filter', { timeout: 20000 })
+          .should('be.visible')
+          .type("RGB");
+      cy.wait(4000);
+      cy.get('.dt-scrollable__no-data', { timeout: 10000 })
+        .should('be.visible');
+      cy.wait(2000);
+      cy.get('.dt-cell--col-6 > .dt-cell__content > .dt-filter', { timeout: 20000 })
+          .should('be.visible')
+          .clear();
+      cy.get('.cursor-pointer', { timeout: 10000 })
+        .should('be.visible')
+        .click();
+      cy.get('[data-value="RGB"]', { timeout: 10000 })
+        .should('be.visible')
+        .click();
+      cy.wait(2000);
+      cy.get('.container > .row').click()
+      cy.wait(3000);
+      cy.get('.dt-cell--col-6 > .dt-cell__content > .dt-filter', { timeout: 20000 })
+          .should('be.visible')
+          .type("RGB");
+      cy.get('.dt-row-1 > .dt-cell--col-6 > .dt-cell__content > div', { timeout: 20000 })
+        .should('be.visible')
+        .contains("RGB");
+      
+
       }); 
       });
+    
   });

@@ -1,3 +1,4 @@
+/* eslint-disable */
 describe('CZ Quotation Workflow Testing', () => {
   beforeEach(() => {
     cy.clearCookies();
