@@ -17,7 +17,7 @@ im_attribute = frappe.form_dict.get('attribute')
 # Fetch all attribute values where parent is im_attribute
 la_attribute_values = frappe.get_all(
     'Item Attribute Value', 
-    filters={'parent': im_attribute}, 
+    filters={'parent': im_attribute},
     fields=['attribute_value']
 )
 
