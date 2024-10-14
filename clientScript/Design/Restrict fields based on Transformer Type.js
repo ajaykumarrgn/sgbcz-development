@@ -1,3 +1,6 @@
+//ISSUE
+//IP-Protection Default is not setting on form load ISS-2024-00114
+
 frappe.ui.form.on('Design', {
 
     onload(frm){
@@ -454,9 +457,15 @@ function fnResetValues(frm) {
         ]);
 
         // Resetting rating and High Voltage tab section to default values
+        //>>ISS-2024-00114 
+        //removed ip_protection from fnResetToDefault and
+        // add it to fnResetFields with default value "IP00"
         fnResetToDefault(['tapping_plus', 'tapping_minus', 'tapping_plus_step', 
-            'vector_group', 'ip_protection', 'vector_group_lv1', 'vector_group_lv2',
+            'vector_group', 'vector_group_lv1', 'vector_group_lv2',
             'type_lv', 'impedance']);
+
+        fnResetFields(['ip_protection'], 'IP00')
+        //<<ISS-2024-00114
             
         if(!frm.doc.is_design){
             fnResetToDefault(['rating']);
