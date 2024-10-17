@@ -8,7 +8,13 @@
     "start": "cd files && node putClientScript.js && node putServerScript.js && node putReport.js",
     "get": "cd files && node getClientScript.js && node getServerScript.js && node getReport.js",
     "upload": "cd files && node uploadClientScript.js && node uploadServerScript.js && node uploadReport.js",
-    "test": "npx cypress run --spec=cypress/e2e/*.cy.js --config-file=cypress.config.cjs"
+    "test": "npx cypress run --spec=cypress/e2e/*.cy.js --config-file=cypress.config.cjs",
+    "get_field": "cd files && node getCustomField.js",
+    "update_field": "cd files && node updateCustomField.js",
+    "get_letterhead_printformat": "cd files && node getLetterAndPrintFormat.js",
+    "upload_letterhead_printformat": "cd files && node uploadLetterAndPrintFormat.js",
+    "get_perm": "cd files && node getRolePerm.js",
+    "upload_perm": "cd files && node updateRolePerm.js"
   },
   "author": "Your Name",
   "license": "MIT",
