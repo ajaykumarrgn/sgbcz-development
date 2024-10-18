@@ -33,9 +33,9 @@ const filesListPath = path.join(currentPath, 'customRole.txt');
 
 async function syncPermissions(rolesData) {
   for (const roleData of rolesData) {
-    const { role, parent } = roleData;
+    const { role, parent, permlevel } = roleData;
     // Check if the role and parent already exist in the system
-    let response = await fetch(`${url}?filters={"role":"${role}", "parent":"${parent}"}&fields=["*"]&limit_page_length=0`, requestOptions);
+    let response = await fetch(`${url}?filters={"role":"${role}", "parent":"${parent}", "permlevel":"${permlevel}"}&fields=["*"]&limit_page_length=0`, requestOptions);
     let existingRecords = await response.json();
     
     if (existingRecords.data.length > 0) {
@@ -68,7 +68,6 @@ async function syncPermissions(rolesData) {
 function comparePermissions(existing, incoming) {
   return (
     existing.if_owner === incoming.if_owner &&
-    existing.permlevel === incoming.permlevel &&
     existing.select === incoming.select &&
     existing.read === incoming.read &&
     existing.write === incoming.write &&
