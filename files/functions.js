@@ -44,6 +44,8 @@ export function getEndPointForDoctype(doctype){
     case 'Perm':
       endpoint = process.env.PERM_END_POINT
       break
+    case 'Custom Doctype':
+      endpoint = process.env.DOCTYPE_END_POINT
     default:
       break
 
