@@ -57,7 +57,6 @@ function cleanItem(item) {
 // Loop through each file in the list
 for (const file of filesToProcess) {
   const fetchUrl = `${baseUrl}/${file}?fields=["*"]&limit_page_length=0`;
-  console.log("Fetch URL:", fetchUrl); // Log the fetch URL
 
   fetch(fetchUrl, requestOptions)
     .then(response => {
@@ -69,8 +68,7 @@ for (const file of filesToProcess) {
       return response.json();
     })
     .then(data => {
-      console.log("Response Data:", data); // Log the response data
-
+ 
       // Check if the data field is an object
       if (data && data.data && typeof data.data === 'object') {
         const documentDetails = data.data; // Get the document details
@@ -80,7 +78,7 @@ for (const file of filesToProcess) {
           ? 'customChildDoctype'
           : documentDetails.issingle === 1
           ? 'customSingleDoctype'
-          : 'Parent'; 
+          : 'parent'; 
 
         const folderPath = path.join(current_path, '..', 'customDoctype', folderName);
         const jsonFileName = path.join(folderPath, `${documentDetails.name}.json`);
@@ -93,7 +91,7 @@ for (const file of filesToProcess) {
         console.log('Folder created successfully:', folderName);
 
         // Create the JSON file for the cleaned document
-        fs.writeFile(jsonFileName, JSON.stringify(cleanedItem), { flag: 'w' }, (err) => {
+        fs.writeFile(jsonFileName, JSON.stringify(cleanedItem, null, 2), { flag: 'w' }, (err) => {
           if (err) {
             console.error('Error writing JSON file:', err);
           } else {

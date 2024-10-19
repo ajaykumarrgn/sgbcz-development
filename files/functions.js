@@ -46,7 +46,9 @@ export function getEndPointForDoctype(doctype){
       break
     case 'Custom Doctype':
       endpoint = process.env.DOCTYPE_END_POINT
+      break
     default:
+      endpoint = '';
       break
 
   }

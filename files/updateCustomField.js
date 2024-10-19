@@ -33,7 +33,7 @@ const url = getEndPointForDoctype('Custom Field');
 async function updateCustomFields() {
   try {
     // Read the files list from files.txt
-    const filesToProcess = fs.readFileSync(filesListPath, 'utf8').split('\n').map(file => file.trim()).filter(Boolean);
+    const filesToProcess = fs.readFileSync(filesListPath, 'utf8').split('\n').map(file => file.trim()).filter(line => line && !line.startsWith('#'));
 
     if (filesToProcess.length === 1 && filesToProcess[0] === 'Skip') {
       console.log('Custom field updating process is skipped as per the txt file.');
