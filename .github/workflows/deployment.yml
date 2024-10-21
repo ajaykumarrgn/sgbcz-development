@@ -96,6 +96,7 @@ jobs:
       PRINT_FORMAT_END_POINT: ${{ vars.QA_PRINT_FORMAT_END_POINT }}
       PERM_END_POINT: ${{ vars.QA_PERM_END_POINT }}
       CUSTOM_FIELD_END_POINT: ${{ vars.QA_CUSTOM_FIELD_END_POINT }}
+      DOCTYPE_END_POINT: ${{ vars.QA_DOCTYPE_END_POINT }}
       KEY: ${{ vars.QA_KEY }}
 
     steps:
@@ -107,10 +108,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload the files
+      - name: Uploading the Custom DocType
         run: |
-          npm i
-          npm run upload
+          if grep -q "custom_doctype" ci/migrate.txt; then
+            echo "Allows the Custom DocType Configuration job to proceed."
+            npm run update_doctype
+          else
+            echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
+            exit 0
+          fi
 
       - name: Upload Custom DocFields
         run: |
@@ -121,6 +127,11 @@ jobs:
             echo "Does not allow the DocFields Configuration job to proceed, skipping."
             exit 0
           fi
+
+      - name: Upload the files
+        run: |
+          npm i
+          npm run upload
 
       - name: Upload Roles and Permission
         run: |
@@ -141,6 +152,17 @@ jobs:
             echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
             exit 0
           fi
+
+      - name: Upload Documents
+        run: |
+          if grep -q "documents" ci/migrate.txt; then
+            echo "Allows the Documents Configuration job to proceed."
+            npm run upload_letterhead_printformat
+          else
+            echo "Does not allow the Documents Configuration job to proceed, skipping."
+            exit 0
+          fi
+          
 
   ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
@@ -297,6 +319,7 @@ jobs:
       PRINT_FORMAT_END_POINT: ${{ vars.PROD_PRINT_FORMAT_END_POINT }}
       PERM_END_POINT: ${{ vars.PROD_PERM_END_POINT }}
       CUSTOM_FIELD_END_POINT: ${{ vars.PROD_CUSTOM_FIELD_END_POINT }}
+      DOCTYPE_END_POINT: ${{ vars.PROD_DOCTYPE_END_POINT }}
       KEY: ${{ vars.PROD_KEY }}
 
     steps:
@@ -308,10 +331,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload the files
+      - name: Uploading the Custom DocType
         run: |
-          npm i
-          npm run upload
+          if grep -q "custom_doctype" ci/migrate.txt; then
+            echo "Allows the Custom DocType Configuration job to proceed."
+            npm run update_doctype
+          else
+            echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
+            exit 0
+          fi
 
       - name: Upload Custom DocFields
         run: |
@@ -322,6 +350,11 @@ jobs:
             echo "Does not allow the DocFields Configuration job to proceed, skipping."
             exit 0
           fi
+
+      - name: Upload the files
+        run: |
+          npm i
+          npm run upload
 
       - name: Upload Roles and Permission
         env:
@@ -342,5 +375,15 @@ jobs:
             npm run upload_letterhead_printformat
           else
             echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
+            exit 0
+          fi
+
+      - name: Upload Documents
+        run: |
+          if grep -q "documents" ci/migrate.txt; then
+            echo "Allows the Documents Configuration job to proceed."
+            npm run upload_letterhead_printformat
+          else
+            echo "Does not allow the Documents Configuration job to proceed, skipping."
             exit 0
           fi

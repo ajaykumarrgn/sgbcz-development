@@ -35,7 +35,7 @@ const baseUrl = getEndPointForDoctype("Custom Doctype");
 const filesToProcess = fs.readFileSync(filesListPath, 'utf8')
   .split('\n')
   .map(file => file.trim())
-  .filter(Boolean);
+  .filter(line => line && !line.startsWith('#'));
 
 // Function to clean an item by removing timestamp fields and the 'name' field from child tables
 function cleanItem(item) {
