@@ -112,6 +112,7 @@ jobs:
         run: |
           if grep -q "custom_doctype" ci/migrate.txt; then
             echo "Allows the Custom DocType Configuration job to proceed."
+            npm i
             npm run update_doctype
           else
             echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
@@ -122,6 +123,7 @@ jobs:
         run: |
           if grep -q "custom_fields" ci/migrate.txt; then
             echo "Allows the DocFields Configuration job to proceed."
+            npm i
             npm run update_field
           else
             echo "Does not allow the DocFields Configuration job to proceed, skipping."
@@ -137,6 +139,7 @@ jobs:
         run: |
           if grep -q "roles_permission" ci/migrate.txt; then
             echo "Allows the Roles and Permission Configuration job to proceed."
+            npm i
             npm run upload_perm
           else
             echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
@@ -147,6 +150,7 @@ jobs:
         run: |
           if grep -q "print_format" ci/migrate.txt; then
             echo "Allows the Letter Head and Print Format Configuration job to proceed."
+            npm i
             npm run upload_letterhead_printformat
           else
             echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
@@ -157,7 +161,8 @@ jobs:
         run: |
           if grep -q "documents" ci/migrate.txt; then
             echo "Allows the Documents Configuration job to proceed."
-            npm run upload_letterhead_printformat
+            npm i
+            npm run update_document
           else
             echo "Does not allow the Documents Configuration job to proceed, skipping."
             exit 0
@@ -335,6 +340,7 @@ jobs:
         run: |
           if grep -q "custom_doctype" ci/migrate.txt; then
             echo "Allows the Custom DocType Configuration job to proceed."
+            npm i
             npm run update_doctype
           else
             echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
@@ -345,6 +351,7 @@ jobs:
         run: |
           if grep -q "custom_fields" ci/migrate.txt; then
             echo "Allows the DocFields Configuration job to proceed."
+            npm i
             npm run update_field
           else
             echo "Does not allow the DocFields Configuration job to proceed, skipping."
@@ -362,6 +369,7 @@ jobs:
         run: |
           if grep -q "roles_permission" ci/migrate.txt; then
             echo "Allows the Roles and Permission Configuration job to proceed."
+            npm i
             npm run upload_perm
           else
             echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
@@ -372,6 +380,7 @@ jobs:
         run: |
           if grep -q "print_format" ci/migrate.txt; then
             echo "Allows the Letter Head and Print Format Configuration job to proceed."
+            npm i
             npm run upload_letterhead_printformat
           else
             echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
@@ -382,7 +391,8 @@ jobs:
         run: |
           if grep -q "documents" ci/migrate.txt; then
             echo "Allows the Documents Configuration job to proceed."
-            npm run upload_letterhead_printformat
+            npm i
+            npm run update_document
           else
             echo "Does not allow the Documents Configuration job to proceed, skipping."
             exit 0
