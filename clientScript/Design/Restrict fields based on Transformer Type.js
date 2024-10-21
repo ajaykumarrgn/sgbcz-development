@@ -1,6 +1,3 @@
-//ISSUE
-//IP-Protection Default is not setting on form load ISS-2024-00114
-
 frappe.ui.form.on('Design', {
 
     onload(frm){
@@ -21,7 +18,7 @@ frappe.ui.form.on('Design', {
 //onchange of factory select field event
 factory: function(frm) {
   
-    fnResetValues(frm);
+    // fnResetValues(frm);
     
     //setting the default transformer type
     //based on factory
@@ -41,8 +38,6 @@ factory: function(frm) {
     }
     
     frm.trigger('fnToggleFields');
-    frm.trigger('fnUpdateInsulationClass');
-    frm.trigger('fnSetTappingsOption');
     
 },
 
@@ -82,54 +77,12 @@ refresh: function(frm) {
         // Triggering the toggle fields based on the factory by here.
         frm.trigger('fnToggleFields');
     }
-        frm.trigger('fnSetTappingsOption');
-        frm.trigger('fnUpdateInsulationClass');
+        // frm.trigger('fnSetTappingsOption');
+        // frm.trigger('fnUpdateInsulationClass');
         frm.trigger('fnToggleFields');
     
 },   
-// Set the options for the insulation class varying for the factory
-fnUpdateInsulationClass: function(frm) {
-  
-    let laOptions = [];
-    switch (frm.doc.factory) {
-        case 'RGB':
-            laOptions = ['F', 'H'];
-            break;
-        case 'NEU':
-            laOptions = ['A', 'B', 'C', 'F', 'H'];
-            break;
-    }
-    frm.set_df_property('insulation_class', 'options', laOptions);
-    
-    if(!frm.doc.insulation_class){
-        frm.set_value('insulation_class', laOptions[0]);
-    }
-      
-},
-// Set the options for the Tappings is varying based on factory
-fnSetTappingsOption: function(frm) {
-  
-    let laTappings = [];
-    switch (frm.doc.factory) {
-        case 'SGBCZ':
-            laTappings = ['2', '3'];
-            break;
-        case 'RGB':
-            laTappings = ['1', '2', '3', '4', '5', '6', '7', '8'];
-            break;
-        case 'NEU':
-            laTappings = ['1', '2', '3', '4', '5', '6', '7', '8'];
-            break;
-    }
-    frm.set_df_property('tapping_plus', 'options', laTappings);
-    frm.set_df_property('tapping_minus', 'options', laTappings);
-    
-    if(!frm.doc.tapping_plus && !frm.doc.tapping_minus){
-        frm.set_value('tapping_plus', laTappings[0]);
-        frm.set_value('tapping_minus', laTappings[0]);
-    }
-    
-},
+
 // This function is used to hide and show fields 
 //based on the factory by controlling here.
 fnToggleFields: function(frm) {
@@ -237,7 +190,7 @@ is_design: function(frm) {
         frm.set_df_property('lv_rated_voltage', 'placeholder', 'LV');
       
         fnUpdateFieldBasedOnIsDesign(frm);
-        fnResetValues(frm);
+        
         
     } else {
         // Display hv_html field
@@ -248,11 +201,6 @@ is_design: function(frm) {
         frm.set_df_property('type_lv', 'hidden', false);
         frm.set_df_property('electrostatic_screen', 'hidden', false);
         frm.set_df_property('parallel_coil', 'hidden', false);
-        frm.set_df_property('vector_group', 'options', [ 'Dyn1', 'Dyn5', 'Dyn7', 'Dyn11','Yy0','Yd1',
-        'Yd5','Yd7','Yd11','YD1','Yz1','Yz5','YZ5','Yz7','Yz11','Dzn0']);
-        frm.set_df_property('climatic_class', 'options', ['C2', 'C3', 'C4', 'C5']);
-        frm.set_df_property('environmental_class', 'options', ['E2', 'E3', 'E4', 'E5']);
-        fnResetValues(frm);
         frm.trigger('fnToggleFields');
     }
 },
@@ -377,121 +325,8 @@ function fnUpdateFieldBasedOnIsDesign(frm){
     frm.set_value('electrostatic_screen', 0);
     frm.set_df_property('parallel_coil', 'hidden', 
         frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
-    //restricting vector group, climatic and enviromental class option
-    //later this value will be maintained in gitra settings
-    frm.set_df_property('vector_group', 'options', ['Dyn1', 'Dyn5', 'Dyn7', 'Dyn11']);
-    frm.set_df_property('climatic_class', 'options', ['C2', 'C3']);
-    frm.set_df_property('environmental_class', 'options', ['E2', 'E3']);
 }
 
-// When changing the HTMl field, clear the below field value
-// as well as html input value
-function fnResetValues(frm) {
-    // Internal function to reset a list of 
-    //fields to a specified default value
-    function fnResetFields(iFields, defaultValue = '') {
-        for (let field of iFields) {
-            frm.set_value(field, defaultValue);
-        }
-    }
-
-    // Internal function to reset item tab fields and 
-    //set them to be editable if not in design mode
-    function fnResetItemTabFields(iFields) {
-        for (let field of iFields) {
-            frm.set_value(field, '');
-            if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
-                // If factory is 'SGBCZ' and not is_design, 
-                //make the field visible and editable
-                frm.set_df_property(field, "hidden", field !== 'direct_material_cost');
-                frm.set_df_property(field, "read_only", false);
-            } else {
-                // Otherwise, hide the field and make it read-only
-                frm.set_df_property(field, "hidden", true);
-                frm.set_df_property(field, "read_only", true);
-            }
-        }
-    }
-
-    // Internal function to clear HTML fields
-    function fnResetHtmlFields(iFields) {
-        for (let field of iFields) {
-            let htmlInput = $(frm.fields_dict[field].wrapper).find('input');
-            htmlInput.val('');
-        }
-    }
-
-    // Internal function to reset fields to their 
-    //default values as specified in the metadata
-    function fnResetToDefault(iFields) {
-        for (let fieldname of iFields) {
-            const FIELD_META = frm.meta.fields.find(field => 
-                    field.fieldname === fieldname);
-            if (FIELD_META) {
-                frm.set_value(fieldname, FIELD_META.default);
-            }
-        }
-    }
-
-    if (frm.doc.status === 'Draft') {
-        
-        fnResetFields(['insulation_class', 'tapping_plus', 'tapping_minus'])
-        // Resetting specific fields to empty
-        if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
-            fnResetFields([
-                'hv_rated_voltage', 'highest_operation_voltage_hv', 
-                'ac_phase_hv', 'li_phase_hv', 'hv1', 'hv2'
-            ]);
-        }
-        
-        //clear only if two lv are there for SGBCZ
-        if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
-            fnResetFields([
-                'lv_rated_voltage', 'lv1', 'lv_2']);
-        }
-
-        // Resetting item tab fields
-        fnResetItemTabFields([
-            "direct_material_cost", "labour", "production_overhead", 
-            "cost_of_goods", "sales_overhead", "administrative_overhead", "total_cost"
-        ]);
-
-        // Resetting rating and High Voltage tab section to default values
-        //>>ISS-2024-00114 
-        //removed ip_protection from fnResetToDefault and
-        // add it to fnResetFields with default value "IP00"
-        fnResetToDefault(['tapping_plus', 'tapping_minus', 'tapping_plus_step', 
-            'vector_group', 'vector_group_lv1', 'vector_group_lv2',
-            'type_lv', 'impedance']);
-
-        fnResetFields(['ip_protection'], 'IP00')
-        //<<ISS-2024-00114
-            
-        if(!frm.doc.is_design){
-            fnResetToDefault(['rating']);
-        }
-            
-        if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
-            // Clearing HTML fields
-            fnResetHtmlFields(['hv_html']);
-        }
-        
-        if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
-            // Clearing HTML fields
-            fnResetHtmlFields(['lv_html']);
-        }
-
-        //onchange of factory clear every field
-        if(frm.doc.factory != 'SGBCZ'){
-            fnResetHtmlFields(['hv_html', 'lv_html', 'power_lv']);
-            fnResetFields([
-                'hv_rated_voltage', 'highest_operation_voltage_hv', 
-                'ac_phase_hv', 'li_phase_hv', 'hv1', 'hv2',
-                'lv_rated_voltage', 'lv1', 'lv_2', 'power_lv1', 'power_lv2'
-            ]);
-        }
-    }
-}
 
 //function to make html field read_only
 function fnSetHTMLFieldsToReadOnly() {

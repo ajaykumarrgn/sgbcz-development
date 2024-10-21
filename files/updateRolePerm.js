@@ -106,7 +106,7 @@ try {
   const filesToProcess = fs.readFileSync(filesListPath, 'utf8')
     .split('\n')
     .map(file => file.trim())
-    .filter(Boolean);
+    .filter(line => line && !line.startsWith('#'));
 
   if (filesToProcess.length === 1 && filesToProcess[0] === 'Skip') {
     console.log('Role updating process is skipped as per the txt file.');

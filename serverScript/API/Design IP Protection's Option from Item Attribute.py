@@ -18,13 +18,12 @@ im_attribute = frappe.form_dict.get('attribute')
 la_attribute_values = frappe.get_all(
     'Item Attribute Value', 
     filters={'parent': im_attribute},
-    fields=['attribute_value']
+    fields=['attribute_value'],
+    order_by='idx asc'
 )
 
-# Prepare and sort a list of attribute values
-la_attribute_values_list = sorted(
-    [item['attribute_value'] for item in la_attribute_values]
-)
+# Prepare a list of attribute values
+la_attribute_values_list = [item['attribute_value'] for item in la_attribute_values]
 
 # Set the options as a list of values
 frappe.flags = {'la_options': la_attribute_values_list}
