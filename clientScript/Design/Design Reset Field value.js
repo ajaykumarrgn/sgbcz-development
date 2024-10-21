@@ -40,8 +40,8 @@ function fnResetValues(frm) {
         }
     }
 
-    // Internal function to reset fields to their 
-    //default values as specified in the metadata
+    // Restore the default values after resetting the factory values
+    
     function fnResetToDefault(iaFields) {
         for (let lFieldname of iaFields) {
             const FIELD_META = frm.meta.fields.find(field => 
@@ -54,7 +54,7 @@ function fnResetValues(frm) {
 
     if (frm.doc.status === 'Draft') {
         
-        // Resetting specific fields to empty
+        // Resetting the specific fields to empty when the factory is "SGBCZ"
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             fnResetFields([
                 'hv_rated_voltage', 'highest_operation_voltage_hv', 
@@ -62,13 +62,14 @@ function fnResetValues(frm) {
             ]);
         }
         
-        //clear only if two lv are there for SGBCZ
+        // In SGBCZ have only one LV value 
+        // So clear the two lv for SGBCZ
         if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
             fnResetFields([
                 'lv_rated_voltage', 'lv1', 'lv_2']);
         }
 
-        // Resetting item tab fields
+        // Resetting item tab fields when shifting the factory
         fnResetItemTabFields([
             "direct_material_cost", "labour", "production_overhead", 
             "cost_of_goods", "sales_overhead", "administrative_overhead", "total_cost"
@@ -83,16 +84,16 @@ function fnResetValues(frm) {
         }
             
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
-            // Clearing HTML fields
+            // Clearing HTML field values
             fnResetHtmlFields(['hv_html']);
         }
         
         if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
-            // Clearing HTML fields
+            // Clearing HTML field values
             fnResetHtmlFields(['lv_html']);
         }
 
-        //onchange of factory clear every field
+        //onchange of each factory clear every field
         if(frm.doc.factory != 'SGBCZ'){
             fnResetHtmlFields(['hv_html', 'lv_html', 'power_lv']);
             fnResetFields([
