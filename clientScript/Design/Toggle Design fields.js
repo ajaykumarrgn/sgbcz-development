@@ -3,7 +3,7 @@ frappe.ui.form.on('Design', {
     //initialized a options as avarible in frm model
     //to hold the vector group lv2 options from item attribute
     frappe.call({
-            method: 'get_transformer_ip_attribute_value',
+            method: 'get_attribute_value_from_item_attribute',
             args: {
                 'attribute': 'Vector Group LV 2'
             },
