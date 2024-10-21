@@ -1,6 +1,6 @@
 frappe.ui.form.on('Design', {
     onload(frm){
-    //initialized a options as avarible in frm model
+    //initialized a options as a variable in frm model
     //to hold the vector group lv2 options from item attribute
     frappe.call({
             method: 'get_attribute_value_from_item_attribute',
@@ -9,7 +9,7 @@ frappe.ui.form.on('Design', {
             },
             callback: function(response) {
                 let laOptions = response.message.la_options;
-                frm.options = laOptions;
+                frm.options = laOptions; //frm varaible
             }
         });
 

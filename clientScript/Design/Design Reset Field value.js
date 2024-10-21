@@ -9,45 +9,45 @@ frappe.ui.form.on('Design', {
 });
  
 function fnResetValues(frm) {
-    
-    function fnResetFields(iFields, defaultValue = '') {
-        for (let field of iFields) {
-            frm.set_value(field, defaultValue);
+    //function to reset the field with default
+    function fnResetFields(iaFields, defaultValue = '') {
+        for (let lField of iaFields) {
+            frm.set_value(lField, defaultValue);
         }
     }
-    
-    function fnResetItemTabFields(iFields) {
-        for (let field of iFields) {
-            frm.set_value(field, '');
+    //reset item tab fields
+    function fnResetItemTabFields(iaFields) {
+        for (let iField of iaFields) {
+            frm.set_value(iField, '');
             if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
                 // If factory is 'SGBCZ' and not is_design, 
                 //make the field visible and editable
-                frm.set_df_property(field, "hidden", field !== 'direct_material_cost');
-                frm.set_df_property(field, "read_only", false);
+                frm.set_df_property(iField, "hidden", iField !== 'direct_material_cost');
+                frm.set_df_property(iField, "read_only", false);
             } else {
                 // Otherwise, hide the field and make it read-only
-                frm.set_df_property(field, "hidden", true);
-                frm.set_df_property(field, "read_only", true);
+                frm.set_df_property(iField, "hidden", true);
+                frm.set_df_property(iField, "read_only", true);
             }
         }
     }
 
     // Internal function to clear HTML fields
-    function fnResetHtmlFields(iFields) {
-        for (let field of iFields) {
-            let htmlInput = $(frm.fields_dict[field].wrapper).find('input');
+    function fnResetHtmlFields(iaFields) {
+        for (let lField of iaFields) {
+            let htmlInput = $(frm.fields_dict[lField].wrapper).find('input');
             htmlInput.val('');
         }
     }
 
     // Internal function to reset fields to their 
     //default values as specified in the metadata
-    function fnResetToDefault(iFields) {
-        for (let fieldname of iFields) {
+    function fnResetToDefault(iaFields) {
+        for (let lFieldname of iaFields) {
             const FIELD_META = frm.meta.fields.find(field => 
-                    field.fieldname === fieldname);
+                    field.fieldname === lFieldname);
             if (FIELD_META) {
-                frm.set_value(fieldname, FIELD_META.default);
+                frm.set_value(lFieldname, FIELD_META.default);
             }
         }
     }
@@ -73,11 +73,12 @@ function fnResetValues(frm) {
             "direct_material_cost", "labour", "production_overhead", 
             "cost_of_goods", "sales_overhead", "administrative_overhead", "total_cost"
         ]);
-
+        //reset to meta data default
         fnResetToDefault(['tapping_plus_step', 'impedance']);
         
        
         if(!frm.doc.is_design){
+            //reset to meta data default
             fnResetToDefault(['rating']);
         }
             
