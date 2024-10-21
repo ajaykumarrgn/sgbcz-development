@@ -14,32 +14,39 @@ frappe.ui.form.on('Design', {
                 && attr.transformer_type === iTransformerType
                 && attr.is_design === iIsDesign);
                 
-            //If ldAttribute has a default value,
-            //set it to the field
+            //If ldAttribute has a default value and options,
             if(ldAttribute && ldAttribute.default && ldAttribute.options){
+                // set the field's option with ldAttribute.options
                 frm.set_df_property(iAttributeName, 'options', ldAttribute.options);
+                //if form status is Draft and value is empty or reset is true
+                //set the default value
                 if((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft'){
                     frm.set_value(iAttributeName, ldAttribute.default);
                 }
                 frm.refresh_field(iAttributeName);
                 
             }else{
+                //call the fngetAttributeOptionFromItemAttribute
                 frm.events.fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, 
-            iAttributeName, iTransformerType, iReset);
+            iAttributeName, iReset);
             }
             
         });
     },
     
-    fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iTransformerType, iReset) {
+    //this function call get_attribute_value_from_item_attribute api
+    fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
         frappe.call({
-            method: 'get_transformer_ip_attribute_value',
+            method: 'get_attribute_value_from_item_attribute',
             args: {
                 'attribute': iAttributeLabel
             },
             callback: function(response) {
                 let laOptions = response.message.la_options;
+                //set the field's options
                 frm.set_df_property(iAttributeName, 'options', laOptions.join('\n'));
+                //if form status is Draft and value is empty or reset is true
+                //set the first index of the response
                 if ((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft') {
                     frm.set_value(iAttributeName, laOptions[0]);
                 }
@@ -68,6 +75,7 @@ fnSetOptionsAndDefault(frm, iReset = false) {
             ['Transformer IP', 'ip_protection']
         ];
 
+        //looping the LA_ATTRIBUTES
         LA_ATTRIBUTES.forEach(laAttribute => {
             frm.events.fngetAttributeOptionAndDefault(frm, laAttribute[0], laAttribute[1], frm.doc.transformer_type, frm.doc.is_design, iReset);
         });
