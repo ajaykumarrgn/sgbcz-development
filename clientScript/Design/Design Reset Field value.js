@@ -9,30 +9,30 @@ frappe.ui.form.on('Design', {
 });
  
 function fnResetValues(frm) {
-    //function to reset the field with default
+    //function to reset the field with default as empty
     function fnResetFields(iaFields, defaultValue = '') {
         for (let lField of iaFields) {
             frm.set_value(lField, defaultValue);
         }
     }
-    //reset item tab fields
+    //reset item tab fields for changing the behaviour of the factory 
     function fnResetItemTabFields(iaFields) {
         for (let iField of iaFields) {
             frm.set_value(iField, '');
             if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
-                // If factory is 'SGBCZ' and not is_design, 
-                //make the field visible and editable
+                //Make the field visible and editable
+                //when the factory is 'SGBCZ' and also is not the design, 
                 frm.set_df_property(iField, "hidden", iField !== 'direct_material_cost');
                 frm.set_df_property(iField, "read_only", false);
             } else {
-                // Otherwise, hide the field and make it read-only
+                // Otherwise, hide the field and make it as read-only
                 frm.set_df_property(iField, "hidden", true);
                 frm.set_df_property(iField, "read_only", true);
             }
         }
     }
 
-    // Internal function to clear HTML fields
+    //To clear HTML fields when changing the one factory to another.
     function fnResetHtmlFields(iaFields) {
         for (let lField of iaFields) {
             let htmlInput = $(frm.fields_dict[lField].wrapper).find('input');
