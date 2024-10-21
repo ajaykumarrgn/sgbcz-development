@@ -14,19 +14,20 @@ frappe.ui.form.on('Design', {
                 && attr.transformer_type === iTransformerType
                 && attr.is_design === iIsDesign);
                 
-            //If ldAttribute has a default value and options,
+            //Get the default value and options from the Gitra Attribute,
             if(ldAttribute && ldAttribute.default && ldAttribute.options){
-                // set the field's option with ldAttribute.options
+                // set the field's option from the Gitra attribute options
                 frm.set_df_property(iAttributeName, 'options', ldAttribute.options);
                 //if form status is Draft and value is empty or reset is true
-                //set the default value
+                //set the default value into the field
                 if((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft'){
                     frm.set_value(iAttributeName, ldAttribute.default);
                 }
                 frm.refresh_field(iAttributeName);
                 
             }else{
-                //call the fngetAttributeOptionFromItemAttribute
+                // If attributes not there in the Gitra settings
+                // then it will get from the Item attribute
                 frm.events.fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, 
             iAttributeName, iReset);
             }
