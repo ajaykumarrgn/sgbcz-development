@@ -52,9 +52,11 @@ frappe.ui.form.on("Design", {
        }
        fnFetchTransformerType(frm);
        fnUpdateButtonGroup(frm);
+       fncheckRecalculateDesign(frm);
        if(frm.is_new()){
            fnDirectMaterial(frm);
        }
+
    },
 
  //when is_design checkbox is enabled
@@ -94,6 +96,25 @@ frappe.ui.form.on("Design", {
        }
    }
 });
+
+function fncheckRecalculateDesign(frm) {
+    const today = new Date();
+  
+    const lastCalculateDate = new Date(frm.doc.last_calculated_on);
+  
+  const refreshDate = frappe.get_doc("Gitra Settings").refresh_date;
+  console.log("Gitra field", refreshDate)
+  const timeDiff = Math.abs(today - lastCalculateDate);
+  const dayDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  
+  console.log("Calculate Date", refreshDate)
+  
+  if (dayDiff >= refreshDate) {
+     
+  } else {
+     
+  }
+} 
 
 function fnXMLDataTab(frm){
     //restrict XML Data tab for other region except SGBCZ
