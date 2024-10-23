@@ -24,7 +24,8 @@ def fn_find_dict_with_keys(doc, i_dict_array):
     return None
 
 
-if not doc.labour and doc.direct_material_cost:
+# if not doc.labour and doc.direct_material_cost:
+if doc.direct_material_cost and (doc.labour or not doc.labour):
     # Get the Gitra Settings
     ld_gitra_settings = frappe.get_doc("Gitra Settings", "Gitra Settings")
 
@@ -49,3 +50,4 @@ if not doc.labour and doc.direct_material_cost:
     #doc.total_cost = round((doc.cost_of_goods + \
     #   doc.sales_overhead + doc.administrative_overhead)/10)*10
     doc.total_cost = doc.cost_of_goods + doc.sales_overhead + doc.administrative_overhead
+    

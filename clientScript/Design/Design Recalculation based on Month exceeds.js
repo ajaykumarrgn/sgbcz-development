@@ -153,12 +153,23 @@ function fnUpdateButtonGroup(frm) {
 
   if (STATUS === 'Calculation Received' && !frm.doc.item) {
     LA_BUTTONS.push({
+                      label: 'Recalculate Design',
+                      action: fnRecalculate
+                  });
+    
+    LA_BUTTONS.push({
           label: 'Create Item',
           action: fncreateItem
       });
-  }
+      
+    }
 
   if (STATUS === 'Item Created' && frm.doc.item) {
+    LA_BUTTONS.push({
+                      label: 'Recalculate Design',
+                      action: fnRecalculate
+                  });
+    
     LA_BUTTONS.push({
           label: 'View Item',
           action: fnviewItem
@@ -175,6 +186,11 @@ function fnUpdateButtonGroup(frm) {
     frm.set_value('status', 'Item Updated')
   }
   if(STATUS === 'Item Updated' && frm.doc.factory == 'SGBCZ'){
+      
+    LA_BUTTONS.push({
+                      label: 'Recalculate Design',
+                      action: fnRecalculate
+                  });
         LA_BUTTONS.push({
           label: 'Update Pricelist',
           action: fnUpdatePricelist
@@ -242,7 +258,7 @@ function fnDirectMaterial(frm){
 function fncheckRecalculateDesign(frm) {
   frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
       let ldDoc = frappe.model.get_list("Quotation Presets");
-      const refreshDate = ldDoc[0].price_recalculation_frequence;
+      const refreshDate = ldDoc[0].price_recalculation_frequency;
       const today = new Date();
       const lastCalculateDate = frm.doc.last_calculated_on ? new Date(frm.doc.last_calculated_on) : null;
 
@@ -303,23 +319,23 @@ function fnRecalculate(frm){
 
 }
 
-function fnUpdatePricelist(frm){
-  // console.log("updated the price list")
-//   frappe.get_all('Item Price', { 
-//     filters: {
-//         item_code: frm.doc.item,
-//         price_list: 'Standard Selling'
-//     },
-//     fields: ['name']
-// }).then(getPricelist => {
-//     if (getPricelist && getPricelist.length > 0) {
-//         console.log(getPricelist[0].name); // Process the first price list entry
-//     } else {
-//         console.log('No price list found for the given filters.');
-//     }
-// }).catch(error => {
-//     console.error('Error fetching price list:', error);
-// });
+function fnUpdatePricelist(frm) {
+  console.log("updated the price list");
+
+    frappe.call({
+        method: 'update_price_rate_on_design_item',
+        args: {
+          i_item_code: frm.doc.item,
+          i_design_id: frm.doc.name
+        },
+        callback: function(response) {
+          if (response.message) {
+            console.log('API response:', response.message);
+          } else {
+            console.log('No response from API.');
+          }
+        },
+    })
 }
 
 function fncreateItem(frm) {
