@@ -35,7 +35,8 @@ frappe.ui.form.on('Design', {
         });
     },
     
-    //this function call get_attribute_value_from_item_attribute api
+    //get values from item attribute through api "get_attribute_value_from_item_attribute"
+    //argument as Attribute Name
     fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
         frappe.call({
             method: 'get_attribute_value_from_item_attribute',

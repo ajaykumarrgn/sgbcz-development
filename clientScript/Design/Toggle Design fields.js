@@ -214,7 +214,8 @@ frappe.ui.form.on('Design', {
     //The function is used to get the vector 
     //group options dynamically from the Docfield
     fnGetSelectOptions: function(iFieldname, frm) {
-        // Fetch the options for the vector_group field dynamically
+        //Fetch the options for the vector_group field dynamically
+        //from frm variable "options"
         if (iFieldname === 'vector_html') {
             return frm.options;
         }
