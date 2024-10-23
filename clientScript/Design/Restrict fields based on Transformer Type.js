@@ -17,8 +17,6 @@ frappe.ui.form.on('Design', {
 
 //onchange of factory select field event
 factory: function(frm) {
-  
-    // fnResetValues(frm);
     
     //setting the default transformer type
     //based on factory
@@ -77,8 +75,6 @@ refresh: function(frm) {
         // Triggering the toggle fields based on the factory by here.
         frm.trigger('fnToggleFields');
     }
-        // frm.trigger('fnSetTappingsOption');
-        // frm.trigger('fnUpdateInsulationClass');
         frm.trigger('fnToggleFields');
     
 },   
