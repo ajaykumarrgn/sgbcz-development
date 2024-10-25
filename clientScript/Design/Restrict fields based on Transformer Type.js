@@ -5,20 +5,18 @@ frappe.ui.form.on('Design', {
         //but at some point it is not
         //working as expected so done the
         //same in onload event
-        // if(frm.doc.status != 'Draft'){
-        //     setTimeout(function() {
-        //     fnSetHTMLFieldsToReadOnly();
-        // }, 500);
-        //     frm.set_read_only();
-        //     frm.disable_save();
-        // }
+        if(frm.doc.status != 'Draft'){
+            setTimeout(function() {
+            fnSetHTMLFieldsToReadOnly();
+        }, 500);
+            frm.set_read_only();
+            frm.disable_save();
+        }
     },
 // When factory is changed, fields also changed for that dependent request.
 
 //onchange of factory select field event
 factory: function(frm) {
-  
-    // fnResetValues(frm);
     
     //setting the default transformer type
     //based on factory
@@ -44,13 +42,13 @@ factory: function(frm) {
 refresh: function(frm) {
    //other then Draft, 
    //the frm should be read only
-    // if(frm.doc.status != 'Draft'){
-    //   setTimeout(function() {
-    //     fnSetHTMLFieldsToReadOnly();
-    // }, 500);
-    //     frm.set_read_only();
-    //     frm.disable_save();
-    // }
+    if(frm.doc.status != 'Draft'){
+      setTimeout(function() {
+        fnSetHTMLFieldsToReadOnly();
+    }, 500);
+        frm.set_read_only();
+        frm.disable_save();
+    }
 
     //is_design based field
     //restriction
