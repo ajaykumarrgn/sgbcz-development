@@ -4,7 +4,7 @@ frappe.ui.form.on("Design", {
   // For backward compatibility: Designs created before adding the factory option.
   // If the status is 'Calculation Received', Factory: 'SGBCZ'
   //Transformer Type: 'DTTHZ2N'
-    fncheckRecalculateDesign(frm);
+    fnCheckRecalculateDesign(frm);
     if(!frm.is_new()){
       if (frm.doc.status === 'Calculation Received' && 
       (!frm.doc.factory || !frm.doc.transformer_type)) {
@@ -20,7 +20,7 @@ frappe.ui.form.on("Design", {
 
   refresh(frm) {  
     fnUpdateButtonGroup(frm);
-    fncheckRecalculateDesign(frm);
+    fnCheckRecalculateDesign(frm);
   },
 
 
@@ -59,36 +59,36 @@ frappe.ui.form.on("Design", {
 });
 
 function fnUpdateButtonGroup(frm) {
-  const STATUS = frm.doc.status;
+  const L_STATUS = frm.doc.status;
   const LA_BUTTONS = [];
 
   // Determine which buttons to show based on status
-  if (STATUS === 'Draft' && frm.doc.is_design === 1) {
+  if (L_STATUS === 'Draft' && frm.doc.is_design === 1) {
     LA_BUTTONS.push({
           label: 'Create Design',
-          action: fncreateDesign
+          action: fnCreateDesign
       });
   }
-  if (STATUS === 'Draft' && frm.doc.is_design === 0) {
+  if (L_STATUS === 'Draft' && frm.doc.is_design === 0) {
     LA_BUTTONS.push({
           label: 'Create Item',
-          action: fncreateItem
+          action: fnCreateItem
       });
   }
 
-  if (STATUS === 'Calculation Received' && !frm.doc.item) {
+  if (L_STATUS === 'Calculation Received' && !frm.doc.item) {
     LA_BUTTONS.push({
           label: 'Recalculate Design',
           action: fnRecalculate
         });
     LA_BUTTONS.push({
           label: 'Create Item',
-          action: fncreateItem
+          action: fnCreateItem
       });
       
     }
 
-  if (STATUS === 'Item Created' && frm.doc.item) {
+  if (L_STATUS === 'Item Created' && frm.doc.item) {
     LA_BUTTONS.push({
                       label: 'Recalculate Design',
                       action: fnRecalculate
@@ -96,21 +96,21 @@ function fnUpdateButtonGroup(frm) {
     
     LA_BUTTONS.push({
           label: 'View Item',
-          action: fnviewItem
+          action: fnViewItem
       });
   }
 
-  if (STATUS === 'Item Created' && !frm.doc.item) {
+  if (L_STATUS === 'Item Created' && !frm.doc.item) {
     LA_BUTTONS.push({
           label: 'Create Item',
-          action: fncreateItem
+          action: fnCreateItem
       });
   }
-  if(STATUS === 'Calculation Received' && frm.doc.item){
+  if(L_STATUS === 'Calculation Received' && frm.doc.item){
     frm.set_value('status', 'Item Updated')
   }
 
-  if(STATUS === 'Item Updated' && frm.doc.factory == 'SGBCZ'){
+  if(L_STATUS === 'Item Updated' && frm.doc.factory == 'SGBCZ'){
       
     LA_BUTTONS.push({
           label: 'Recalculate Design',
@@ -122,7 +122,7 @@ function fnUpdateButtonGroup(frm) {
         });
     LA_BUTTONS.push({
           label: 'View Item',
-          action: fnviewItem
+          action: fnViewItem
         });
   }
   // Pass the button array to the fnShowButtonGroup function
@@ -138,19 +138,19 @@ function fnShowButtonGroup(frm, iaButtonArray) {
 
   if (Array.isArray(iaButtonArray)) {
   iaButtonArray.forEach(function(idButton) {
-        const { label, action } = idButton;
-        if (label && action) {   
+        const { LD_LABEL, LD_ACTION } = idButton;
+        if (LD_LABEL && LD_ACTION) {   
             // Add the custom button
-            const BUTTON = frm.add_custom_button(__(label), function() {
+            const LD_BUTTON = frm.add_custom_button(__(LD_LABEL), function() {
                 if (!frm.is_dirty()) {
-                    action(frm);
+                    LD_ACTION(frm);
                 }
             });
           //   Ensure the button is enabled/disabled based on form dirty state
             if (frm.is_dirty()) {
-                $(BUTTON).prop('disabled', true).css('pointer-events', 'none');
+                $(LD_BUTTON).prop('disabled', true).css('pointer-events', 'none');
             } else {
-                $(BUTTON).prop('disabled', false).css('pointer-events', 'auto');
+                $(LD_BUTTON).prop('disabled', false).css('pointer-events', 'auto');
             }
         }
     });   
@@ -158,25 +158,25 @@ function fnShowButtonGroup(frm, iaButtonArray) {
 }
 
 //Get the list of quotation preset with the design recalculated frequency
-function fncheckRecalculateDesign(frm) {
+function fnCheckRecalculateDesign(frm) {
 frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
     let ldDoc = frappe.model.get_list("Quotation Presets");
-    const lRefreshDate = ldDoc[0].price_recalculation_frequency;
-    const lToday = new Date();
-    const lLastCalculateDate = frm.doc.last_calculated_on ? new Date(frm.doc.last_calculated_on) : null;
+    const LREFRESHDATE = ldDoc[0].price_recalculation_frequency;
+    const LTODAY = new Date();
+    const LLASTCALCULATEDATE = frm.doc.last_calculated_on ? new Date(frm.doc.last_calculated_on) : null;
 
-    if (lRefreshDate && lLastCalculateDate) {
-        const lTimeDiff = Math.abs(lToday - lLastCalculateDate);
-        const lDayDiff = Math.ceil(lTimeDiff / (1000 * 3600 * 24));
+    if (LREFRESHDATE && LLASTCALCULATEDATE) {
+        const LTIMEDIFF = Math.abs(LTODAY - LLASTCALCULATEDATE);
+        const LDAYDIFF = Math.ceil(LTIMEDIFF / (1000 * 3600 * 24));
 
-        if (lDayDiff >= lRefreshDate) {
-            const BUTTONS = [];
+        if (LDAYDIFF >= LREFRESHDATE) {
+            const LA_BUTTONS = [];
 
             if (frm.doc.status == 'Calculation Received' && !frm.doc.item) {
                 frm.set_intro(false);
-                frm.set_intro(__('The calculation is expired by ') + lDayDiff + " days from default price recalculation frequency", 'yellow');
+                frm.set_intro(__('The calculation is expired by ') + LDAYDIFF + " days from default price recalculation frequency", 'yellow');
 
-                BUTTONS.push({
+                LA_BUTTONS.push({
                     label: 'Recalculate Design',
                     action: fnRecalculate
                 });
@@ -184,19 +184,19 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
 
             if (frm.doc.status == 'Item Created') {
                 frm.set_intro(false);
-                frm.set_intro(__('The calculation is expired by ') + lDayDiff + " days from default price recalculation frequency", 'yellow');
+                frm.set_intro(__('The calculation is expired by ') + LDAYDIFF + " days from default price recalculation frequency", 'yellow');
 
-                BUTTONS.push({
+                LA_BUTTONS.push({
                     label: 'Recalculate Design',
                     action: fnRecalculate
                 });
-                BUTTONS.push({
+                LA_BUTTONS.push({
                     label: 'View Item',
-                    action: fnviewItem
+                    action: fnViewItem
                 });
             }
             // Pass the button array to the function
-            fnShowButtonGroup(frm, BUTTONS);
+            fnShowButtonGroup(frm, LA_BUTTONS);
           }
         }
     });
@@ -204,13 +204,13 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
 
 function fnRecalculate(frm){
 // Clear all the specified fields
-  const fieldsToClear = [
+  const LA_FIELDSTOCLEAR = [
     'upstream_file', 'gitra_xml', 'gitra_xml_downstream',
     'gitra_json_downstream', 'direct_material_cost'
   ];
 
   // Set all fields to empty string
-  fieldsToClear.forEach(field => frm.set_value(field, ''));
+  LA_FIELDSTOCLEAR.forEach(field => frm.set_value(field, ''));
 
   // Update the status and save the form
   frm.set_value("status", "Perform Calculation");
@@ -228,7 +228,7 @@ function fnUpdatePricelist(frm) {
       callback: function(response) {
         if (response.message) {
           console.log('API response:', response.message);
-          hideUpdatePricelistButton(frm)
+          fnHideUpdatePricelistButton(frm)
         } else {
           console.log('No response from API.');
         }
@@ -236,7 +236,7 @@ function fnUpdatePricelist(frm) {
   })
 }
 
-function fncreateItem(frm) {
+function fnCreateItem(frm) {
   //the Item will be created if no load and load loss
   //guarantee is not empty
   if(frm.doc.no_load_loss_guarantee && frm.doc.load_loss_guarantee
@@ -354,17 +354,17 @@ function fncreateItem(frm) {
 }
 
 //Enable the create design button and also set the status when design in draft mode.
-function fncreateDesign(frm) {
+function fnCreateDesign(frm) {
   frm.set_value("status", "Perform Calculation");
   frm.save();
 }
 
 //When clicking the View Item and it redirects to the item form
-function fnviewItem(frm) {
+function fnViewItem(frm) {
   frappe.set_route("item", frm.doc.item);
 }
 
 //Hide the Update Pricelist button after setting the total cost into the price list rate
-function hideUpdatePricelistButton(frm) {
+function fnHideUpdatePricelistButton(frm) {
   $('.btn:contains("Update Pricelist")').hide();
 }

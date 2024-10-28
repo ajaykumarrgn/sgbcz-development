@@ -8,8 +8,8 @@ frappe.ui.form.on("Design", {
      * @params {xmlString} string calculated xml received from Gitra
      * @params {fileUrl} string cdn of xml-js javascript library
      */
-    function fnConvertXmlToJson(iXmlString, lFileUrl) {
-      const OPTIONS = {
+    function fnConvertXmlToJson(iXmlString, iFileUrl) {
+      const LD_OPTIONS = {
         compact: true,
         ignoreAttributes: true, //ignores attributes and nodes
       };
@@ -17,47 +17,47 @@ frappe.ui.form.on("Design", {
       // create a script node in the html document
       // equivalent to <script src="https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js" 
       // type="text/javascript"></script>
-      let lDOMScriptEle = document.createElement("script");
+      let LD_DOMScriptEle = document.createElement("script");
 
-      lDOMScriptEle.setAttribute("src", lFileUrl);
-      lDOMScriptEle.setAttribute("type", "text/javascript");
+      LD_DOMScriptEle.setAttribute("src", iFileUrl);
+      LD_DOMScriptEle.setAttribute("type", "text/javascript");
 
-      document.body.appendChild(lDOMScriptEle);
+      document.body.appendChild(LD_DOMScriptEle);
 
       // success event
-      lDOMScriptEle.addEventListener("load", () => {
+      LD_DOMScriptEle.addEventListener("load", () => {
         // Call the xml2json from the xml-js library and parse the as Json object
-        const JSONDATA = JSON.parse(xml2json(iXmlString, OPTIONS));
+        const LD_JSONDATA = JSON.parse(xml2json(iXmlString, LD_OPTIONS));
         //console.log()
         // convert to string so that it can be stored to the code field
-        frm.doc.gitra_json_downstream = JSON.stringify(JSONDATA, null, 2);
+        frm.doc.gitra_json_downstream = JSON.stringify(LD_JSONDATA, null, 2);
 
         // Repalce the "," with "." as decimal separator
         // parseFloat(text.replace(",", "."));
         // set the currency field from the gitra xml to design
         frm.set_value(
           "currency",
-          JSONDATA.sgb.TGtWickelzettel.preiswaehrung._text
+          LD_JSONDATA.sgb.TGtWickelzettel.preiswaehrung._text
         );
         // set the direct material cost field from the gitra xml to design
         frm.set_value(
           "direct_material_cost",
           parseFloat(
-            JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(",", ".")
+            LD_JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(",", ".")
           )
         );
 
         //>>TASK-2024-00299
         //If a parallel coil appears in the design, add 200 to the direct material cost
-        const TGTSPULE =
-          JSONDATA.sgb.TGtWickelzettel.TGtWickelzettelSystemeListe
+        const LA_TGTSPULE =
+          LD_JSONDATA.sgb.TGtWickelzettel.TGtWickelzettelSystemeListe
             .TGtWickelzettelSystem[1].TGtWicklungenListe.TGtWicklung
             .TGtSpulenListe.TGtSpule;
-        if (TGTSPULE.length === 2) {
+        if (LA_TGTSPULE.length === 2) {
           frm.set_value(
             "direct_material_cost",
             parseFloat(
-              JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(",", ".")
+              LD_JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(",", ".")
             ) + 200
           );
           // Reset this value of Labour to zero to ensure the recalculation is triggered
@@ -74,7 +74,7 @@ frappe.ui.form.on("Design", {
         frm.save();
       });
       // error event
-      lDOMScriptEle.addEventListener("error", (ev) => {
+      LD_DOMScriptEle.addEventListener("error", (ev) => {
         console.log("Error on loading file", ev);
       });
     }
@@ -87,8 +87,8 @@ frappe.ui.form.on("Design", {
 
     // update the last file pulled date to last changed on.
     if (frm.doc.upstream_file && !frm.doc.last_calculated_on) {
-      const DATEPART = frm.doc.upstream_file.split("_")[1]; // Extract the date part
-      frm.set_value("last_calculated_on", DATEPART);
+      const L_DATEPART = frm.doc.upstream_file.split("_")[1]; // Extract the date part
+      frm.set_value("last_calculated_on", L_DATEPART);
       // refresh changes
       frm.refresh_fields();
       // save the form

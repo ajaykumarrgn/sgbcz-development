@@ -12,7 +12,7 @@ l_total_cost = ld_design_record.total_cost
 if not l_item_code or not l_total_cost:
     frappe.throw(_("Item code and Total cost are required."))
 
-# Get the Price list based on the item code 
+# Get the Price list from the Item Price based on the item code 
 la_item_price_rate = frappe.get_list("Item Price", filters={
     "item_code": l_item_code,
     "price_list": "Standard Selling"
