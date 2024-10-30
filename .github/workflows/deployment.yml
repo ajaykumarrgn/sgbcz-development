@@ -145,6 +145,17 @@ jobs:
             exit 0
           fi
 
+      - name: Upload User Permission
+        run: |
+          if grep -q "user_permission" ci/migrate.txt; then
+            echo "Allows the User Permission Configuration job to proceed."
+            npm i
+            npm run update_user_permission
+          else
+            echo "Does not allow the User Permission Configuration job to proceed, skipping."
+            exit 0
+          fi
+
       - name: Upload Letterhead and Printformat
         run: |
           if grep -q "print_format" ci/migrate.txt; then
@@ -282,7 +293,7 @@ jobs:
         (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
       )
 
     steps:
@@ -311,7 +322,7 @@ jobs:
         (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
       )
     env:
       HOST: ${{ vars.PROD_HOST }}
@@ -372,6 +383,17 @@ jobs:
             npm run upload_perm
           else
             echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
+            exit 0
+          fi
+
+      - name: Upload User Permission
+        run: |
+          if grep -q "user_permission" ci/migrate.txt; then
+            echo "Allows the User Permission Configuration job to proceed."
+            npm i
+            npm run update_user_permission
+          else
+            echo "Does not allow the User Permission Configuration job to proceed, skipping."
             exit 0
           fi
 
