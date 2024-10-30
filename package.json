@@ -18,7 +18,9 @@
     "get_doctype": "cd files && node getCustomDoctype.js",
     "update_doctype":"cd files && node updateCustomDoctype.js",
     "get_document": "cd files && node getDocument.js",
-    "update_document": "cd files && node updateDocument.js"
+    "update_document": "cd files && node updateDocument.js",
+    "get_user_permission": "cd files && node getUserPermission.js",
+    "update_user_permission": "cd files && node uploadUserPermission.js"
   },
   "author": "Your Name",
   "license": "MIT",
