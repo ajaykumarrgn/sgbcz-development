@@ -14,7 +14,11 @@
     "get_letterhead_printformat": "cd files && node getLetterAndPrintFormat.js",
     "upload_letterhead_printformat": "cd files && node uploadLetterAndPrintFormat.js",
     "get_perm": "cd files && node getRolePerm.js",
-    "upload_perm": "cd files && node updateRolePerm.js"
+    "upload_perm": "cd files && node updateRolePerm.js",
+    "get_doctype": "cd files && node getCustomDoctype.js",
+    "update_doctype":"cd files && node updateCustomDoctype.js",
+    "get_document": "cd files && node getDocument.js",
+    "update_document": "cd files && node updateDocument.js"
   },
   "author": "Your Name",
   "license": "MIT",

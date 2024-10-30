@@ -1,4 +1,19 @@
 frappe.ui.form.on('Design', {
+    onload(frm){
+    //initialized a options as a variable in frm model
+    //to hold the vector group lv2 options from item attribute
+    frappe.call({
+            method: 'get_attribute_value_from_item_attribute',
+            args: {
+                'attribute': 'Vector Group LV 2'
+            },
+            callback: function(response) {
+                let laOptions = response.message.la_options;
+                frm.options = laOptions; //frm varaible
+            }
+        });
+
+    },
     validate(frm) {
         //Get all the HTML fields to validate 
         let lFieldsToValidate = fnGetHtmlfields();
@@ -199,13 +214,10 @@ frappe.ui.form.on('Design', {
     //The function is used to get the vector 
     //group options dynamically from the Docfield
     fnGetSelectOptions: function(iFieldname, frm) {
-        // Fetch the options for the vector_group field dynamically
+        //Fetch the options for the vector_group field dynamically
+        //from frm variable "options"
         if (iFieldname === 'vector_html') {
-            let laOptions = [];
-            if (frm.fields_dict.vector_group) {
-                laOptions = frm.fields_dict.vector_group.df.options.split('\n');
-            }
-            return laOptions;
+            return frm.options;
         }
         
     },
