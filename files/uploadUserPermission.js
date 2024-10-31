@@ -38,12 +38,12 @@ async function uploadUserPermissions() {
           // Use the cleaned line as the path
           const pathParts = cleanedLine.split('/').map(item => item.trim());
           if (pathParts.length >= 3) {
-            const key = pathParts[0]; // e.g., "Territory"
-            const forValue = pathParts[1]; // e.g., "Germany Selling"
-            const userEmailFile = pathParts[2]; // e.g., "user1@sgb-smit.group.json"
+            const key = pathParts[0]; 
+            const forValue = pathParts[1]; 
+            const userEmailFile = pathParts[2];
 
             if (!permissions[key]) permissions[key] = [];
-            permissions[key].push({ forValue, userEmailFile, isDelete }); // Store the delete flag
+            permissions[key].push({ forValue, userEmailFile, isDelete }); 
           } else {
             console.error(`Invalid path structure in userPermission.txt: ${line}`);
           }
@@ -67,11 +67,13 @@ async function uploadUserPermissions() {
             ...requestOptions,
             method: 'GET'
           });
-
+          const getURLLog = `${baseUrl}?filters={"user":"${userEmailFile.replace('.json', '')}","allow":"${key}"}`
+          console.log('the GET Method targeting url : ', getURLLog )
           const existingData = await getResponse.json();
 
           // Step 5: Perform DELETE or Update/Create based on isDelete flag
           if (isDelete) {
+            console.log("the data from get : ", existingData.data )
             // If DELETE is specified
             if (existingData.data && existingData.data.length > 0) {
               const name = existingData.data[0].name;
