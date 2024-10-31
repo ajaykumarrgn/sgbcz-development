@@ -96,6 +96,7 @@ jobs:
       PERM_END_POINT: ${{ vars.QA_PERM_END_POINT }}
       CUSTOM_FIELD_END_POINT: ${{ vars.QA_CUSTOM_FIELD_END_POINT }}
       DOCTYPE_END_POINT: ${{ vars.QA_DOCTYPE_END_POINT }}
+      USER_PERMISSION : ${{ vars.QA_USER_PERMISSION }}
       KEY: ${{ vars.QA_KEY }}
 
     steps:
@@ -335,6 +336,7 @@ jobs:
       PERM_END_POINT: ${{ vars.PROD_PERM_END_POINT }}
       CUSTOM_FIELD_END_POINT: ${{ vars.PROD_CUSTOM_FIELD_END_POINT }}
       DOCTYPE_END_POINT: ${{ vars.PROD_DOCTYPE_END_POINT }}
+      USER_PERMISSION : ${{ vars.PROD_USER_PERMISSION }}
       KEY: ${{ vars.PROD_KEY }}
 
     steps:

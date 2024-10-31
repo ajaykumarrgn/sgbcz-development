@@ -67,13 +67,11 @@ async function uploadUserPermissions() {
             ...requestOptions,
             method: 'GET'
           });
-          const getURLLog = `${baseUrl}?filters={"user":"${userEmailFile.replace('.json', '')}","allow":"${key}"}`
-          console.log('the GET Method targeting url : ', getURLLog )
+          
           const existingData = await getResponse.json();
 
           // Step 5: Perform DELETE or Update/Create based on isDelete flag
           if (isDelete) {
-            console.log("the data from get : ", existingData.data )
             // If DELETE is specified
             if (existingData.data && existingData.data.length > 0) {
               const name = existingData.data[0].name;
