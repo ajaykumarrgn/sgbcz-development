@@ -112,7 +112,7 @@ def fn_get_final_data(i_filters):
             'parent': ('IN',ia_delivery_notes),
             'pos': ('IN', ia_unique_pos),
             #'docstatus': ("!=", 2), #<< Commented this line for the show only the submitted documents (ISS-2024-00120)
-            'docstatus': ("=", 1),
+            'docstatus': ("=", 1), #<<ISS-2024-00120
         }
         # Get delivery items from the 'Delivery Note Item' doctype
         # with specified fields and filters
