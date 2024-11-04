@@ -6,8 +6,7 @@ on:
       - main
       - r2
       - hot-fix
-      - develop
-      - offer-workflow
+      - hot-fix-release
     paths-ignore: # Avoid triggering on PR merges with specific commit messages
       - '**/cypress/**'  
 
@@ -19,13 +18,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     steps:
       - name: Use Node.js v20
@@ -77,13 +76,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     needs: code_quality_check
     env:
@@ -97,6 +96,7 @@ jobs:
       PERM_END_POINT: ${{ vars.QA_PERM_END_POINT }}
       CUSTOM_FIELD_END_POINT: ${{ vars.QA_CUSTOM_FIELD_END_POINT }}
       DOCTYPE_END_POINT: ${{ vars.QA_DOCTYPE_END_POINT }}
+      USER_PERMISSION : ${{ vars.QA_USER_PERMISSION }}
       KEY: ${{ vars.QA_KEY }}
 
     steps:
@@ -146,6 +146,17 @@ jobs:
             exit 0
           fi
 
+      - name: Upload User Permission
+        run: |
+          if grep -q "user_permission" ci/migrate.txt; then
+            echo "Allows the User Permission Configuration job to proceed."
+            npm i
+            npm run update_user_permission
+          else
+            echo "Does not allow the User Permission Configuration job to proceed, skipping."
+            exit 0
+          fi
+
       - name: Upload Letterhead and Printformat
         run: |
           if grep -q "print_format" ci/migrate.txt; then
@@ -179,13 +190,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     env:
       USER_NAME: ${{ secrets.TEST_USER_NAME }}
@@ -283,7 +294,7 @@ jobs:
         (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
       )
 
     steps:
@@ -312,7 +323,7 @@ jobs:
         (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
       )
     env:
       HOST: ${{ vars.PROD_HOST }}
@@ -325,6 +336,7 @@ jobs:
       PERM_END_POINT: ${{ vars.PROD_PERM_END_POINT }}
       CUSTOM_FIELD_END_POINT: ${{ vars.PROD_CUSTOM_FIELD_END_POINT }}
       DOCTYPE_END_POINT: ${{ vars.PROD_DOCTYPE_END_POINT }}
+      USER_PERMISSION : ${{ vars.PROD_USER_PERMISSION }}
       KEY: ${{ vars.PROD_KEY }}
 
     steps:
@@ -373,6 +385,17 @@ jobs:
             npm run upload_perm
           else
             echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
+            exit 0
+          fi
+
+      - name: Upload User Permission
+        run: |
+          if grep -q "user_permission" ci/migrate.txt; then
+            echo "Allows the User Permission Configuration job to proceed."
+            npm i
+            npm run update_user_permission
+          else
+            echo "Does not allow the User Permission Configuration job to proceed, skipping."
             exit 0
           fi
 

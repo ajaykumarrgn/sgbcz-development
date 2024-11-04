@@ -47,6 +47,9 @@ export function getEndPointForDoctype(doctype){
     case 'Custom Doctype':
       endpoint = process.env.DOCTYPE_END_POINT
       break
+    case 'User Permission':
+      endpoint = process.env.USER_PERMISSION 
+      break
     default:
       endpoint = '';
       break
@@ -58,4 +61,3 @@ export function getEndPointForDoctype(doctype){
   return baseUrl
   console.log("baseUrl", baseUrl)
 }
-
