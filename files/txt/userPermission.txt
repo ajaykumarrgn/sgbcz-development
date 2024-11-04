@@ -4,4 +4,4 @@
 #Territory/Germany/user1@sgb-smit.group.json
 #Territory/Germany/user1@sgb-smit.group.json DELETE
 
-Price List/Germany Selling/daniel.meyer@sgb-smit.group.json DELETE
+Price List/Germany Selling/user1@sgb-smit.group.json DELETE
