@@ -1,0 +1,15 @@
+#please provide filePath no need (,)
+# if you want to delete the user permission you can add DELETE tag at end
+#ex: 
+#Territory/Germany/user1@sgb-smit.group.json
+#Territory/Germany/user1@sgb-smit.group.json DELETE
+
+Price List/Germany Selling/klaus.follmann@sgb-smit.group.json DELETE
+Price List/Germany Selling/frank.wenzel@sgb-smit.group.json DELETE
+Price List/Germany Selling/holger.breitenfeldt@sgb-smit.group.json DELETE
+Price List/Germany Selling/thomas.richter@sgb-smit.group.json DELETE
+Price List/Germany Selling/tobias.knipfer@sgb-smit.group.json DELETE
+Price List/Germany Selling/daniel.meyer@sgb-smit.group.json DELETE
+Price List/Germany Selling/user1@sgb-smit.group.json DELETE
+
+
