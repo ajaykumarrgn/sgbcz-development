@@ -71,7 +71,7 @@ frappe.ui.form.on("Item", {
             cur_frm.set_value("description", lItemDescription);
           }
         );
-      } else if (frm.doc.attributes){
+      } else{
         // For non-variant items, follow the same logic
         lIndex = frm.doc.attributes.findIndex(
           (element) => element.attribute == "Power (kVA)"
