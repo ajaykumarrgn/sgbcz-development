@@ -2,10 +2,6 @@ lo_doc = frappe.form_dict.get('io_doc')
 # Access the parent
 l_parent = lo_doc.custom_factory  
 
-def fn_convert_fieldname_to_label(i_field_name);
-    
-    return l_field_label
-
 def fn_validate_field_prefix(i_field_validation_rules, i_value, ia_response):
     # Validate the prefix of a given field value
     if i_value:
