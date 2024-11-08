@@ -1,5 +1,6 @@
 //Change Request
 //TASK-2024-00299: To calculate the direct material cost with 200, considering the design based on the parallel coil.
+//US-2024-0167: Reset the values for Labour and Last calculated on for recalculating the existing design item
 frappe.ui.form.on("Design", {
   refresh(frm) {
     /*
