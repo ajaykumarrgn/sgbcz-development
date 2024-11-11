@@ -1,3 +1,4 @@
+//The design form displays the save alert twice (ISS-2024-00133)
 frappe.ui.form.on('Design', {
     fngetAttributeOptionAndDefault(frm, iAttributeLabel, 
             iAttributeName, iTransformerType, iIsDesign, iReset = false) {
@@ -77,7 +78,10 @@ fnSetOptionsAndDefault(frm, iReset = false) {
 
         //looping the LA_ATTRIBUTES
         LA_ATTRIBUTES.forEach(laAttribute => {
-            frm.events.fngetAttributeOptionAndDefault(frm, laAttribute[0], laAttribute[1], frm.doc.transformer_type, frm.doc.is_design, iReset);
+            // Get the vector group Lv1 and Vector Group LV2 when only LV2 is present
+            if (frm.doc.lv_2 > 0 || !['vector_group_lv1', 'vector_group_lv2'].includes(laAttribute[1])) { //<<ISS-2024-00133
+                frm.events.fngetAttributeOptionAndDefault(frm, laAttribute[0], laAttribute[1], frm.doc.transformer_type, frm.doc.is_design, iReset);
+            }
         });
     },
 
