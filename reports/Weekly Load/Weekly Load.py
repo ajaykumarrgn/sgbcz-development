@@ -4,7 +4,6 @@
 # Throw error message if years are different in the from and to date filters(Issue : ISS-2024-00054)
 # Show only the Submitted documents in the weekly load report (Issue : ISS-2024-00120)
 
-
 def fn_get_columns(i_filters):
     # To Get the Calendar Week from a given Date
     def fn_get_calander_week(i_date):
