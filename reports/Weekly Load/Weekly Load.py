@@ -328,7 +328,7 @@ def fn_get_final_data(i_filters):
         #  Add sum of parallel per week row
         la_e_final_data.append(ld_parallel_row)
 
-        #  Add Total row to the output
+        # Add Total row to the output
         la_e_final_data.append(ld_total_row)
 
         return la_e_final_data
