@@ -3,6 +3,8 @@
 # Set the filter to enable the checkbox for setting the weekly capacity chart size to 40. (Issue : ISS-2024-00007)
 # Throw error message if years are different in the from and to date filters(Issue : ISS-2024-00054)
 # Show only the Submitted documents in the weekly load report (Issue : ISS-2024-00120)
+
+
 def fn_get_columns(i_filters):
     # To Get the Calendar Week from a given Date
     def fn_get_calander_week(i_date):
@@ -124,8 +126,9 @@ def fn_get_final_data(i_filters):
         ld_filters = {
             "parent": ("IN", ia_delivery_notes),
             "pos": ("IN", ia_unique_pos),
+            # In "docstatus != 2," it displays both draft and submitted records.
             #'docstatus': ("!=", 2), #<< Commented this line for the show only the submitted documents (ISS-2024-00120)
-            "docstatus": ("=", 1),  # <<ISS-2024-00120
+            'docstatus': ("=", 1),  # <<ISS-2024-00120
         }
         # Get delivery items from the 'Delivery Note Item' doctype
         # with specified fields and filters
