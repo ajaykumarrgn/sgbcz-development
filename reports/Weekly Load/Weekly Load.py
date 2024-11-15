@@ -318,7 +318,7 @@ def fn_get_final_data(i_filters):
         # Sort the output based on power
         # e_final_data = sorted(e_final_data, key=lambda x: (x['power']) )
 
-        #  Add The weekly capacity row
+        # Add The weekly capacity row
         la_e_final_data.append(
             fn_get_weekly_planned_capacity_row(
                 id_planned_capacity, dict(ld_planning_row_dict), ld_parallel_row
