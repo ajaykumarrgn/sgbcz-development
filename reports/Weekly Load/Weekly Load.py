@@ -12,7 +12,7 @@ def fn_get_columns(id_filters):
         # Return the Calendar Week as a String
         return str(l_date.isocalendar()[1])
 
-    # commented the section of code because it would execute before displaying the error message.>>ISS-2024-00054
+    # commented the section of code because it would execute before displaying the error message.>>ISS-2024-00054.
     #  def get_calander_year(i_date):
     #     date = frappe.utils.getdate(i_date)
     #     return (str(date.isocalendar()[0]))
