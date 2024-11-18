@@ -1,7 +1,5 @@
 // Change References
 // Formation of Enclosure Item Description:(Issue# : ISS-2024-00004)
-// Enable this script not saving the item under other Item group as well as
-// regression for Formation of Enclosure Item Description (ISS-2024-00122)
 //>> ISS-2024-00004
 frappe.ui.form.on('Item', {
     
