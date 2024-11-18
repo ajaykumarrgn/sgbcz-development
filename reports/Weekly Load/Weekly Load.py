@@ -39,9 +39,9 @@ def fn_get_columns(id_filters):
     l_to_week = fn_get_calander_week(id_filters["to_date"])
     
     # Loop through calendar weeks between the "from_date" and "to_date".
-    for la_week in range(int(l_from_week), int(l_to_week)):
+    for l_week in range(int(l_from_week), int(l_to_week)):
         ld_column = dict(
-            {"fieldname": str(la_week), "label": (str(la_week)), "fieldtype": "Int", "width": 50}
+            {"fieldname": str(l_week), "label": (str(l_week)), "fieldtype": "Int", "width": 50}
         )
         la_columnswk.append(ld_column)
     la_columns.extend(la_columnswk)
@@ -192,10 +192,10 @@ def fn_get_final_data(id_filters):
     ):
         id_planning_row["power"] = "Weekly Capacity"
         # id_planning_row[week] for week in id_planned_capacity
-        for i_weekly_capacity in id_planned_capacity["planned_capacity_item"]:
+        for ld_weekly_capacity in id_planned_capacity["planned_capacity_item"]:
 
             # Get the week number from the planned weekly capacity in string format
-            l_week_number = str(i_weekly_capacity["week"])
+            l_week_number = str(ld_weekly_capacity["week"])
 
             # Initialize the number of transformers to be reduced
             # transformers_to_be_reduced  = 0
@@ -204,7 +204,7 @@ def fn_get_final_data(id_filters):
             # transformers_to_be_reduced = (int(id_parallel_row[l_week_number])-1) // int(id_planned_capacity.parallel_weekly_capacity)
 
             # Get the planned weekly capacity and reduce it by the parallel factor from above step
-            # id_planning_row[week_number] = int(i_weekly_capacity['qty']) - transformers_to_be_reduced
+            # id_planning_row[week_number] = int(ld_weekly_capacity['qty']) - transformers_to_be_reduced
 
             l_transformers_to_be_reduced = 0
 
@@ -217,10 +217,10 @@ def fn_get_final_data(id_filters):
 
                 # Get the planned weekly capacity and reduce it by the parallel factor from above step
             id_planning_row[l_week_number] = max(
-                0, int(i_weekly_capacity["qty"]) - l_transformers_to_be_reduced
+                0, int(ld_weekly_capacity["qty"]) - l_transformers_to_be_reduced
             )
 
-        id_planning_row["i_weekly_capacity"] = 29
+        id_planning_row["ld_weekly_capacity"] = 29
         return id_planning_row
 
     # Calculate sum of parallel coils per week
@@ -276,15 +276,15 @@ def fn_get_final_data(id_filters):
             ld_planning_row = dict(ld_planning_row_dict)
             # assign the rating for planning row
             ld_planning_row["power"] = i_rating
-            for la_item in (
-                la_item
-                for la_item in ia_transformers_rating
-                if la_item["attribute_value"] == i_rating
+            for ld_item in (
+                ld_item
+                for ld_item in ia_transformers_rating
+                if ld_item["attribute_value"] == i_rating
             ):
                 for i_delivery_item in (
                     i_delivery_item
                     for i_delivery_item in ia_delivery_note_items
-                    if i_delivery_item["item_code"] == la_item["parent"]
+                    if i_delivery_item["item_code"] == ld_item["parent"]
                 ):
                     for ld_schedule_line in ia_schedule_lines:
                         if (
@@ -427,8 +427,8 @@ def fn_get_chart_data(i_planning_data, id_filters):
     # planned_dataset['type'] = 'line'
     # planned_data = []
 
-    for l_wk in range(int(l_from_week), int(l_to_week)):
-        la_labels.append(str(l_wk))
+    for l_week in range(int(l_from_week), int(l_to_week)):
+        la_labels.append(str(l_week))
 
     for index, data in enumerate(i_planning_data):
         # Ignore Row Weekly Capacity and Parallel for stacked bar chart. It is already used in line chart
@@ -445,8 +445,8 @@ def fn_get_chart_data(i_planning_data, id_filters):
                     ld_dataset["chartType"] = "line"
                     # <<ISS-2024-00035
 
-                    for l_wk in range(int(l_from_week), int(l_to_week)):
-                        values.append(data.get(str(l_wk)))
+                    for l_week in range(int(l_from_week), int(l_to_week)):
+                        values.append(data.get(str(l_week)))
                     # >> ISS-2024-00007
 
                     ld_dataset["values"] = la_values
@@ -458,8 +458,8 @@ def fn_get_chart_data(i_planning_data, id_filters):
                 ld_dataset["name"] = data["power"]
                 ld_dataset["chartType"] = "bar"
 
-                for l_wk in range(int(l_from_week), int(l_to_week)):
-                    la_values.append(data.get(str(l_wk)))
+                for l_week in range(int(l_from_week), int(l_to_week)):
+                    la_values.append(data.get(str(l_week)))
 
                 ld_dataset["values"] = la_values
 
