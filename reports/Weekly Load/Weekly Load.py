@@ -70,7 +70,7 @@ def fn_get_final_data(id_filters):
     # Check if the calendar years of 'from_date' and 'to_date' are different
     if int(fn_get_calander_year(l_from_date)) != int(fn_get_calander_year(l_to_date)):
         # If the years are different, raise an exception with a message
-        frappe.throw("Please use the Same Year in the Date Range")
+        frappe.throw(_("Please use the Same Year in the Date Range"))
     # <<ISS-2024-00054
 
     #   Get unique list in a given array for the specified key
