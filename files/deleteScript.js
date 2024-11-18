@@ -39,7 +39,7 @@ fs.readFile('./txt/deleteRecord.txt', 'utf8', (err, data) => {
       .then((response) => response.text())
       .then((result) => {
         // Check if the response is successful and print result
-        if (result.message === 'ok') {
+        if (result.message === "ok") {
           console.log(`${param} record is deleted successfully`);
         } else {
           console.log(`Failed to delete ${param}:`, result);
