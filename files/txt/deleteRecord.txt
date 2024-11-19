@@ -7,6 +7,7 @@ Client Script/Transformer Type Based On Factory Beta
 Client Script/Item Description Beta
 Client Script/Item Name Beta
 Client Script/Item Technical Name Beta
+Client Script/Item Description Modify
 Server Script/Design Compute Cost Beta
 Server Script/Item Design Compute Cost Beta
 Server Script/Create Item From Design Beta

@@ -178,6 +178,17 @@ jobs:
             echo "Does not allow the Documents Configuration job to proceed, skipping."
             exit 0
           fi
+
+      - name: Delete Files
+        run: |
+          if grep -q "delete_files" ci/migrate.txt; then
+            echo "Allows the Deletion of Files to proceed"
+            npm i
+            npm run delete_record
+          else
+            echo "Does not allows the Deletion of Files to proceed, skipping."
+            exit 0
+          fi
           
 
   ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
@@ -420,3 +431,16 @@ jobs:
             echo "Does not allow the Documents Configuration job to proceed, skipping."
             exit 0
           fi
+      
+      - name: Delete Files
+        run: |
+          if grep -q "delete_files" ci/migrate.txt; then
+            echo "Allows the Deletion of Files to proceed"
+            npm i
+            npm run delete_record
+          else
+            echo "Does not allows the Deletion of Files to proceed, skipping."
+            exit 0
+          fi
+      
+        
