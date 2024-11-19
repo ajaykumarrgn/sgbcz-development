@@ -4,7 +4,7 @@
 
 cur_frm.cscript.custom_validate = function(doc) {
     // clear item_code (name is from item_code)
-    function add_attribute_to_item_name(iDoc, iAttribute){
+    function fnAddAttributeToItemName(iDoc, iAttribute){
         // Get the current item_name
         let lItemName = iDoc.item_name;
         
@@ -33,9 +33,9 @@ cur_frm.cscript.custom_validate = function(doc) {
     // Only for new documents
     if(cur_frm.is_new() && !cur_frm.doc.has_variants) {
         
-        var lItemCode  = '';
-        // Split the item code using '-' as a separator and store the resulting array in attribute_values
-        const attribute_values = doc.item_code.split('-');
+        // var lItemCode  = '';
+        // // Split the item code using '-' as a separator and store the resulting array in attribute_values
+        // const attribute_values = doc.item_code.split('-');
        
         // first 2 characters based on item_group
         switch(doc.item_group) {
@@ -55,13 +55,13 @@ cur_frm.cscript.custom_validate = function(doc) {
         	            }
         	   }
         	   // Add other specified attributes to the item_name 
-        	   doc.item_name = add_attribute_to_item_name(doc, "HV (kV)");
-        	   doc.item_name = add_attribute_to_item_name(doc, "HV 1 (kV)");
-        	   doc.item_name = add_attribute_to_item_name(doc, "HV 2 (kV)");
-        	   doc.item_name = add_attribute_to_item_name(doc, "LV (V)");
-        	   doc.item_name = add_attribute_to_item_name(doc, "Uk (%)");
-        	    //doc.item_name = add_attribute_to_item_name(doc, "P0 (W)");
-        	   doc.item_name = add_attribute_to_item_name(doc, "HV LI (kV)");
+        	   doc.item_name = fnAddAttributeToItemName(doc, "HV (kV)");
+        	   doc.item_name = fnAddAttributeToItemName(doc, "HV 1 (kV)");
+        	   doc.item_name = fnAddAttributeToItemName(doc, "HV 2 (kV)");
+        	   doc.item_name = fnAddAttributeToItemName(doc, "LV (V)");
+        	   doc.item_name = fnAddAttributeToItemName(doc, "Uk (%)");
+        	    //doc.item_name = fnAddAttributeToItemName(doc, "P0 (W)");
+        	   doc.item_name = fnAddAttributeToItemName(doc, "HV LI (kV)");
         	   //replaces all occurrences of "-" with "/" and "." with "," here -g is flag denote global search
         	   doc.item_code =  doc.item_code.replace(/-/g, '/').replace(/\./g, ',');
         	   // incase the HV1 or HV2 is not entered replace  /// to /0/0/
@@ -94,17 +94,17 @@ cur_frm.cscript.custom_validate = function(doc) {
         	        }
         	   }
                 // Add other specified attributes to the item_name 
-                doc.item_name = add_attribute_to_item_name(doc, "HV (kV)");
-                doc.item_name = add_attribute_to_item_name(doc, "HV 1 (kV)");
-                doc.item_name = add_attribute_to_item_name(doc, "HV 2 (kV)");
-                doc.item_name = add_attribute_to_item_name(doc, "LV (V)");
-                doc.item_name = add_attribute_to_item_name(doc, "Uk (%)");
-                doc.item_name = add_attribute_to_item_name(doc, "Power LV 1 (KV)");
-                doc.item_name = add_attribute_to_item_name(doc, "LV 1 (V)");
-                doc.item_name = add_attribute_to_item_name(doc, "Uk LV 1 (%)");
-                doc.item_name = add_attribute_to_item_name(doc, "Power LV 2 (KV)");
-                doc.item_name = add_attribute_to_item_name(doc, "LV 2 (V)");
-                doc.item_name = add_attribute_to_item_name(doc, "Uk LV 2 (%)");
+                doc.item_name = fnAddAttributeToItemName(doc, "HV (kV)");
+                doc.item_name = fnAddAttributeToItemName(doc, "HV 1 (kV)");
+                doc.item_name = fnAddAttributeToItemName(doc, "HV 2 (kV)");
+                doc.item_name = fnAddAttributeToItemName(doc, "LV (V)");
+                doc.item_name = fnAddAttributeToItemName(doc, "Uk (%)");
+                doc.item_name = fnAddAttributeToItemName(doc, "Power LV 1 (KV)");
+                doc.item_name = fnAddAttributeToItemName(doc, "LV 1 (V)");
+                doc.item_name = fnAddAttributeToItemName(doc, "Uk LV 1 (%)");
+                doc.item_name = fnAddAttributeToItemName(doc, "Power LV 2 (KV)");
+                doc.item_name = fnAddAttributeToItemName(doc, "LV 2 (V)");
+                doc.item_name = fnAddAttributeToItemName(doc, "Uk LV 2 (%)");
                 //replaces all occurrences of "-" with "/" and "." with "," here -g is flag denote global search
                 doc.item_code =  doc.item_code.replace(/-/g, '/').replace(/\./g, ',');
                 // incase the HV1 or HV2 is not entered replace  /// to /0/0/
@@ -120,8 +120,8 @@ cur_frm.cscript.custom_validate = function(doc) {
 
         	case "Enclosure":
                 // Add attributes to the item name
-                doc.item_name = add_attribute_to_item_name(doc, "Enclosure IP Rating");
-                doc.item_name = add_attribute_to_item_name(doc, "Mounting Type");
+                doc.item_name = fnAddAttributeToItemName(doc, "Enclosure IP Rating");
+                doc.item_name = fnAddAttributeToItemName(doc, "Mounting Type");
                 
                 // Replace hyphens with slashes in the item code
                 doc.item_code = doc.item_code.replace(/-/g, '/');

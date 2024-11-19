@@ -1,1 +1,12 @@
-Client Script/Testscript
+Client Script/Design Filters Defaults Beta
+Client Script/Design Gitra XML Beta
+Client Script/Design Losses Defaults Beta
+Client Script/Design Title Beta
+Client Script/Design Voltage Defaults Beta
+Client Script/Transformer Type Based On Factory Beta
+Client Script/Item Description Beta
+Client Script/Item Name Beta
+Client Script/Item Technical Name Beta
+Server Script/Design Compute Cost Beta
+Server Script/Item Design Compute Cost Beta
+Server Script/Create Item From Design Beta

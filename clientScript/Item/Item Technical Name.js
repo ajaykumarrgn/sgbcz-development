@@ -7,8 +7,8 @@ frappe.ui.form.on('Item', {
     validate(frm){
  	    let lItemTechnicalName;
  	    // Function to format the HV text based on attribute values
- 	    function fget_hv(iDoc) {
- 	        var lhv_text = "";
+ 	    function fnGetHv(iDoc) {
+ 	        var lHvText = "";
 	        // Find the index of the attribute "HV (kV)"
  	        let lIndex = iDoc.attributes.findIndex(element => element.attribute=="HV (kV)");
  	        // If "HV (kV)" is not available, try "HV 1 (kV)" and "HV 2 (kV)"
@@ -18,22 +18,22 @@ frappe.ui.form.on('Item', {
      	        
      	        //>>ISS-2024-00017
      	        //Replace the HV1 as HV₁ 
-     	        lhv_text = 'HV₁ ' + (iDoc.attributes[lIndex].attribute_value).toString().replace(/\./g, ",") + ' [kV]';
+     	        lHvText = 'HV₁ ' + (iDoc.attributes[lIndex].attribute_value).toString().replace(/\./g, ",") + ' [kV]';
      	        
      	        // Find the index of the attribute "HV 2 (kV)"
      	        lIndex = iDoc.attributes.findIndex(element => element.attribute=="HV 2 (kV)");
      	        
      	        //Replace the HV2 as HV₂ 
-     	        lhv_text = lhv_text + ', ' + 'HV₂ ' + (iDoc.attributes[lIndex].attribute_value).toString().replace(/\./g, ",") + ' [kV]';
+     	        lHvText = lHvText + ', ' + 'HV₂ ' + (iDoc.attributes[lIndex].attribute_value).toString().replace(/\./g, ",") + ' [kV]';
      	        //<<ISS-2024-00017
      	        
      	       
      	    } else {
      	        // If "HV (kV)" is available, use it
-     	        lhv_text = 'HV ' + (iDoc.attributes[lIndex].attribute_value).toString().replace(/\./g, ",") + ' [kV]';
+     	        lHvText = 'HV ' + (iDoc.attributes[lIndex].attribute_value).toString().replace(/\./g, ",") + ' [kV]';
     	            
             } 
-     	    return lhv_text;
+     	    return lHvText;
  	    }
         //>> TASK-2024-0582
         //Funtion to get LV if available or get the LV 1 and LV 2
@@ -87,8 +87,8 @@ frappe.ui.form.on('Item', {
     	            }
     	        }
         	    //Retrieve the formatted HV values, whether it is 'HV' or a combination of 'HV1' and 'HV2'
-                let lhv_text = fget_hv(frm.doc);
-                lItemTechnicalName =  lItemTechnicalName + ', ' + lhv_text;
+                let lHvText = fnGetHv(frm.doc);
+                lItemTechnicalName =  lItemTechnicalName + ', ' + lHvText;
         	         
         	   
         	   // Find index of attribute "LV (V)"
@@ -165,8 +165,8 @@ frappe.ui.form.on('Item', {
                     }
 
                     //Retrieve the formatted HV values, whether it is 'HV' or a combination of 'HV1' and 'HV2'
-                    let lhv_text = fget_hv(frm.doc);
-                    lItemTechnicalName =  lItemTechnicalName + ', ' + lhv_text;
+                    let lHvText = fnGetHv(frm.doc);
+                    lItemTechnicalName =  lItemTechnicalName + ', ' + lHvText;
 
                     //Retrieve the formatted LV values, whether it is 'LV' or a combination of 'LV1' and 'LV2'
                     let lLVtext = fgeLVwithUk(frm.doc);

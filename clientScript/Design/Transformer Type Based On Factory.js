@@ -146,19 +146,19 @@ frappe.ui.form.on("Design", {
      // Determine which button to show based on status
      if (STATUS === 'Draft' && frm.doc.is_design === 1) {
          iButtonLabel = 'Create Design';
-         iButtonFunction = fncreateDesign;
+         iButtonFunction = fnCreateDesign;
      } else if (STATUS === 'Draft' && frm.doc.is_design === 0) {
         iButtonLabel = 'Create Item';
-        iButtonFunction = fncreateItem;
+        iButtonFunction = fnCreateItem;
      } else if (STATUS === 'Calculation Received' && !frm.doc.item) {
         iButtonLabel = 'Create Item';
-        iButtonFunction = fncreateItem;
+        iButtonFunction = fnCreateItem;
      } else if (STATUS === 'Item Created' && frm.doc.item) {
         iButtonLabel = 'View Item';
-        iButtonFunction = fnviewItem;
+        iButtonFunction = fnViewItem;
      } else if (STATUS === 'Item Created' && !frm.doc.item) {
         iButtonLabel = 'Create Item';
-        iButtonFunction = fncreateItem;
+        iButtonFunction = fnCreateItem;
      }
   
      fnShowButtonGroup(frm, iButtonLabel, iButtonFunction);
@@ -210,7 +210,7 @@ frappe.ui.form.on("Design", {
      
   }
   
-  function fncreateItem(frm) {
+  function fnCreateItem(frm) {
     //the Item will be created if no load and load loss
     //guarantee is not empty
     if(frm.doc.no_load_loss_guarantee && frm.doc.load_loss_guarantee
@@ -330,12 +330,12 @@ frappe.ui.form.on("Design", {
     }
   }
   
-  function fncreateDesign(frm) {
+  function fnCreateDesign(frm) {
    frm.set_value("status", "Perform Calculation");
    frm.save();
   }
   
-  function fnviewItem(frm) {
+  function fnViewItem(frm) {
    frappe.set_route("item", frm.doc.item);
   }
   

@@ -11,8 +11,8 @@ frappe.ui.form.on('Design', {
     * @params {string} transformer_type - The type of transformer 
     * for which the range is validated
     */
-    fnValidateAttributeRange(frm, iAttribute_label, 
-            iAttribute_name, iTransformer_type) {
+    fnValidateAttributeRange(frm, iAttributeLabel, 
+            iAttributeName, iTransformerType) {
         const DOCTYPE = "Gitra Settings";
          // Initialize the model with doctype Gitra Settings
         frappe.model.with_doc(DOCTYPE, DOCTYPE, function() {
@@ -22,12 +22,12 @@ frappe.ui.form.on('Design', {
             // Find the specific attribute based on the attribute_label
             //and transformer_type
             let ldAttribute = ldDoc[0].attributes.find(attr => 
-                attr.parameter === iAttribute_label 
-                && attr.transformer_type === iTransformer_type);
+                attr.parameter === iAttributeLabel 
+                && attr.transformer_type === iTransformerType);
             
             if(ldAttribute){
                 // Ensure all values are numeric for accurate comparison
-                let lAttributeName = parseFloat(frm.doc[iAttribute_name]);
+                let lAttributeName = parseFloat(frm.doc[iAttributeName]);
                 let lMinValue = parseFloat(ldAttribute.min);
                 let lMaxValue = parseFloat(ldAttribute.max);
         
@@ -47,7 +47,7 @@ frappe.ui.form.on('Design', {
             //If ldAttribute has a default value,
             //set it to the field
             if(ldAttribute && ldAttribute.default){
-                frm.set_value(iAttribute_name, ldAttribute.default);
+                frm.set_value(iAttributeName, ldAttribute.default);
             }
             
         });
