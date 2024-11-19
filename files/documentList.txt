@@ -4,7 +4,5 @@
 # Optional filters can be added for fetching the doctype's document
 # ex: filters = {"status":"Cancelled}  but be sure to use filters = before 
 
-Document = Translation
-filters = {"modified": ["between", ["2024-10-16", "2024-11-13"]]}
-
+Single Document = Gitra Settings
 
