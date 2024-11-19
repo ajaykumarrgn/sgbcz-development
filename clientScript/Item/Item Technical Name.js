@@ -36,7 +36,7 @@ frappe.ui.form.on('Item', {
      	    return lHvText;
  	    }
         //>> TASK-2024-0582
-        //Funtion to get LV if available or get the LV 1 and LV 2
+        // Funtion to get LV if available or get the LV 1 and LV 2
         function fgeLVwithUk(iDoc) {
             var lLVtext = "";
             // Find index of attribute "LV (V)"
