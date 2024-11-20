@@ -4,6 +4,7 @@
 ## it_dict_array is a dictionary array
 ## i_key the key to searched for
 ## i_value the value to searched for
+
 def fn_find_row_by_key_value(ia_dict_array, i_key, i_value):
     for id_row in ia_dict_array:
         if id_row.get(i_key) == i_value:
@@ -24,7 +25,7 @@ def fn_find_dict_with_keys(id_dict_row, ia_dict_array):
     return None
 
 
-# Begin of Change EBITDA Report (>> #TASK-2024-00157)
+# Begin of Changed EBITDA Report (>> #TASK-2024-00157):
 if doc.material_cost:
 
     # Get the Gitra Settings
