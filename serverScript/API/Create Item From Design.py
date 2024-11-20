@@ -7,19 +7,19 @@ def fn_get_attribute(i_variant_of, i_attribute, i_attribute_value):
 
 
 # Fill basic details of the item
-def fn_fill_item_basic_details(i_item, i_item_group, i_variant_of):
-    i_item.item_group = i_item_group
-    i_item.include_item_in_manufacturing = 0
-    i_item.variant_of = i_variant_of
-    i_item.stock_uom = "PC"
-    return i_item
+def fn_fill_item_basic_details(id_item, i_item_group, i_variant_of):
+    id_item.item_group = i_item_group
+    id_item.include_item_in_manufacturing = 0
+    id_item.variant_of = i_variant_of
+    id_item.stock_uom = "PC"
+    return id_item
 
 
 # Fill item description from template item
-def fn_fill_item_description(i_item, i_template_item_code):
+def fn_fill_item_description(id_item, i_template_item_code):
     ld_template_item = frappe.get_doc("Item", i_template_item_code)
-    i_item.description = ld_template_item.description
-    return i_item
+    id_item.description = ld_template_item.description
+    return id_item
 
 
 def fn_update_or_append_item_code_format(i_attribute, i_attribute_value):
@@ -54,7 +54,7 @@ def fn_remove_trailing_zeros(i_number_str):
 
 # Generate item code from its attributes
 def fn_get_item_code_from_attributes(id_item):
-    ld_item_code = id_item.variant_of
+    l_item_code = id_item.variant_of
     # Create a lookup dictionary for item_code_format to access attribute_value by attribute
     ld_item_code_format_dict = {
         a["attribute"]: a["attribute_value"] for a in la_item_code_format
@@ -64,8 +64,8 @@ def fn_get_item_code_from_attributes(id_item):
         # Check if the current attribute is present in ld_item_code_format_dict
         if ld_attribute.attribute in ld_item_code_format_dict:
             # Use the attribute_value from item_code_format
-            ld_item_code = (
-                ld_item_code
+            l_item_code = (
+                l_item_code
                 + "/"
                 + fn_remove_trailing_zeros(
                     str(ld_item_code_format_dict[ld_attribute.attribute])
@@ -73,12 +73,12 @@ def fn_get_item_code_from_attributes(id_item):
             )
         else:
             # Use the attribute's own attribute_value if not found in item_code_format
-            ld_item_code = (
-                ld_item_code
+            l_item_code = (
+                l_item_code
                 + "/"
                 + fn_remove_trailing_zeros(str(ld_attribute.attribute_value))
             )
-    return ld_item_code
+    return l_item_code
 
 
 # Define the parameter mapping definitions
@@ -267,10 +267,6 @@ ld_item_new.design = ld_design.name
 # initialize an empty array
 la_item_code_format = []
 
-# Initialize a flag to check if either 'lwa' or 'lpa' has been set
-lwa_set = False
-lpa_set = False
-
 # Append attributes while avoiding duplicates
 la_existing_attributes = set()
 
@@ -285,20 +281,18 @@ for ld_attribute in la_template_attributes:
     )
 
     # Retrieve the 'numeric_values' attribute from the database
-    ld_doc_attr = frappe.db.get_value(
+    l_doc_attr = frappe.db.get_value(
         "Item Attribute", ld_attribute.attribute, ["numeric_values"]
     )
 
-    # Initialize ld_docvalue to 0
-    ld_docvalue = 0
-
-    ld_docAbb = 0
+    # Initialize l_docvalue to 0
+    l_docvalue = 0
 
     # Get the value from the design document
     ld_docvalue_temp = ld_design.get(ld_designdoc_field)
 
     # If the attribute has numeric values
-    if ld_doc_attr:
+    if l_doc_attr:
         # If the corresponding document field has a value captured
         if ld_docvalue_temp:
             # If the document field is not of type float or int
@@ -312,7 +306,7 @@ for ld_attribute in la_template_attributes:
             # make the type as int to trim the .00s
             if ld_docvalue_temp % 1 == 0:
                 ld_docvalue_temp = int(ld_docvalue_temp)
-            ld_docvalue = ld_docvalue_temp
+            l_docvalue = ld_docvalue_temp
     else:
         # get the abbreviation for the attribute value
         ld_doc_abbr = frappe.db.get_value(
@@ -324,7 +318,7 @@ for ld_attribute in la_template_attributes:
             la_item_code_format.append(
                 {"attribute": ld_attribute.attribute, "attribute_value": ld_doc_abbr}
             )
-        ld_docvalue = ld_docvalue_temp
+        l_docvalue = ld_docvalue_temp
 
     # Conditionally append attributes
     if ld_attribute.attribute == "Electrostatic screen":
@@ -477,7 +471,7 @@ for ld_attribute in la_template_attributes:
         ld_item_new.append(
             "attributes",
             fn_get_attribute(
-                ld_design.transformer_type, ld_attribute.attribute, ld_docvalue
+                ld_design.transformer_type, ld_attribute.attribute, l_docvalue
             ),
         )
 
