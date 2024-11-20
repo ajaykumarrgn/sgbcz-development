@@ -1,35 +1,34 @@
 //Change Reference
 //Both HV1 and HV2. 1 and 2 as Subscript (Issue: ISS-2024-00017)
 frappe.ui.form.on("Item", {
-  refresh(frm) {},
   validate(frm) {
     let lItemTechnicalName;
     // Function to format the HV text based on attribute values
-    function fnGetHv(iDoc) {
+    function fnGetHv(idDoc) {
       var lHvText = "";
       // Find the index of the attribute "HV (kV)"
-      let lIndex = iDoc.attributes.findIndex(
-        (element) => element.attribute == "HV (kV)"
+      let lIndex = idDoc.attributes.findIndex(
+        (ld_element) => ld_element.attribute == "HV (kV)"
       );
       // If "HV (kV)" is not available, try "HV 1 (kV)" and "HV 2 (kV)"
-      if (!iDoc.attributes[lIndex].attribute_value) {
+      if (!idDoc.attributes[lIndex].attribute_value) {
         // Find the index of the attribute "HV 1 (kV)"
-        lIndex = iDoc.attributes.findIndex(
-          (element) => element.attribute == "HV 1 (kV)"
+        lIndex = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "HV 1 (kV)"
         );
 
         //>>ISS-2024-00017
         //Replace the HV1 as HV₁
         lHvText =
           "HV₁ " +
-          iDoc.attributes[lIndex].attribute_value
+          idDoc.attributes[lIndex].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [kV]";
 
         // Find the index of the attribute "HV 2 (kV)"
-        lIndex = iDoc.attributes.findIndex(
-          (element) => element.attribute == "HV 2 (kV)"
+        lIndex = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "HV 2 (kV)"
         );
 
         //Replace the HV2 as HV₂
@@ -37,7 +36,7 @@ frappe.ui.form.on("Item", {
           lHvText +
           ", " +
           "HV₂ " +
-          iDoc.attributes[lIndex].attribute_value
+          idDoc.attributes[lIndex].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [kV]";
@@ -46,7 +45,7 @@ frappe.ui.form.on("Item", {
         // If "HV (kV)" is available, use it
         lHvText =
           "HV " +
-          iDoc.attributes[lIndex].attribute_value
+          idDoc.attributes[lIndex].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [kV]";
@@ -55,94 +54,94 @@ frappe.ui.form.on("Item", {
     }
     //>> TASK-2024-0582
     // Funtion to get LV if available or get the LV 1 and LV 2
-    function fnGeLVwithUk(iDoc) {
+    function fnGeLVwithUk(idDoc) {
       var lLVtext = "";
       // Find index of attribute "LV (V)"
-      let lIndexvalue = iDoc.attributes.findIndex(
-        (element) => element.attribute == "LV (V)"
+      let lIndexvalue = idDoc.attributes.findIndex(
+        (ld_element) => ld_element.attribute == "LV (V)"
       );
       // If "LV (V)" is not available, try "LV 1 (V)" and "LV 2 (V)"
-      if (!iDoc.attributes[lIndexvalue].attribute_value) {
+      if (!idDoc.attributes[lIndexvalue].attribute_value) {
         // Find index of attribute "Power LV 1 (KV)"
-        lIndexvalue = iDoc.attributes.findIndex(
-          (element) => element.attribute == "Power LV 1 (KV)"
+        lIndexvalue = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "Power LV 1 (KV)"
         );
         lLVtext =
           " Power LV₁ " +
-          iDoc.attributes[lIndexvalue].attribute_value
+          idDoc.attributes[lIndexvalue].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [kV]";
         // Find index of attribute "LV 1 (V)"
-        lIndexvalue = iDoc.attributes.findIndex(
-          (element) => element.attribute == "LV 1 (V)"
+        lIndexvalue = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "LV 1 (V)"
         );
         lLVtext +=
           ", " +
           "LV₁ " +
-          iDoc.attributes[lIndexvalue].attribute_value
+          idDoc.attributes[lIndexvalue].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [V]";
         // Find index of attribute "Uk LV 1 (%)"
-        lIndexvalue = iDoc.attributes.findIndex(
-          (element) => element.attribute == "Uk LV 1 (%)"
+        lIndexvalue = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "Uk LV 1 (%)"
         );
         lLVtext +=
           ", " +
           "Uk LV₁ " +
-          iDoc.attributes[lIndexvalue].attribute_value
+          idDoc.attributes[lIndexvalue].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [%]";
         // Find index of attribute "Power LV 2 (KV)"
-        lIndexvalue = iDoc.attributes.findIndex(
-          (element) => element.attribute == "Power LV 2 (KV)"
+        lIndexvalue = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "Power LV 2 (KV)"
         );
         lLVtext +=
           ", " +
           "Power LV₂ " +
-          iDoc.attributes[lIndexvalue].attribute_value
+          idDoc.attributes[lIndexvalue].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [kV]";
         // Find index of attribute "LV 2 (V)"
-        lIndexvalue = iDoc.attributes.findIndex(
-          (element) => element.attribute == "LV 2 (V)"
+        lIndexvalue = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "LV 2 (V)"
         );
         lLVtext +=
           ", " +
           "LV₂ " +
-          iDoc.attributes[lIndexvalue].attribute_value
+          idDoc.attributes[lIndexvalue].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [V]";
         // Find index of attribute "Uk LV 2 (%)"
-        lIndexvalue = iDoc.attributes.findIndex(
-          (element) => element.attribute == "Uk LV 2 (%)"
+        lIndexvalue = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "Uk LV 2 (%)"
         );
         lLVtext +=
           ", " +
           "Uk LV₂ " +
-          iDoc.attributes[lIndexvalue].attribute_value
+          idDoc.attributes[lIndexvalue].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [%]";
       } else {
         lLVtext =
           " LV " +
-          iDoc.attributes[lIndexvalue].attribute_value
+          idDoc.attributes[lIndexvalue].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [V]";
         // Find index of attribute "Uk (%)"
-        lIndexvalue = iDoc.attributes.findIndex(
-          (element) => element.attribute == "Uk (%)"
+        lIndexvalue = idDoc.attributes.findIndex(
+          (ld_element) => ld_element.attribute == "Uk (%)"
         );
         lLVtext +=
           ", " +
           "Uk " +
-          iDoc.attributes[lIndexvalue].attribute_value
+          idDoc.attributes[lIndexvalue].attribute_value
             .toString()
             .replace(/\./g, ",") +
           " [%]";
@@ -156,7 +155,7 @@ frappe.ui.form.on("Item", {
       if (frm.doc.variant_of && frm.doc.variant_of.startsWith("DTTHZ2N")) {
         // Find the index of the attribute "Power (kVA)"
         let lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "Power (kVA)"
+          (ld_element) => ld_element.attribute == "Power (kVA)"
         );
         // Check if "Power (kVA)" attribute is present
         if (lIndex >= 0) {
@@ -174,7 +173,7 @@ frappe.ui.form.on("Item", {
 
         // Find index of attribute "LV (V)"
         lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "LV (V)"
+          (ld_element) => ld_element.attribute == "LV (V)"
         );
         // Check if "LV (V)" attribute is present
         if (lIndex >= 0) {
@@ -189,7 +188,7 @@ frappe.ui.form.on("Item", {
 
         // Find index of attribute "Uk (%)"
         lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "Uk (%)"
+          (ld_element) => ld_element.attribute == "Uk (%)"
         );
         // Check if "Uk (%)" attribute is present
         if (lIndex >= 0) {
@@ -204,7 +203,7 @@ frappe.ui.form.on("Item", {
 
         // Find index of attribute "P0 (W)"
         lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "P0 (W)"
+          (ld_element) => ld_element.attribute == "P0 (W)"
         );
         // Check if "P0 (W)" attribute is present
         if (lIndex >= 0) {
@@ -219,7 +218,7 @@ frappe.ui.form.on("Item", {
 
         // Find index of attribute "Pk (W)"
         lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "Pk (W)"
+          (ld_element) => ld_element.attribute == "Pk (W)"
         );
         // Check if "Pk (W)" attribute is present
         if (lIndex >= 0) {
@@ -257,7 +256,7 @@ frappe.ui.form.on("Item", {
       if (laTemplate.includes(frm.doc.variant_of)) {
         // Find the index of the attribute "Power (kVA)"
         let lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "Power (kVA)"
+          (ld_element) => ld_element.attribute == "Power (kVA)"
         );
         // Check if "Power (kVA)" attribute is present
         if (lIndex >= 0) {
@@ -281,7 +280,7 @@ frappe.ui.form.on("Item", {
 
         // Find index of attribute "P0 (W)"
         lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "P0 (W)"
+          (ld_element) => ld_element.attribute == "P0 (W)"
         );
         // Check if "P0 (W)" attribute is present
         if (lIndex >= 0) {
@@ -296,7 +295,7 @@ frappe.ui.form.on("Item", {
 
         // Find index of attribute "Pk (W)"
         lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "Pk (W)"
+          (ld_element) => ld_element.attribute == "Pk (W)"
         );
         // Check if "Pk (W)" attribute is present
         if (lIndex >= 0) {
@@ -311,7 +310,7 @@ frappe.ui.form.on("Item", {
 
         // Find index of attribute "Winding Material"
         lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "Winding Material"
+          (ld_element) => ld_element.attribute == "Winding Material"
         );
         // Check if "Winding Material" attribute is present
         if (lIndex >= 0) {
@@ -324,7 +323,7 @@ frappe.ui.form.on("Item", {
 
         // Find index of attribute "Cooling"
         lIndex = frm.doc.attributes.findIndex(
-          (element) => element.attribute == "Cooling"
+          (ld_element) => ld_element.attribute == "Cooling"
         );
         // Check if "Cooling" attribute is present
         if (lIndex >= 0) {

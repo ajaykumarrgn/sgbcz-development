@@ -10,7 +10,7 @@ cur_frm.cscript.custom_validate = function (doc) {
 
     // Find the index of the attribute in the attributes array
     let lIndex = iDoc.attributes.findIndex(
-      (element) => element.attribute == iAttribute
+      (ld_element) => ld_element.attribute == iAttribute
     );
 
     // Handle specific attributes
@@ -54,7 +54,7 @@ cur_frm.cscript.custom_validate = function (doc) {
         doc.item_name = doc.variant_of;
         // Find the index of the "Power (kVA)" attribute in the attributes array
         let lIndex = doc.attributes.findIndex(
-          (element) => element.attribute == "Power (kVA)"
+          (ld_element) => ld_element.attribute == "Power (kVA)"
         );
         // Check if the "Power (kVA)" attribute exists and has a value
         if (lIndex >= 0) {
@@ -102,7 +102,7 @@ cur_frm.cscript.custom_validate = function (doc) {
         doc.item_name = doc.variant_of;
         // Find the index of the "Power (kVA)" attribute in the attributes array
         let lIndexvalue = doc.attributes.findIndex(
-          (element) => element.attribute == "Power (kVA)"
+          (ld_element) => ld_element.attribute == "Power (kVA)"
         );
         // Check if the "Power (kVA)" attribute exists and has a value
         if (lIndexvalue >= 0) {

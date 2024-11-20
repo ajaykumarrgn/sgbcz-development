@@ -28,10 +28,10 @@ frappe.ui.form.on("Item", {
           // Commented this line due to incorrect attribute name for rating
           // Previously, "IP Rating" was the rating attribute, 
           // but it has now been changed to "Power (kVA)"
-          //lIndex = frm.doc.attributes.findIndex(element => element.attribute=="IP Rating"); //<<ISS-2024-00004
+          //lIndex = frm.doc.attributes.findIndex(ld_element => ld_element.attribute=="IP Rating"); //<<ISS-2024-00004
   
           lIndex = frm.doc.attributes.findIndex(
-            (element) => element.attribute == "Power (kVA)"
+            (ld_element) => ld_element.attribute == "Power (kVA)"
           ); //<<ISS-2024-00004
           if (lIndex >= 0) {
             lItemDescription +=
@@ -45,9 +45,9 @@ frappe.ui.form.on("Item", {
           // Find the index of 'Enclosure' attribute in the attributes array
           //Previously, "eNCLOSURE" was the attribute,
           // but it has now been changed to "Enclosure IP Rating"
-          //lIndex = frm.doc.attributes.findIndex(element => element.attribute=="Enclosure"); <<ISS-2024-00004
+          //lIndex = frm.doc.attributes.findIndex(ld_element => ld_element.attribute=="Enclosure"); <<ISS-2024-00004
           lIndex = frm.doc.attributes.findIndex(
-            (element) => element.attribute == "Enclosure IP Rating"
+            (ld_element) => ld_element.attribute == "Enclosure IP Rating"
           );
           // Add IP rating to the Description if there is index
           if (lIndex >= 0) {
@@ -57,7 +57,7 @@ frappe.ui.form.on("Item", {
   
           // Find the index of 'Mounting Type' attribute in the attributes array
           lIndex = frm.doc.attributes.findIndex(
-            (element) => element.attribute == "Mounting Type"
+            (ld_element) => ld_element.attribute == "Mounting Type"
           );
           // Add mounting to the Description if there is index
           if (lIndex >= 0) {
@@ -68,7 +68,7 @@ frappe.ui.form.on("Item", {
           //Cooling method not include in the item descrtion 
           // for the Enclosure template
           // Find the index of 'Cooling Method' attribute in the attributes array
-          // lIndex = frm.doc.attributes.findIndex(element => element.attribute=="Cooling Method");
+          // lIndex = frm.doc.attributes.findIndex(ld_element => ld_element.attribute=="Cooling Method");
           // if(lIndex>=0){
   
           // lItemDescription   = lItemDescription + ','  + ' Cooling Method: ' + (frm.doc.attributes[lIndex].attribute_value).toString();
