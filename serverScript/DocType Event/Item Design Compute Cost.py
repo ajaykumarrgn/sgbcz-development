@@ -4,6 +4,7 @@
 ## it_dict_array is a dictionary array
 ## i_key the key to searched for
 ## i_value the value to searched for
+
 def fn_find_row_by_key_value(ia_dict_array, i_key, i_value):
     for id_row in ia_dict_array:
         if id_row.get(i_key) == i_value:
