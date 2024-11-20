@@ -1,6 +1,9 @@
-//In Earlier, we have the formation of the Design name as Rating/HV/LV/Impedance/Li Phase
-//Now ,sometimes HV1 and HV2 or LV1 and Lv2 are present, so that change the formation
-//as Rating/HV1/HV2/LV/Impedance/Li Phase or Rating/HV/LV1/LV2/Impedance/Li Phase.
+//In Earlier, we have the formation of the Design name 
+// as Rating/HV/LV/Impedance/Li Phase
+// Now ,sometimes HV1 and HV2 or LV1 and Lv2 are present, 
+// so that change the formation
+// as Rating/HV1/HV2/LV/Impedance/Li Phase 
+// or Rating/HV/LV1/LV2/Impedance/Li Phase.
 cur_frm.cscript.custom_validate = function (doc) {
   function fnGetCleanString(iFloat, isHV) {
     if (iFloat === null || iFloat === undefined) {
@@ -22,17 +25,26 @@ cur_frm.cscript.custom_validate = function (doc) {
       : "";
   }
 
-  // Determine the impedance or uk values based on factory and LV1 and LV2 fields
+  // Determine the impedance or uk values 
+  // based on factory and LV1 and LV2 fields
   function fnPutImpedanceOrUK() {
     if (doc.lv1 && doc.lv_2) {
       // If both LV1 and LV2 are present
-      if (doc.factory === 'RGB') {
-        return fnGetCleanString(doc.uk_lv1, false) + "/" + fnGetCleanString(doc.uk_lv2, false);
-      } else if (doc.factory === 'NEU') {
-        return fnGetCleanString(doc.ukhv_lv1, false) + "/" + fnGetCleanString(doc.ukhv_lv2, false);
+      if (doc.factory === "RGB") {
+        return (
+          fnGetCleanString(doc.uk_lv1, false) +
+          "/" +
+          fnGetCleanString(doc.uk_lv2, false)
+        );
+      } else if (doc.factory === "NEU") {
+        return (
+          fnGetCleanString(doc.ukhv_lv1, false) +
+          "/" +
+          fnGetCleanString(doc.ukhv_lv2, false)
+        );
       } else {
         // If factory is neither RGB nor NEU, return empty string
-        return ""; 
+        return "";
       }
     } else {
       // If LV1 and LV2 are not both present, return impedance
@@ -41,7 +53,7 @@ cur_frm.cscript.custom_validate = function (doc) {
   }
 
   // Generate document title based on field values
-  var docTitle =
+  var lDocTitle =
     doc.transformer_type +
     " " +
     doc.rating +
@@ -55,5 +67,5 @@ cur_frm.cscript.custom_validate = function (doc) {
     doc.li_phase_hv;
 
   // Set the document title
-  doc.title = docTitle;
+  doc.title = lDocTitle;
 };
