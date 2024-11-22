@@ -1,0 +1,19 @@
+{
+  "name": "Item-main-default_print_format",
+  "docstatus": 0,
+  "idx": 0,
+  "is_system_generated": 1,
+  "doctype_or_field": "DocType",
+  "doc_type": "Item",
+  "field_name": null,
+  "row_name": null,
+  "module": null,
+  "property": "default_print_format",
+  "property_type": "Data",
+  "value": "SGBCZ Technical Data Sheet",
+  "default_value": null,
+  "_user_tags": null,
+  "_comments": null,
+  "_assign": null,
+  "_liked_by": null
+}
