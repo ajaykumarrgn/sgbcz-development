@@ -1,0 +1,19 @@
+{
+  "name": "Design-main-default_print_format",
+  "docstatus": 0,
+  "idx": 0,
+  "is_system_generated": 1,
+  "doctype_or_field": "DocType",
+  "doc_type": "Design",
+  "field_name": null,
+  "row_name": null,
+  "module": null,
+  "property": "default_print_format",
+  "property_type": "Data",
+  "value": "Technical Data V5",
+  "default_value": null,
+  "_user_tags": null,
+  "_comments": null,
+  "_assign": null,
+  "_liked_by": null
+}
