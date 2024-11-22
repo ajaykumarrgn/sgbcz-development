@@ -24,7 +24,7 @@ const requestOptionsPOST = {
 
 const current_path = process.cwd();
 const customFieldFolder = path.join(current_path, '..', 'customField');
-const filesListPath = path.join(current_path, 'customFieldMigrate.txt'); // Path to the files list
+const filesListPath = path.join(current_path,'txt', 'customFieldMigrate.txt'); // Path to the files list
 
 // Fetch all custom fields from the API
 const url = getEndPointForDoctype('Custom Field');

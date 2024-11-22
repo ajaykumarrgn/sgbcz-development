@@ -16,7 +16,7 @@ const requestOptions = {
 };
 
 const current_path = process.cwd();
-const filesListPath = path.join(current_path, 'documentList.txt');
+const filesListPath = path.join(current_path, 'txt', 'documentList.txt');
 
 // Function to create the "customDoctype" folder if it doesn't exist
 function ensureCustomDoctypeFolderExists() {
@@ -33,7 +33,7 @@ ensureCustomDoctypeFolderExists();
 const baseUrl = getEndPointForDoctype();
 
 // Read filters from the configuration file
-const configContent = fs.readFileSync(path.join(current_path, 'documentList.txt'), 'utf8');
+const configContent = fs.readFileSync(path.join(current_path, 'txt', 'documentList.txt'), 'utf8');
 const filtersLine = configContent.split('\n').find(line => line.startsWith('filters ='));
 const filters = filtersLine ? filtersLine.match(/filters\s*=\s*(.*)/)?.[1]?.trim() || '' : ''; 
 
