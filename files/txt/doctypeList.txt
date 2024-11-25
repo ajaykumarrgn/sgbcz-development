@@ -2,5 +2,4 @@
 # Example:
 # Design
 
-Design
-Gitra Attributes
+
