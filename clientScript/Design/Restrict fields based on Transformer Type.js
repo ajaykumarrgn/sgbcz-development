@@ -311,6 +311,7 @@ function fnSetFormToReadOnly(frm){
     //but at some point it is not
     //working as expected so done the
     //same in onload event
+
     if(frm.doc.status != 'Draft' && !frm.is_new()) { //<<ISS-2024-00133
         setTimeout(function() {
         fnSetHTMLFieldsToReadOnly();

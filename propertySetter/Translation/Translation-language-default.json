@@ -1,0 +1,19 @@
+{
+  "name": "Translation-language-default",
+  "docstatus": 0,
+  "idx": 0,
+  "is_system_generated": 0,
+  "doctype_or_field": "DocField",
+  "doc_type": "Translation",
+  "field_name": "language",
+  "row_name": null,
+  "module": null,
+  "property": "default",
+  "property_type": "Text",
+  "value": "Deutsch",
+  "default_value": null,
+  "_user_tags": null,
+  "_comments": null,
+  "_assign": null,
+  "_liked_by": null
+}

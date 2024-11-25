@@ -189,38 +189,24 @@ jobs:
             echo "Does not allows the Deletion of Files to proceed, skipping."
             exit 0
           fi
-          
-  cypress_wait:
-    runs-on: ubuntu-latest
-    needs: quality
-    if: |
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-      !(
-        github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
-        github.event.before == 'refs/heads/main'
-      ) &&
-      !(
-        github.event_name == 'pull_request' &&
-        github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
-      )
 
-    steps:
-      - uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.TOKEN }}
-          approvers: Eswari-Manie
-          minimum-approvals: 1
-          issue-title: "Waiting for cypress test"
-          issue-body: "Please approve or deny for conducting the cypress test in Quality"
+      - name: Update Property Setter
+        run: |
+          if grep -q "update_property_setter" ci/migrate.txt; then
+            echo "Allows the Updation of Core Doc Fields to proceed"
+            npm i
+            npm run update_property_setter
+          else
+            echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
+            exit 0
+          fi
+          
 
   ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
   cypress_test:
     runs-on: ubuntu-latest
-    needs: cypress_wait
+    needs: quality
     if: |
       !contains(github.event.head_commit.message, '[skip ci]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
@@ -465,6 +451,17 @@ jobs:
             npm run delete_record
           else
             echo "Does not allows the Deletion of Files to proceed, skipping."
+            exit 0
+          fi
+
+      - name: Update Property Setter
+        run: |
+          if grep -q "update_property_setter" ci/migrate.txt; then
+            echo "Allows the Updation of Core Doc Fields to proceed"
+            npm i
+            npm run update_property_setter
+          else
+            echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
             exit 0
           fi
       
