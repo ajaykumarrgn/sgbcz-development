@@ -26,7 +26,8 @@ describe('qsgbcz Design ', () => {
       cy.get('.primary-action > .hidden-xs').click();
       cy.get(':nth-child(2) > .section-body > :nth-child(1) > form > .form-group.frappe-control > .checkbox > label > .input-area > .input-with-feedback')
         .click()
-        .wait(500);
+        .wait(1000);
+      cy.wait(2000);
       cy.get('.btn-modal-close').click();
       cy.wait(2000);
       
@@ -41,14 +42,16 @@ describe('qsgbcz Design ', () => {
         .type(testdata[3].value, '{enter}');
       
       cy.get(':nth-child(7) > .section-body > .form-column > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
-        .type(testdata[17].value, '{enter}');
+        .type(testdata[4].value, '{enter}');
       cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .primary-action').click().wait(1000)
       
-      cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .primary-action').click();     //Should be perform calculation status
+      //cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .primary-action').click();     //Should be perform calculation status
       cy.get('.custom-actions > .btn').click().wait(2000);
 // delete the design
       cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .menu-btn-group > .btn').click();
-      cy.get(':nth-child(9) > .grey-link').click();  
+      cy.wait(1000);
+      cy.get(':nth-child(9) > .grey-link').click();
+      cy.wait(1000);
       cy.get('.modal.show > .modal-dialog > .modal-content > .modal-footer > .standard-actions > .btn-primary').click();        
     });
   });
