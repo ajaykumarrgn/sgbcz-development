@@ -4,7 +4,7 @@
 # Throw error message if years are different in the from and to date filters(Issue : ISS-2024-00054)
 # Show only the Submitted documents in the weekly load report (Issue : ISS-2024-00120)
 
-def fn_get_columns(i_filters):
+def fn_get_columns(id_filters):
     # To Get the Calendar Week from a given Date
     def fn_get_calander_week(i_date):
         # Convert the Date String into a Date object in any format
@@ -12,7 +12,7 @@ def fn_get_columns(i_filters):
         # Return the Calendar Week as a String
         return str(l_date.isocalendar()[1])
 
-    # commented the section of code because it would execute before displaying the error message.>>ISS-2024-00054
+    # commented the section of code because it would execute before displaying the error message.>>ISS-2024-00054.
     #  def get_calander_year(i_date):
     #     date = frappe.utils.getdate(i_date)
     #     return (str(date.isocalendar()[0]))
@@ -34,15 +34,14 @@ def fn_get_columns(i_filters):
 
     la_columnswk = []
     # Get the Calendar Week based on the "from_date" and "to_date" filters.
-    l_from_week = fn_get_calander_week(i_filters["from_date"])
-    # frappe.msgprint('From Week' + str(from_week))
-    l_to_week = fn_get_calander_week(i_filters["to_date"])
-    # log(to_week)
-
+    l_from_week = fn_get_calander_week(id_filters["from_date"])
+    
+    l_to_week = fn_get_calander_week(id_filters["to_date"])
+    
     # Loop through calendar weeks between the "from_date" and "to_date".
-    for wk in range(int(l_from_week), int(l_to_week)):
+    for l_week in range(int(l_from_week), int(l_to_week)):
         ld_column = dict(
-            {"fieldname": str(wk), "label": _(str(wk)), "fieldtype": "Int", "width": 50}
+            {"fieldname": str(l_week), "label": (str(l_week)), "fieldtype": "Int", "width": 50}
         )
         la_columnswk.append(ld_column)
     la_columns.extend(la_columnswk)
@@ -56,7 +55,7 @@ def fn_get_columns(i_filters):
 #
 # Main function to process the data for the final report
 #
-def fn_get_final_data(i_filters):
+def fn_get_final_data(id_filters):
 
     #  Begin of sub functions
     # >>ISS-2024-00054
@@ -66,12 +65,12 @@ def fn_get_final_data(i_filters):
         # Returns the week number of the year by using the ISO calendar and especially returns the [0] only for the year
         return str(l_date.isocalendar()[0])
 
-    l_from_date = i_filters["from_date"]
-    l_to_date = i_filters["to_date"]
+    l_from_date = id_filters["from_date"]
+    l_to_date = id_filters["to_date"]
     # Check if the calendar years of 'from_date' and 'to_date' are different
     if int(fn_get_calander_year(l_from_date)) != int(fn_get_calander_year(l_to_date)):
         # If the years are different, raise an exception with a message
-        frappe.throw("Please use the Same Year in the Date Range")
+        frappe.throw(_("Please use the Same Year in the Date Range"))
     # <<ISS-2024-00054
 
     #   Get unique list in a given array for the specified key
@@ -98,7 +97,7 @@ def fn_get_final_data(i_filters):
     #   Get All schedule lines with planned production end date between the filter date
     #   Field 'parent' is Delivery Note corresponding to a schedule line
     #   Ignore cancelled documents(docstatus != 2)
-    def fn_get_schedule_lines(i_filters):
+    def fn_get_schedule_lines(id_filters):
         # frappe.get_all isn't working with between filter for this case hence using frappe.db.sql
         ld_schedule_lines = frappe.db.sql(
             """select pos, planned_production_end_date, parent
@@ -109,7 +108,7 @@ def fn_get_final_data(i_filters):
                             and status IN ('Purchasing', 'Purchasing/Stock')
                             """,
             # << ISS-2024-00033
-            {"to_date": i_filters.to_date, "from_date": i_filters.from_date},
+            {"to_date": id_filters.to_date, "from_date": id_filters.from_date},
             as_dict=1,
         )
         return ld_schedule_lines
@@ -179,84 +178,84 @@ def fn_get_final_data(i_filters):
     # Add Paralle information to the rating for tranformers with attribute Parallel coil
     def fn_add_parallel_to_rating(ia_transformers_rating, ia_unique_parallel):
 
-        for item in (
-            item
-            for item in ia_transformers_rating
-            if (item["parent"] in ia_unique_parallel)
+        for ld_item in (
+            ld_item
+            for ld_item in ia_transformers_rating
+            if (ld_item["parent"] in ia_unique_parallel)
         ):
-            item["attribute_value"] = item["attribute_value"] + "P"
+            ld_item["attribute_value"] = ld_item["attribute_value"] + "P"
         return ia_transformers_rating
 
     # Add planned overall weekly capacity as a row to the output table
     def fn_get_weekly_planned_capacity_row(
-        i_planned_capacity, i_planning_row, i_parallel_row
+        id_planned_capacity, id_planning_row, id_parallel_row
     ):
-        i_planning_row["power"] = "Weekly Capacity"
-        # i_planning_row[week] for week in i_planned_capacity
-        for i_weekly_capacity in i_planned_capacity["planned_capacity_item"]:
+        id_planning_row["power"] = "Weekly Capacity"
+        # id_planning_row[week] for week in id_planned_capacity
+        for ld_weekly_capacity in id_planned_capacity["planned_capacity_item"]:
 
             # Get the week number from the planned weekly capacity in string format
-            l_week_number = str(i_weekly_capacity["week"])
+            l_week_number = str(ld_weekly_capacity["week"])
 
             # Initialize the number of transformers to be reduced
             # transformers_to_be_reduced  = 0
 
             ## For every 3 parallel coils per week reduce the planned capacity by 1
-            # transformers_to_be_reduced = (int(i_parallel_row[l_week_number])-1) // int(i_planned_capacity.parallel_weekly_capacity)
+            # transformers_to_be_reduced = (int(id_parallel_row[l_week_number])-1) // int(id_planned_capacity.parallel_weekly_capacity)
 
             # Get the planned weekly capacity and reduce it by the parallel factor from above step
-            # i_planning_row[week_number] = int(i_weekly_capacity['qty']) - transformers_to_be_reduced
+            # id_planning_row[week_number] = int(ld_weekly_capacity['qty']) - transformers_to_be_reduced
 
-            transformers_to_be_reduced = 0
+            l_transformers_to_be_reduced = 0
 
             # Check if parallel coils are present and greater than 0
-            if i_parallel_row.get(l_week_number, 0) > 0:
+            if id_parallel_row.get(l_week_number, 0) > 0:
                 # Calculate the number of transformers to be reduced for every 3 parallel coils per week
-                transformers_to_be_reduced = (
-                    int(i_parallel_row[l_week_number]) - 1
-                ) // int(i_planned_capacity.parallel_weekly_capacity)
+                l_transformers_to_be_reduced = (
+                    int(id_parallel_row[l_week_number]) - 1
+                ) // int(id_planned_capacity.parallel_weekly_capacity)
 
                 # Get the planned weekly capacity and reduce it by the parallel factor from above step
-            i_planning_row[l_week_number] = max(
-                0, int(i_weekly_capacity["qty"]) - transformers_to_be_reduced
+            id_planning_row[l_week_number] = max(
+                0, int(ld_weekly_capacity["qty"]) - l_transformers_to_be_reduced
             )
 
-        i_planning_row["i_weekly_capacity"] = 29
-        return i_planning_row
+        id_planning_row["ld_weekly_capacity"] = 29
+        return id_planning_row
 
     # Calculate sum of parallel coils per week
-    def fn_get_sum_of_parallel(i_planning_row, i_plwk, i_parallel_row):
-        if "P" in i_planning_row["power"]:
-            i_parallel_row[i_plwk] = i_parallel_row[i_plwk] + 1
+    def fn_get_sum_of_parallel(id_planning_row, i_plwk, id_parallel_row):
+        if "P" in id_planning_row["power"]:
+            id_parallel_row[i_plwk] = id_parallel_row[i_plwk] + 1
 
-        return i_parallel_row
+        return id_parallel_row
 
     # Calculate sum of individual ratings per week
-    def fn_get_total(i_planning_row, i_plwk, i_total_row):
-        i_total_row[i_plwk] = i_total_row[i_plwk] + 1
-        return i_total_row
+    def fn_get_total(id_planning_row, i_plwk, id_total_row):
+        id_total_row[i_plwk] = id_total_row[i_plwk] + 1
+        return id_total_row
 
     def fn_get_final_data_records(
-        i_filters,
+        id_filters,
         ia_unique_rating,
         ia_transformers_rating,
-        i_delivery_note_items,
-        i_schedule_lines,
+        ia_delivery_note_items,
+        ia_schedule_lines,
         id_planned_capacity,
     ):
         # Define a custom key function to extract numeric portion from a string
-        def fn_custom_sort_key(s):
+        def fn_custom_sort_key(i_string):
             # Remove non-numeric characters from the end of the string
-            s = "".join(c for c in s if c.isdigit() or c == "-")
+            i_string = "".join(c for c in i_string if c.isdigit() or c == "-")
 
             # Convert the string to an integer, treating '-' as a negative sign
-            return int(s) if s.isdigit() else -int(s[1:]) if s[1:].isdigit() else 0
+            return int(i_string) if i_string.isdigit() else -int(i_string[1:]) if i_string[1:].isdigit() else 0
 
         # Initialize an empty output array
         la_e_final_data = []
         # Get the dict for output table.
         ld_planning_row_dict = fn_get_planning_row_dict(
-            i_filters.from_date, i_filters.to_date
+            id_filters.from_date, id_filters.to_date
         )
 
         # Create dict for parallel row
@@ -277,24 +276,24 @@ def fn_get_final_data(i_filters):
             ld_planning_row = dict(ld_planning_row_dict)
             # assign the rating for planning row
             ld_planning_row["power"] = i_rating
-            for la_item in (
-                la_item
-                for la_item in ia_transformers_rating
-                if la_item["attribute_value"] == i_rating
+            for ld_item in (
+                ld_item
+                for ld_item in ia_transformers_rating
+                if ld_item["attribute_value"] == i_rating
             ):
                 for i_delivery_item in (
                     i_delivery_item
-                    for i_delivery_item in i_delivery_note_items
-                    if i_delivery_item["item_code"] == la_item["parent"]
+                    for i_delivery_item in ia_delivery_note_items
+                    if i_delivery_item["item_code"] == ld_item["parent"]
                 ):
-                    for i_schedule_line in i_schedule_lines:
+                    for ld_schedule_line in ia_schedule_lines:
                         if (
-                            i_schedule_line["parent"] == i_delivery_item["parent"]
-                        ) and i_schedule_line["pos"] == i_delivery_item["pos"]:
+                            ld_schedule_line["parent"] == i_delivery_item["parent"]
+                        ) and ld_schedule_line["pos"] == i_delivery_item["pos"]:
                             l_pl_wk = fn_get_calander_week(
-                                i_schedule_line["planned_production_end_date"]
+                                ld_schedule_line["planned_production_end_date"]
                             )
-                            # frappe.msgprint("planning week" + schedule_line['parent'] + str(l_pl_wk))
+                           
                             ld_planning_row[l_pl_wk] = ld_planning_row[l_pl_wk] + 1
 
                             ld_parallel_row = fn_get_sum_of_parallel(
@@ -334,9 +333,9 @@ def fn_get_final_data(i_filters):
         return la_e_final_data
 
     # Get Planned Capacity
-    def fn_get_planned_capacity(i_filters):
+    def fn_get_planned_capacity(id_filters):
         l_calander_year = frappe.utils.formatdate(
-            i_filters.from_date, format_string="YYYY"
+            id_filters.from_date, format_string="YYYY"
         )
         ld_et_planned_capacity = frappe.get_doc(
             "Planned Capacity", l_calander_year
@@ -347,7 +346,7 @@ def fn_get_final_data(i_filters):
     #   End of sub functions
 
     la_final_data = []
-    la_schedule_lines = fn_get_schedule_lines(i_filters)
+    la_schedule_lines = fn_get_schedule_lines(id_filters)
 
     # Get unique delivery notes for the schedule lines selected
     la_delivery_notes = fn_get_unique(la_schedule_lines, "parent")
@@ -382,11 +381,11 @@ def fn_get_final_data(i_filters):
     la_unique_rating = fn_get_unique(la_transformers_rating, "attribute_value")
 
     # Get Planned Capacity for the fiscal year
-    la_planned_capacity = fn_get_planned_capacity(i_filters)
+    la_planned_capacity = fn_get_planned_capacity(id_filters)
 
     # Final output
     la_final_data = fn_get_final_data_records(
-        i_filters,
+        id_filters,
         la_unique_rating,
         la_transformers_rating,
         la_delivery_note_items,
@@ -400,7 +399,7 @@ def fn_get_final_data(i_filters):
 # Getting data for the chart
 
 
-def fn_get_chart_data(i_planning_data, i_filters):
+def fn_get_chart_data(i_planning_data, id_filters):
     def fn_get_calander_week(i_date):
         l_date = frappe.utils.getdate(i_date)
         return str(l_date.isocalendar()[1])
@@ -415,21 +414,21 @@ def fn_get_chart_data(i_planning_data, i_filters):
         )
 
     # >>ISS-2024-00035
-    l_from_week = fn_get_calander_week(i_filters.from_date)
-    l_to_week = fn_get_calander_week(i_filters.to_date)
+    l_from_week = fn_get_calander_week(id_filters.from_date)
+    l_to_week = fn_get_calander_week(id_filters.to_date)
     la_datasets = []
     la_labels = []
 
     # commented for the issue of not displaying correct planned data (# ISS-2024-00035)
     # planned_dataset = {}
     # planned_dataset['name'] = "Planned"
-    # planned_dataset['values'] = list([d['qty'] for d in fn_get_planned_capacity(i_filters.from_date)])
+    # planned_dataset['values'] = list([d['qty'] for d in fn_get_planned_capacity(id_filters.from_date)])
     # planned_dataset['chartType'] = 'line'
     # planned_dataset['type'] = 'line'
     # planned_data = []
 
-    for l_wk in range(int(l_from_week), int(l_to_week)):
-        la_labels.append(str(l_wk))
+    for l_week in range(int(l_from_week), int(l_to_week)):
+        la_labels.append(str(l_week))
 
     for index, data in enumerate(i_planning_data):
         # Ignore Row Weekly Capacity and Parallel for stacked bar chart. It is already used in line chart
@@ -441,13 +440,13 @@ def fn_get_chart_data(i_planning_data, i_filters):
 
             # get the data of the Row weekly capacity and display in line chart
             if data["power"] == "Weekly Capacity":
-                if i_filters.weekly_capacity == 1:
+                if id_filters.weekly_capacity == 1:
                     ld_dataset["name"] = data["power"]
                     ld_dataset["chartType"] = "line"
                     # <<ISS-2024-00035
 
-                    for l_wk in range(int(l_from_week), int(l_to_week)):
-                        values.append(data.get(str(l_wk)))
+                    for l_week in range(int(l_from_week), int(l_to_week)):
+                        values.append(data.get(str(l_week)))
                     # >> ISS-2024-00007
 
                     ld_dataset["values"] = la_values
@@ -459,8 +458,8 @@ def fn_get_chart_data(i_planning_data, i_filters):
                 ld_dataset["name"] = data["power"]
                 ld_dataset["chartType"] = "bar"
 
-                for l_wk in range(int(l_from_week), int(l_to_week)):
-                    la_values.append(data.get(str(l_wk)))
+                for l_week in range(int(l_from_week), int(l_to_week)):
+                    la_values.append(data.get(str(l_week)))
 
                 ld_dataset["values"] = la_values
 
