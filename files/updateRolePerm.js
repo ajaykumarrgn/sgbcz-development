@@ -29,7 +29,7 @@ const requestOptionsPOST = {
 const url = getEndPointForDoctype('Perm');
 const currentPath = process.cwd();
 const customRoleFolder = path.join(currentPath, '..', 'customRole');
-const filesListPath = path.join(currentPath, 'customRole.txt');
+const filesListPath = path.join(currentPath,'txt', 'customRole.txt');
 
 async function syncPermissions(rolesData) {
   for (const roleData of rolesData) {

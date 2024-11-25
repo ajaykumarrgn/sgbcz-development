@@ -39,7 +39,8 @@ frappe.ui.form.on('Design', {
         });
     },
     
-    //get values from item attribute through api "get_attribute_value_from_item_attribute"
+    //get values from item attribute through 
+    //api "get_attribute_value_from_item_attribute"
     //argument as Attribute Name
     fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
         frappe.call({
@@ -62,7 +63,7 @@ frappe.ui.form.on('Design', {
 
     },
     
-fnSetOptionsAndDefault(frm, iReset = false) {
+    fnSetOptionsAndDefault(frm, iReset = false) {
         //Attribute mapping
         const LA_ATTRIBUTES = [
             ['Bushings HV', 'bushing_hv'],
@@ -104,7 +105,8 @@ fnSetOptionsAndDefault(frm, iReset = false) {
     transformer_type(frm) {
         frm.events.fnSetOptionsAndDefault(frm);
     },
-    //Clear the exist status filters when enter into the new design form >>(ISS-2024-00133)
+    //Clear the exist status filters when enter into 
+    //the new design form >>(ISS-2024-00133)
     //Reseting the framework functionality of carring 
     //the filter value to the full form on creating new document
     refresh(frm) {
