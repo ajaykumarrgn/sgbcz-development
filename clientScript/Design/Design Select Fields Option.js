@@ -1,6 +1,7 @@
 // Change Reference
 //Create the new design without follow the exist filters:>>(ISS-2024-00133)
 //Design form saved the twice:>>(ISS-2024-00133)
+
 frappe.ui.form.on('Design', {
     fngetAttributeOptionAndDefault(frm, iAttributeLabel, 
             iAttributeName, iTransformerType, iIsDesign, iReset = false) {
@@ -38,7 +39,8 @@ frappe.ui.form.on('Design', {
         });
     },
     
-    //get values from item attribute through api "get_attribute_value_from_item_attribute"
+    //get values from item attribute through 
+    //api "get_attribute_value_from_item_attribute"
     //argument as Attribute Name
     fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
         frappe.call({
@@ -61,7 +63,7 @@ frappe.ui.form.on('Design', {
 
     },
     
-fnSetOptionsAndDefault(frm, iReset = false) {
+    fnSetOptionsAndDefault(frm, iReset = false) {
         //Attribute mapping
         const LA_ATTRIBUTES = [
             ['Bushings HV', 'bushing_hv'],
@@ -86,12 +88,10 @@ fnSetOptionsAndDefault(frm, iReset = false) {
         });
     },
 
-    refresh(frm) {
-        //Issue: Form saved twice in the draft status 
-        //Only refresh the form when form is new (>>ISS-2024-00133)
-        if (frm.is_new()) {
-            frm.events.fnSetOptionsAndDefault(frm);
-        }
+    //refresh(frm) { //Commented this line for the issue (<<ISS-2024-00133)
+    onload(frm) {
+        //Issue: Form saved twice in the draft status (>>ISS-2024-00133)
+        frm.events.fnSetOptionsAndDefault(frm);
     },
 
     is_design(frm) {
@@ -104,18 +104,15 @@ fnSetOptionsAndDefault(frm, iReset = false) {
 
     transformer_type(frm) {
         frm.events.fnSetOptionsAndDefault(frm);
-    }
-
-});
-
-//Clear the exist status filters when enter into the new design form >>(ISS-2024-00133)
-frappe.ui.form.on('Design', {
+    },
+    //Clear the exist status filters when enter into 
+    //the new design form >>(ISS-2024-00133)
     //Reseting the framework functionality of carring 
     //the filter value to the full form on creating new document
-	refresh(frm) {
+    refresh(frm) {
 	    if(frm.is_new() && frm.is_dirty()){
 	        frm.set_value('status', 'Draft');
 	    }
 	}
+
 });
-//<<(ISS-2024-00133)

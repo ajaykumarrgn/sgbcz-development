@@ -4,8 +4,8 @@ frappe.ui.form.on('Design', {
     onload(frm){
         fnSetFormToReadOnly(frm); //<<ISS-2024-00133
     },
-// When factory is changed, fields also changed for that dependent request.
 
+// When factory is changed, fields also changed for that dependent request.
 //onchange of factory select field event
 factory: function(frm) {
     
@@ -311,7 +311,8 @@ function fnSetFormToReadOnly(frm){
     //but at some point it is not
     //working as expected so done the
     //same in onload event
-    if(frm.doc.status != 'Draft' && !frm.is_new()){ //<<ISS-2024-00133
+
+    if(frm.doc.status != 'Draft' && !frm.is_new()) { //<<ISS-2024-00133
         setTimeout(function() {
         fnSetHTMLFieldsToReadOnly();
     }, 500);
