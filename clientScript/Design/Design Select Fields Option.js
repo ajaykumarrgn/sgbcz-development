@@ -105,6 +105,7 @@ frappe.ui.form.on('Design', {
     transformer_type(frm) {
         frm.events.fnSetOptionsAndDefault(frm);
     },
+    
     //Clear the exist status filters when enter into 
     //the new design form >>(ISS-2024-00133)
     //Reseting the framework functionality of carring 
