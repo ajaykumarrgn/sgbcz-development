@@ -1,6 +1,6 @@
 // Change Reference
-// Create the new design without follow the exist filters:>>(ISS-2024-00133)
-// Design form saved the twice:>>(ISS-2024-00133)
+// Create the new design without following the exist filters:>>(ISS-2024-00133)
+// Design form saved twice:>>(ISS-2024-00133)
 
 frappe.ui.form.on('Design', {
     fngetAttributeOptionAndDefault(frm, iAttributeLabel, 
