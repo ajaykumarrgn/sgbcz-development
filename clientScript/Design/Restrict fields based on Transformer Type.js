@@ -307,11 +307,8 @@ function fnUpdateFieldBasedOnIsDesign(frm){
 }
 
 function fnSetFormToReadOnly(frm){
-    //readonly was given at refresh
-    //but at some point it is not
-    //working as expected so done the
-    //same in onload event
-
+    //Make the form read-only, except 
+    //when the form is not in draft status and is not new.
     if(frm.doc.status != 'Draft' && !frm.is_new()) { //<<ISS-2024-00133
         setTimeout(function() {
         fnSetHTMLFieldsToReadOnly();

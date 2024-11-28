@@ -1,6 +1,6 @@
 // Change Reference
-//Create the new design without follow the exist filters:>>(ISS-2024-00133)
-//Design form saved the twice:>>(ISS-2024-00133)
+// Create the new design without following the exist filters:>>(ISS-2024-00133)
+// Design form saved twice:>>(ISS-2024-00133)
 
 frappe.ui.form.on('Design', {
     fngetAttributeOptionAndDefault(frm, iAttributeLabel, 
@@ -89,8 +89,16 @@ frappe.ui.form.on('Design', {
     },
 
     //refresh(frm) { //Commented this line for the issue (<<ISS-2024-00133)
+    //Issue: Form saved twice in the draft status (>>ISS-2024-00133)
+    //Clear the exist status filters when enter into 
+    //the new design form >>(ISS-2024-00133)
+    //Reseting the framework functionality of carrying 
+    //the filter value to the full form on creating new document
     onload(frm) {
-        //Issue: Form saved twice in the draft status (>>ISS-2024-00133)
+        if(frm.is_new()){
+	        frm.set_value('status', 'Draft');
+	    }
+
         frm.events.fnSetOptionsAndDefault(frm);
     },
 
@@ -105,15 +113,4 @@ frappe.ui.form.on('Design', {
     transformer_type(frm) {
         frm.events.fnSetOptionsAndDefault(frm);
     },
-    
-    //Clear the exist status filters when enter into 
-    //the new design form >>(ISS-2024-00133)
-    //Reseting the framework functionality of carring 
-    //the filter value to the full form on creating new document
-    refresh(frm) {
-	    if(frm.is_new() && frm.is_dirty()){
-	        frm.set_value('status', 'Draft');
-	    }
-	}
-
 });
