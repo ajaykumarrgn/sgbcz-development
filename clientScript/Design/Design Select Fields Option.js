@@ -1,19 +1,22 @@
+// Change Reference
+// Create the new design without following the exist filters:>>(ISS-2024-00133)
+// Design form saved twice:>>(ISS-2024-00133)
+
 frappe.ui.form.on('Design', {
-    fngetAttributeOptionAndDefault(frm, iAttributeLabel, 
+    fnGetAttributeOptionAndDefault(frm, iAttributeLabel, 
             iAttributeName, iTransformerType, iIsDesign, iReset = false) {
-        const DOCTYPE = "Gitra Settings";
-         // Initialize the model with doctype Gitra Settings
-        frappe.model.with_doc(DOCTYPE, DOCTYPE, function() {
+        const L_DOCTYPE = "Gitra Settings";
+        // Initialize the model with doctype Gitra Settings
+        frappe.model.with_doc(L_DOCTYPE, L_DOCTYPE, function() {
             // Then from the model get the list. This will
             // return all attributes of the model including child table
-            let ldDoc = frappe.model.get_list(DOCTYPE);
+            let ldDoc = frappe.model.get_list(L_DOCTYPE);
             // Find the specific attribute based on the attribute_label
             //and transformer_type
             let ldAttribute = ldDoc[0].attributes.find(attr => 
                 attr.parameter === iAttributeLabel 
                 && attr.transformer_type === iTransformerType
                 && attr.is_design === iIsDesign);
-                
             //Get the default value and options from the Gitra Attribute,
             if(ldAttribute && ldAttribute.default && ldAttribute.options){
                 // set the field's option from the Gitra attribute options
@@ -24,18 +27,17 @@ frappe.ui.form.on('Design', {
                     frm.set_value(iAttributeName, ldAttribute.default);
                 }
                 frm.refresh_field(iAttributeName);
-                
             }else{
                 // If attributes not there in the Gitra settings
                 // then it will get from the Item attribute
                 frm.events.fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, 
             iAttributeName, iReset);
             }
-            
         });
     },
     
-    //get values from item attribute through api "get_attribute_value_from_item_attribute"
+    //get values from item attribute through 
+    //api "get_attribute_value_from_item_attribute"
     //argument as Attribute Name
     fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
         frappe.call({
@@ -55,10 +57,9 @@ frappe.ui.form.on('Design', {
                 frm.refresh_field(iAttributeName);
             }
         });
-
     },
     
-fnSetOptionsAndDefault(frm, iReset = false) {
+    fnSetOptionsAndDefault(frm, iReset = false) {
         //Attribute mapping
         const LA_ATTRIBUTES = [
             ['Bushings HV', 'bushing_hv'],
@@ -76,14 +77,22 @@ fnSetOptionsAndDefault(frm, iReset = false) {
             ['Environmental class', 'environmental_class'],
             ['Transformer IP', 'ip_protection']
         ];
-
         //looping the LA_ATTRIBUTES
         LA_ATTRIBUTES.forEach(laAttribute => {
-            frm.events.fngetAttributeOptionAndDefault(frm, laAttribute[0], laAttribute[1], frm.doc.transformer_type, frm.doc.is_design, iReset);
+            frm.events.fnGetAttributeOptionAndDefault(frm, laAttribute[0], laAttribute[1], frm.doc.transformer_type, frm.doc.is_design, iReset);
         });
     },
 
-    refresh(frm) {
+    //refresh(frm) { //Commented this line for the issue (<<ISS-2024-00133)
+    //Issue: Form saved twice in the draft status (>>ISS-2024-00133)
+    //Clear the exist status filters when enter into 
+    //the new design form >>(ISS-2024-00133)
+    //Reseting the framework functionality of carrying 
+    //the filter value to the full form on creating new document
+    onload(frm) {
+        if(frm.is_new() && frm.doc.status !== 'Draft'){
+	        frm.set_value('status', 'Draft');
+	    }
         frm.events.fnSetOptionsAndDefault(frm);
     },
 
@@ -97,6 +106,5 @@ fnSetOptionsAndDefault(frm, iReset = false) {
 
     transformer_type(frm) {
         frm.events.fnSetOptionsAndDefault(frm);
-    }
-
+    },
 });
