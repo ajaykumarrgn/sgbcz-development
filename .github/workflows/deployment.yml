@@ -8,7 +8,11 @@ on:
       - hot-fix
       - hot-fix-release
     paths-ignore: # Avoid triggering on PR merges with specific commit messages
-      - '**/cypress/**'  
+      - '**/cypress/**'
+      - '.github/**'
+      - '.pylintrc'
+      - 'eslint.config.js'
+      - 'eslint-plugin-custom-rules.js' 
 
 jobs:
   code_quality_check:
@@ -190,18 +194,6 @@ jobs:
             exit 0
           fi
 
-      - name: Update Property Setter
-        run: |
-          if grep -q "update_property_setter" ci/migrate.txt; then
-            echo "Allows the Updation of Core Doc Fields to proceed"
-            npm i
-            npm run update_property_setter
-          else
-            echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
-            exit 0
-          fi
-          
-
   ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
   cypress_test:
@@ -235,6 +227,7 @@ jobs:
         with:
           submodules: true
           token: ${{ secrets.TEST_REPO_KEY }}
+          fetch-depth: 0 # fetch full history
 
       - name: Read Commit Hash
         id: read_commit_hash
@@ -244,7 +237,7 @@ jobs:
 
       - name: Initialize and Update Submodule to Specific Commit
         run: |
-          git submodule update --init --recursive
+          git submodule update --init --recursive --remote
           cd testAutomate
           git fetch origin
           git checkout ${{ env.COMMIT_HASH }}
