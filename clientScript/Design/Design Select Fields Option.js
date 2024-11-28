@@ -90,7 +90,7 @@ frappe.ui.form.on('Design', {
     //Reseting the framework functionality of carrying 
     //the filter value to the full form on creating new document
     onload(frm) {
-        if(frm.is_new()){
+        if(frm.is_new() && frm.doc.status !== 'Draft'){
 	        frm.set_value('status', 'Draft');
 	    }
         frm.events.fnSetOptionsAndDefault(frm);
