@@ -446,5 +446,16 @@ jobs:
             echo "Does not allows the Deletion of Files to proceed, skipping."
             exit 0
           fi
+
+      - name: Update Property Setter
+        run: |
+          if grep -q "update_property_setter" ci/migrate.txt; then
+            echo "Allows the Updation of Core Doc Fields to proceed"
+            npm i
+            npm run update_property_setter
+          else
+            echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
+            exit 0
+          fi
       
         
