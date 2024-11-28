@@ -1,3 +1,7 @@
+// Change Reference
+// Create the new design without following the exist filters:>>(ISS-2024-00133)
+// Design form saved twice:>>(ISS-2024-00133)
+
 frappe.ui.form.on('Design', {
     fngetAttributeOptionAndDefault(frm, iAttributeLabel, 
             iAttributeName, iTransformerType, iIsDesign, iReset = false) {
@@ -14,19 +18,20 @@ frappe.ui.form.on('Design', {
                 && attr.transformer_type === iTransformerType
                 && attr.is_design === iIsDesign);
                 
-            //If ldAttribute has a default value and options,
+            //Get the default value and options from the Gitra Attribute,
             if(ldAttribute && ldAttribute.default && ldAttribute.options){
-                // set the field's option with ldAttribute.options
+                // set the field's option from the Gitra attribute options
                 frm.set_df_property(iAttributeName, 'options', ldAttribute.options);
                 //if form status is Draft and value is empty or reset is true
-                //set the default value
+                //set the default value into the field
                 if((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft'){
                     frm.set_value(iAttributeName, ldAttribute.default);
                 }
                 frm.refresh_field(iAttributeName);
                 
             }else{
-                //call the fngetAttributeOptionFromItemAttribute
+                // If attributes not there in the Gitra settings
+                // then it will get from the Item attribute
                 frm.events.fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, 
             iAttributeName, iReset);
             }
@@ -34,7 +39,9 @@ frappe.ui.form.on('Design', {
         });
     },
     
-    //this function call get_attribute_value_from_item_attribute api
+    //get values from item attribute through 
+    //api "get_attribute_value_from_item_attribute"
+    //argument as Attribute Name
     fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
         frappe.call({
             method: 'get_attribute_value_from_item_attribute',
@@ -56,7 +63,7 @@ frappe.ui.form.on('Design', {
 
     },
     
-fnSetOptionsAndDefault(frm, iReset = false) {
+    fnSetOptionsAndDefault(frm, iReset = false) {
         //Attribute mapping
         const LA_ATTRIBUTES = [
             ['Bushings HV', 'bushing_hv'],
@@ -81,7 +88,17 @@ fnSetOptionsAndDefault(frm, iReset = false) {
         });
     },
 
-    refresh(frm) {
+    //refresh(frm) { //Commented this line for the issue (<<ISS-2024-00133)
+    //Issue: Form saved twice in the draft status (>>ISS-2024-00133)
+    //Clear the exist status filters when enter into 
+    //the new design form >>(ISS-2024-00133)
+    //Reseting the framework functionality of carrying 
+    //the filter value to the full form on creating new document
+    onload(frm) {
+        if(frm.is_new()){
+	        frm.set_value('status', 'Draft');
+	    }
+
         frm.events.fnSetOptionsAndDefault(frm);
     },
 
@@ -95,6 +112,5 @@ fnSetOptionsAndDefault(frm, iReset = false) {
 
     transformer_type(frm) {
         frm.events.fnSetOptionsAndDefault(frm);
-    }
-
+    },
 });

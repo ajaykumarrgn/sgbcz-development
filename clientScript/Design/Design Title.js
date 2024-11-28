@@ -1,36 +1,71 @@
-cur_frm.cscript.custom_validate = function(doc) {
-    var hv_in_kv = parseInt(doc.hv_rated_voltage)/1000
-    // Trim trailing zeros if present(eg 3.40 to 3.4)
-    //hv_in_kv = hv_in_kv.toString().replace(/\.?0+$/, '');
-    
-    var hv_in_kv_str = hv_in_kv.toString();
-
+//In Earlier, we have the formation of the Design name 
+// as Rating/HV/LV/Impedance/Li Phase
+// Now ,sometimes HV1 and HV2 or LV1 and Lv2 are present, 
+// so that change the formation
+// as Rating/HV1/HV2/LV/Impedance/Li Phase 
+// or Rating/HV/LV1/LV2/Impedance/Li Phase.
+cur_frm.cscript.custom_validate = function (doc) {
+  function fnGetCleanString(iFloat, isHV) {
+    if (iFloat === null || iFloat === undefined) {
+      return "";
+    }
+    var lFloatInStr = isHV
+      ? (parseFloat(iFloat) / 1000).toString()
+      : iFloat.toString();
     // Remove trailing zeros after the decimal point
-    hv_in_kv_str = hv_in_kv_str.replace(/(\.\d*?)0+$/, '$1');
-    //Replace . with ,
-    hv_in_kv = hv_in_kv_str.replace(/\./g, ",");
-    
-    // Generate document title based on field values
-    var docTitle = 'DTTHZ2N ' + doc.rating + '/' + hv_in_kv.toString() + '/' + doc.lv_rated_voltage
-	                        + '/' + doc.impedance + '/' + doc.li_phase_hv;
-	
-    //var docTitle = 'DTTHZ2N ' + doc.rating + '/' + hv_in_kv.toString() + '/' + doc.highest_operation_voltage_hv + '/' + doc.ac_phase_hv + '/' + doc.li_phase_hv + '/' + doc.lv_rated_voltage + '/' + doc.impedance;
-    // Commenting to meet the new naming standard as on 22nd nov 23 bug 57 from the backlog sheet.
-    // if(doc.k4_factor === 'Yes'){
-    //     // Append 'K4' to the document title if k4_factor is 'Yes'
-    //     docTitle  = docTitle + '/' + 'K4';
-    // }
-    
-    // if(doc.ip_protection != 'IP00'){
-    //     // Append IP protection value to the document title if it is not 'IP00'
-    //     docTitle  = docTitle + '/' + doc.ip_protection;
-    // }
-//     if(doc.specifics){
-//          // Append 'specifics' field value to the document title if it is present
-//         docTitle  = docTitle + '/' + doc.specifics;
-// 	}
-	// Set the document title
-	doc.title = docTitle;
-	
-	  
+    lFloatInStr = lFloatInStr.replace(/(\.\d*?)0+$/, "$1");
+    // Replace . with ,
+    return lFloatInStr.replace(/\./g, ",");
+  }
+  function fnCombineVoltageValues(iV, iV1, iV2, isHV) {
+    return iV
+      ? fnGetCleanString(iV, isHV)
+      : iV1 && iV2
+      ? fnGetCleanString(iV1, isHV) + "/" + fnGetCleanString(iV2, isHV)
+      : "";
+  }
+
+  // Determine the impedance or uk values 
+  // based on factory and LV1 and LV2 fields
+  function fnPutImpedanceOrUK() {
+    if (doc.lv1 && doc.lv_2) {
+      // If both LV1 and LV2 are present
+      if (doc.factory === "RGB") {
+        return (
+          fnGetCleanString(doc.uk_lv1, false) +
+          "/" +
+          fnGetCleanString(doc.uk_lv2, false)
+        );
+      } else if (doc.factory === "NEU") {
+        return (
+          fnGetCleanString(doc.ukhv_lv1, false) +
+          "/" +
+          fnGetCleanString(doc.ukhv_lv2, false)
+        );
+      } else {
+        // If factory is neither RGB nor NEU, return empty string
+        return "";
+      }
+    } else {
+      // If LV1 and LV2 are not both present, return impedance
+      return doc.impedance || "";
+    }
+  }
+
+  // Generate document title based on field values
+  var lDocTitle =
+    doc.transformer_type +
+    " " +
+    doc.rating +
+    "/" +
+    fnCombineVoltageValues(doc.hv_rated_voltage, doc.hv1, doc.hv2, true) +
+    "/" +
+    fnCombineVoltageValues(doc.lv_rated_voltage, doc.lv1, doc.lv_2, false) +
+    "/" +
+    fnPutImpedanceOrUK() +
+    "/" +
+    doc.li_phase_hv;
+
+  // Set the document title
+  doc.title = lDocTitle;
 };

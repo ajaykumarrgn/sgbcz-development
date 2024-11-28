@@ -16,7 +16,7 @@ const requestOptions = {
 };
 
 const current_path = process.cwd();
-const filesListPath = path.join(current_path, 'doctypeList.txt');
+const filesListPath = path.join(current_path,'txt', 'doctypeList.txt');
 
 // Function to create the "customDoctype" folder if it doesn't exist
 function ensureCustomDoctypeFolderExists() {

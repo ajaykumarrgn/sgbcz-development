@@ -1,24 +1,13 @@
+//Make the form editable only on draft status(ISS-2024-00133)
 frappe.ui.form.on('Design', {
 
     onload(frm){
-        //readonly was given at refresh
-        //but at some point it is not
-        //working as expected so done the
-        //same in onload event
-        if(frm.doc.status != 'Draft'){
-            setTimeout(function() {
-            fnSetHTMLFieldsToReadOnly();
-        }, 500);
-            frm.set_read_only();
-            frm.disable_save();
-        }
+        fnSetFormToReadOnly(frm); //<<ISS-2024-00133
     },
-// When factory is changed, fields also changed for that dependent request.
 
+// When factory is changed, fields also changed for that dependent request.
 //onchange of factory select field event
 factory: function(frm) {
-  
-    // fnResetValues(frm);
     
     //setting the default transformer type
     //based on factory
@@ -42,15 +31,7 @@ factory: function(frm) {
 },
 
 refresh: function(frm) {
-   //other then Draft, 
-   //the frm should be read only
-    if(frm.doc.status != 'Draft'){
-      setTimeout(function() {
-        fnSetHTMLFieldsToReadOnly();
-    }, 500);
-        frm.set_read_only();
-        frm.disable_save();
-    }
+    fnSetFormToReadOnly(frm); //<<ISS-2024-00133
 
     //is_design based field
     //restriction
@@ -77,8 +58,6 @@ refresh: function(frm) {
         // Triggering the toggle fields based on the factory by here.
         frm.trigger('fnToggleFields');
     }
-        // frm.trigger('fnSetTappingsOption');
-        // frm.trigger('fnUpdateInsulationClass');
         frm.trigger('fnToggleFields');
     
 },   
@@ -327,6 +306,17 @@ function fnUpdateFieldBasedOnIsDesign(frm){
         frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
 }
 
+function fnSetFormToReadOnly(frm){
+    //Make the form read-only, except 
+    //when the form is not in draft status and is not new.
+    if(frm.doc.status != 'Draft' && !frm.is_new()) { //<<ISS-2024-00133
+        setTimeout(function() {
+        fnSetHTMLFieldsToReadOnly();
+    }, 500);
+        frm.set_read_only();
+        frm.disable_save();
+    }
+}
 
 //function to make html field read_only
 function fnSetHTMLFieldsToReadOnly() {

@@ -3,47 +3,45 @@ import { getEndPointForDoctype } from "./functions.js";
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-
+ 
 dotenv.config({ path: '../.env' });
-
+ 
 const myHeaders = new Headers();
 myHeaders.append("Authorization", process.env.KEY);
 myHeaders.append("Content-Type", "application/json"); // Set the content type
-
-const current_path = process.cwd();
-const customDoctypeFolderPath = path.join(current_path, '..', 'document');
-
+ 
+// Get the project root directory dynamically
+const rootPath = path.resolve(process.cwd(), '..');
+const filesListPath = path.join(process.cwd(), 'txt', 'documentList.txt'); // Path to documentList.txt
+ 
 // Function to upload a JSON file
 async function uploadJsonFile(filePath, isSingleDocument, folderName = "") {
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
     const jsonData = JSON.parse(fileContent);
     const baseUrl = getEndPointForDoctype();
-
-    // Determine the request URL based on whether it's a single document or a general document
+ 
     const requestUrl = isSingleDocument
-      ? `${baseUrl}${jsonData.name}/${jsonData.name}` // Use this URL for single document
-      : `${baseUrl}${folderName}/${jsonData.name}`; // Use this URL for general documents
-
-    // First try PUT request
+      ? `${baseUrl}${jsonData.name}/${jsonData.name}`
+      : `${baseUrl}${folderName}/${jsonData.name}`;
+ 
     const putResponse = await fetch(requestUrl, {
       method: "PUT",
       headers: myHeaders,
-      body: JSON.stringify(jsonData), // Set the body to the JSON data
+      body: JSON.stringify(jsonData),
     });
-
+ 
     if (putResponse.ok) {
       console.log(`Updated document: ${jsonData.name}`);
     } else if (putResponse.status === 404) {
       console.log(`Document not found for ${jsonData.name}. Trying to create it with POST...`);
-
-      // Attempt POST since PUT failed with 404
+ 
       const postResponse = await fetch(baseUrl, {
         method: "POST",
         headers: myHeaders,
-        body: JSON.stringify(jsonData), // Set the body to the JSON data
+        body: JSON.stringify(jsonData),
       });
-
+ 
       if (postResponse.ok) {
         console.log(`Created document: ${jsonData.name}`);
       } else {
@@ -51,7 +49,6 @@ async function uploadJsonFile(filePath, isSingleDocument, folderName = "") {
         console.log(`HTTP error on POST! Status: ${postResponse.status}, Message: ${errorMessage}`);
       }
     } else {
-      // Log other error statuses for PUT
       const errorMessage = await putResponse.text();
       console.log(`HTTP error on PUT! Status: ${putResponse.status}, Message: ${errorMessage}`);
     }
@@ -59,32 +56,61 @@ async function uploadJsonFile(filePath, isSingleDocument, folderName = "") {
     console.log(`Error during request: ${error.message}`);
   }
 }
-
-// Function to recursively process JSON files in the specified directory
-async function processJsonFiles(directory, isSingleDocument = false, folderName = "") {
+ 
+// Function to process directories and files
+async function processDirectory(directory, isSingleDocument) {
   try {
-    // Read the contents of the directory
     const filesAndDirs = fs.readdirSync(directory);
-
+ 
     for (const entry of filesAndDirs) {
       const entryPath = path.join(directory, entry);
       const stat = fs.statSync(entryPath);
-
+ 
       if (stat.isDirectory()) {
-        // Check if the current directory is 'singleDocument' to set the flag
-        const isSingleDocFolder = entry === 'singleDocument';
-
-        // Recursively process subdirectories, updating the isSingleDocument flag as needed
-        await processJsonFiles(entryPath, isSingleDocFolder, entry);
+        await processDirectory(entryPath, isSingleDocument);
       } else if (entry.endsWith('.json') && stat.isFile()) {
         console.log(`Processing JSON file: ${entryPath}`);
-        await uploadJsonFile(entryPath, isSingleDocument, folderName); // Pass folderName for multiple document mode
+        await uploadJsonFile(entryPath, isSingleDocument, path.basename(directory));
       }
     }
   } catch (error) {
-    console.log(`Error processing JSON files: ${error.message}`);
+    console.log(`Error processing directory: ${error.message}`);
   }
 }
-
-// Start processing the JSON files
-processJsonFiles(customDoctypeFolderPath).catch(console.error);
+ 
+// Function to process JSON files from the documentList.txt
+async function processJsonFilesFromList(filePath) {
+  try {
+    const filePaths = fs.readFileSync(filePath, 'utf8').split('\n').map(line => line.trim()).filter(Boolean);
+ 
+    // Filter paths to only include those starting with "document/"
+    const documentPaths = filePaths.filter(relativePath => relativePath.startsWith('document/'));
+ 
+    for (const relativePath of documentPaths) {
+      const absolutePath = path.join(rootPath, relativePath); // Resolve paths from root directory
+      console.log(`Processing path: ${absolutePath}`); // Debugging log
+ 
+      // Check if directory exists before processing
+      if (fs.existsSync(absolutePath)) {
+        const stat = fs.statSync(absolutePath);
+ 
+        if (stat.isDirectory()) {
+          console.log(`Traversing directory: ${absolutePath}`);
+          const isSingleDocument = relativePath.includes('singleDocument');
+          await processDirectory(absolutePath, isSingleDocument);
+        } else if (stat.isFile() && absolutePath.endsWith('.json')) {
+          console.log(`Processing single JSON file: ${absolutePath}`);
+          await uploadJsonFile(absolutePath, false, path.basename(path.dirname(absolutePath)));
+        }
+      } else {
+        console.log(`Directory does not exist: ${absolutePath}`);
+      }
+    }
+  } catch (error) {
+    console.log(`Error processing files from list: ${error.message}`);
+  }
+}
+ 
+// Start processing JSON files listed in the documentList.txt
+processJsonFilesFromList(filesListPath).catch(console.error);
+ 
