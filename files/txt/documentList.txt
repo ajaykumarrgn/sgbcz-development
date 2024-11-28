@@ -4,5 +4,5 @@
 # Optional filters can be added for fetching the doctype's document
 # ex: filters = {"status":"Cancelled}  but be sure to use filters = before 
 
-Single Document = Gitra Settings
+#document/Translation
 
