@@ -13,11 +13,6 @@ on:
       - '.pylintrc'
       - 'eslint.config.js'
       - 'eslint-plugin-custom-rules.js' 
-      - '**/cypress/**'
-      - '.github/**'
-      - '.pylintrc'
-      - 'eslint.config.js'
-      - 'eslint-plugin-custom-rules.js' 
 
 jobs:
   code_quality_check:
@@ -202,10 +197,6 @@ jobs:
   ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
   cypress_test:
-
-  ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
-
-  cypress_test:
     runs-on: ubuntu-latest
     needs: quality
     if: |
@@ -237,7 +228,6 @@ jobs:
           submodules: true
           token: ${{ secrets.TEST_REPO_KEY }}
           fetch-depth: 0 # fetch full history
-          fetch-depth: 0 # fetch full history
 
       - name: Read Commit Hash
         id: read_commit_hash
@@ -247,7 +237,6 @@ jobs:
 
       - name: Initialize and Update Submodule to Specific Commit
         run: |
-          git submodule update --init --recursive --remote
           git submodule update --init --recursive --remote
           cd testAutomate
           git fetch origin
@@ -468,5 +457,3 @@ jobs:
             echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
             exit 0
           fi
-      
-        
