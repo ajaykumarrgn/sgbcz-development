@@ -104,7 +104,7 @@ describe('SGBCZ factory non is design', () => {
 
         });
     });
-    describe('Saving and Tear of', () => {
+    describe('Saving and Tear off', () => {
         it('should save the Design and delete', () => {
             const testdata = Cypress.env('testData');
             const target = testdata[1].value;
