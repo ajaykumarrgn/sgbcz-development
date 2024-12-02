@@ -134,7 +134,7 @@ describe('Checking Creation of Item from Design NEU', () => {
       });
 
   });
-  describe('Check the Specifies and Attachments', () => {
+  describe('Should check the Specifics field', () => {
 
       it('Should check the Specifies', () => {
 

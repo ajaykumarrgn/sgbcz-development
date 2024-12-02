@@ -69,7 +69,7 @@ describe('View the Item', () => {
     });
 });
 
-describe('Check the Specifies and Attachments', () => {
+describe('Should check the Specifics field', () => {
     it('Should check the Specifies', () => {
       const testdata = Cypress.env('testData');
       cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();

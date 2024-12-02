@@ -1,5 +1,4 @@
-
-describe('Checking RGB foctory for design', () => {
+describe('Checking RGB factory for design', () => {
     beforeEach(() => {
         cy.task('readExcelFile', { filePath: 'cypress/e2e/variables/envItem-Creation-from-Design-CEU000010500028.xlsx', sheetName: 'Sheet1' }).then((testdata) => {
             Cypress.log({ message: 'excel data loaded', log: false });
@@ -26,21 +25,32 @@ describe('Checking RGB foctory for design', () => {
         it('Should give pop up message for the wrong HV value', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
-            cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().clear().wait(500).type(testdata[2].Value).wait(4000); //factory
+
+            cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({ force: true }).wait(2000).clear({ force: true })
+            .wait(2000)
+            .type(testdata[2].Value).wait(4000); //factory
+
             cy.get('#design-__details > :nth-child(3) > .section-head').click();
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[3].Value,'{enter}'); //enter the wrong value 300
-            // cy.get('#design-__details > :nth-child(3) > .section-head').click();
-            // cy.get('.btn-modal-close').should('be.visible');
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[3].Value,'{enter}'); //enter the wrong value 300            
+            // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click();
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click()
+
         });
-        it('Should give pop up message for the wrong suffix hv value', () => {
+        it('Should give pop up message for the wrong second hv value', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
-            cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().clear().wait(500).type(testdata[2].Value).wait(4000); //factory
+            cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({ force: true }).wait(2000).clear({ force: true })
+            .wait(2000)
+            .type(testdata[2].Value).wait(4000); //factory
+
             cy.get('#design-__details > :nth-child(3) > .section-head').click();
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[4].Value,'{enter}').wait(3000); //enter the wrong suffix value 3000/4000
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[3].Value,'{enter}'); //enter the wrong value 300            
+            // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click();
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click()
         });
+
         it('Should accept the correct hv value', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
@@ -50,7 +60,7 @@ describe('Checking RGB foctory for design', () => {
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click();
               });
-        it('Should accept the correct suffix hv value', () => {
+        it('Should accept the correct second hv value', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().clear().wait(500).type(testdata[2].Value).wait(4000); //factory
@@ -73,13 +83,13 @@ describe('Checking RGB foctory for design', () => {
             // cy.get('#design-__details > :nth-child(3) > .section-head').click();
             // cy.get('.btn-modal-close').should('be.visible');
         });
-        it('Should give pop up message for the wrong suffix LV value', () => {
+        it('Should give pop up message for the wrong second LV value', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().clear().wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click();
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
-            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[11].Value,'{enter}').wait(3000); //enter the wrong suffix value 300/400
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[10].Value,'{enter}'); //enter the wrong value 300/400
         
         });
         it('Should accept the correct LV value', () => {
@@ -91,7 +101,7 @@ describe('Checking RGB foctory for design', () => {
             cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[12].Value,'{enter}').wait(5000); //enter the correct hv value 300
             // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click();
               });
-        it('Should accept the correct suffix LV value', () => {
+        it('Should accept the correct second LV value', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().clear().wait(500).type(testdata[2].Value).wait(4000); //factory
