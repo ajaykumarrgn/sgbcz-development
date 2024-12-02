@@ -1,0 +1,19 @@
+{
+  "name": "Payment Terms Template-allocate_payment_based_on_payment_terms-hidden",
+  "docstatus": 0,
+  "idx": 0,
+  "is_system_generated": 0,
+  "doctype_or_field": "DocField",
+  "doc_type": "Payment Terms Template",
+  "field_name": "allocate_payment_based_on_payment_terms",
+  "row_name": null,
+  "module": null,
+  "property": "hidden",
+  "property_type": "Check",
+  "value": "1",
+  "default_value": null,
+  "_user_tags": null,
+  "_comments": null,
+  "_assign": null,
+  "_liked_by": null
+}
