@@ -33,7 +33,7 @@ describe('Letter Head and Footer for all factories', () => {
       cy.get('@testdata').then((testdata) => {
         const target = testdata[1].Value;
         cy.visit(target); 
-        cy.wait(3000);
+        cy.wait(4000);
         cy.get('div[data-fieldname="print_format"] select', { timeout: 10000 }) 
             .select(testdata[3].Value) 
             .should('have.value', testdata[3].Value);
