@@ -1,0 +1,19 @@
+{
+  "name": "Design-title-in_list_view",
+  "docstatus": 0,
+  "idx": 0,
+  "is_system_generated": 1,
+  "doctype_or_field": "DocField",
+  "doc_type": "Design",
+  "field_name": "title",
+  "row_name": null,
+  "module": null,
+  "property": "in_list_view",
+  "property_type": "Check",
+  "value": "1",
+  "default_value": null,
+  "_user_tags": null,
+  "_comments": null,
+  "_assign": null,
+  "_liked_by": null
+}
