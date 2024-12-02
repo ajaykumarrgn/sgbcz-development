@@ -107,7 +107,9 @@ describe('SGBCZ non is design item creation', () => {
         cy.visit(target);
         cy.wait(2000);
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
+        cy.wait(3000);
         cy.get('#design-item_tab-tab').click();
+        cy.wait(3000);
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click();
         cy.wait(2000);
         cy.get(':nth-child(4) > .section-body > .form-column > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback')
