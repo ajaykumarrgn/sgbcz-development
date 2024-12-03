@@ -14,7 +14,8 @@ describe('Testing RGB factory for design', () => {
             cy.get('#login_password').type(password);
             cy.get('.for-login > .login-content > .form-signin > .page-card-actions > .btn').click();
             cy.location('pathname', { timeout: 20000 }).should('include', '/app');
-            cy.visit(target); 
+            cy.visit(target);
+            cy.wait(4000);
         });
     });
     // afterEach(() => {
@@ -27,20 +28,37 @@ describe('Testing RGB factory for design', () => {
         it('Should test the design can be save and delete by filling the mandatory fields', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(5000);
-
+            cy.wait(3000)
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback', { timeout: 10000 }).should('exist').click({ force: true }).wait(2000).clear({ force: true })
             .wait(5000)
             .type(testdata[2].Value).wait(4000); //factory
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force:true}).wait(3000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[5].Value,'{enter}').wait(3000); //enter the correct hv value 3000
+            //cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[5].Value,'{enter}').wait(3000); //enter the correct hv value 3000
+            // Alias the element to avoid lengthy selectors
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldA');
+            // Click the element
+            cy.get('@inputFieldA').click().wait(3000);
+            // Re-fetch the element and type the value
+            cy.get('@inputFieldA').type(testdata[5].Value, { force: true }).wait(3000);
+            cy.wait(6000);
             cy.get('#design-__details > :nth-child(3) > .section-head').click({force:true});
             cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force:true}).wait(3000);
-            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[12].Value,'{enter}').wait(3000); //enter the correct lv value 300
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldB');
+            cy.get('@inputFieldB').click().wait(3000);
+            cy.get('@inputFieldB').type(testdata[12].Value, { force: true }).wait(3000); //enter the correct lv value 300
+            cy.wait(6000);
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click({force:true});
             cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .primary-action').click({force:true}).wait(3000); //save the design
             cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .menu-btn-group > .btn').click({force:true});
             cy.get(':nth-child(11) > .grey-link').click({force:true}).wait(4000); //Delete the design
             cy.get('.modal.show > .modal-dialog > .modal-content > .modal-footer > .standard-actions > .btn-primary').click({force:true}).wait(3000); //yes
+            cy.wait(300);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
  
         });
         
@@ -52,13 +70,27 @@ describe('Testing RGB factory for design', () => {
             .type(testdata[2].Value).wait(4000); //factory
 
             cy.get('#design-__details > :nth-child(3) > .section-head').click();
-            cy.wait(30000)
+            cy.wait(3000)
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[3].Value,'{enter}'); //enter the wrong value 300            
+            //cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[3].Value,'{enter}'); //enter the wrong value 300            
             // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click();
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click()
+            // Alias the element to avoid lengthy selectors
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldA');
+            // Click the element
+            cy.get('@inputFieldA').click({ force: true }).wait(3000);
+            // Re-fetch the element and type the value
+            cy.get('@inputFieldA').type(testdata[3].Value, { force: true }).type('{enter}').wait(3000);
+            cy.wait(6000);
+            //cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click()
             // cy.get('.btn-modal-close').should('be.visible');
-            cy.wait(4000)
+            // cy.wait(4000);
+            // cy.get('.btn-modal-close').click({ force:true });
+            // cy.wait(300);
+            // // Logout after each test case
+            // cy.get('.nav-link > .avatar').click();
+            // cy.get('[onclick="return frappe.app.logout()"]').click();
+            // cy.wait(300);
         });
         it('Should Validate the wrong second hv value', () => {
             const testdata = Cypress.env('testData');
@@ -70,11 +102,25 @@ describe('Testing RGB factory for design', () => {
             cy.get('#design-__details > :nth-child(3) > .section-head').click();
             cy.wait(30000)
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[3].Value,'{enter}'); //enter the wrong value 400            
+            //cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[3].Value,'{enter}'); //enter the wrong value 400            
             // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click();
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click()
+            // Alias the element to avoid lengthy selectors
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldA');
+            // Click the element
+            cy.get('@inputFieldA').click({ force: true }).wait(3000);
+            // Re-fetch the element and type the value
+            cy.get('@inputFieldA').type(testdata[4].Value, { force: true }, '{enter}').wait(3000);
+            cy.wait(6000);
+            //cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click()
             // cy.get('.btn-modal-close').should('be.visible');
-            cy.wait(4000)
+            // cy.wait(4000);
+            // cy.get('.btn-modal-close').click({ force:true });
+            // cy.wait(300);
+            // // Logout after each test case
+            // cy.get('.nav-link > .avatar').click();
+            // cy.get('[onclick="return frappe.app.logout()"]').click();
+            // cy.wait(300);
         });
 
         it('Should accept the correct hv value', () => {
@@ -83,8 +129,21 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().clear().wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click();
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
+            //cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
+            // Alias the element to avoid lengthy selectors
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldA');
+            // Click the element
+            cy.get('@inputFieldA').click().wait(3000);
+            // Re-fetch the element and type the value
+            cy.get('@inputFieldA').type(testdata[5].Value, { force: true }).wait(3000);
+            cy.wait(6000);
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click();
+            cy.wait(300);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
         });
         
         it('Should accept the correct second hv value', () => {
@@ -93,8 +152,21 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force: true}).clear({force: true}).wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force: true}).wait(1000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
+            //cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
+            // Alias the element to avoid lengthy selectors
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldA');
+            // Click the element
+            cy.get('@inputFieldA').click().wait(3000);
+            // Re-fetch the element and type the value
+            cy.get('@inputFieldA').type(testdata[6].Value, { force: true }).wait(3000);
+            cy.wait(6000);
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click({force: true});
+            cy.wait(300);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
          });
 
          it('Should give pop up message for the wrong LV value', () => {
@@ -103,9 +175,21 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force: true}).clear({force: true}).wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force: true}).wait(1000);
-            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[10].Value,'{enter}'); //enter the wrong value 150
+            // cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[10].Value,'{enter}'); //enter the wrong value 150
             // cy.get('#design-__details > :nth-child(3) > .section-head').click();
             // cy.get('.btn-modal-close').should('be.visible');
+            //cy.wait(3000);
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldB');
+            cy.get('@inputFieldB').click({ force: true }).wait(3000);
+            cy.get('@inputFieldB').type(testdata[10].Value, { force: true }).type('{enter}').wait(3000); //enter the correct lv value 300
+            cy.wait(6000);
+            // cy.get('.btn-modal-close').click({ force:true });
+            // cy.wait(300);
+            // // Logout after each test case
+            // cy.get('.nav-link > .avatar').click();
+            // cy.get('[onclick="return frappe.app.logout()"]').click();
+            // cy.wait(300);
         });
         it('Should give pop up message for the wrong second LV value', () => {
             const testdata = Cypress.env('testData');
@@ -113,19 +197,41 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force: true}).clear({force: true}).wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force: true}).wait(1000);
-            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[11].Value,'{enter}').wait(3000); //enter the wrong second value 300/400
+            // cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[11].Value,'{enter}').wait(3000); //enter the wrong second value 300/400
+            // cy.wait(3000);
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldB');
+            cy.get('@inputFieldB').click({ force: true }).wait(3000);
+            cy.get('@inputFieldB').type(testdata[11].Value, { force: true }, '{enter}').wait(3000); //enter the correct lv value 300
+            cy.wait(6000);
+            // cy.get('.btn-modal-close').click({ force:true });
+            // cy.wait(300);
+            // // Logout after each test case
+            // cy.get('.nav-link > .avatar').click();
+            // cy.get('[onclick="return frappe.app.logout()"]').click();
+            // cy.wait(300);
         
         });
         it('Should accept the correct LV value', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force: true}).clear({force: true}).wait(2000).type(testdata[2].Value).wait(4000); //factory
-            cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
+            //cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force: true}).wait(1000);
-            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[12].Value,'{enter}').wait(5000); //enter the correct hv value 300
+            // cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[12].Value,'{enter}').wait(5000); //enter the correct hv value 300
             // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click();
-              });
-        
+              //});
+            //cy.wait(300);
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputFieldB');
+            cy.get('@inputFieldB').click().wait(3000);
+            cy.get('@inputFieldB').type(testdata[12].Value, { force: true }).wait(3000); //enter the correct lv value 300
+            cy.wait(6000);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
+        });
         it('should Check the all the Transformer Environment for factory RGB', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
@@ -133,7 +239,11 @@ describe('Testing RGB factory for design', () => {
             cy.get('#design-transformer_environment_tab-tab').click({force:true}).wait(3000);
             cy.get('div[data-fieldname="temperature_rise_oil"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').should('not.be.visible');
             cy.get('div[data-fieldname="temperature_rise_winding"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').should('not.be.visible');
-            cy.wait(4000)
+            cy.wait(4000);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
         }); //Transformer Environment    
     
         
