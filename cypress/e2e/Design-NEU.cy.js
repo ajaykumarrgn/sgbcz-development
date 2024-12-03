@@ -139,8 +139,7 @@ describe('Testing NEU factory for design', () => {
             cy.get('div[data-fieldname="temperature_rise_oil"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').should('have.value',testdata[63].Value);
             cy.get('div[data-fieldname="temperature_rise_winding"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').should('have.value',testdata[68].Value);
             cy.wait(4000)
-        }); //Transformer Environment    
-    
+        }); //Transformer Environment       
         
     });
 
