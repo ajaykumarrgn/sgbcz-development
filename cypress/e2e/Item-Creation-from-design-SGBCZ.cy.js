@@ -62,17 +62,24 @@ describe('SGBCZ non is design item creation', () => {
         const testdata = Cypress.env('testData');
         const target = testdata[1].value;
         cy.visit(target);
+        cy.wait(3000);
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
+        cy.wait(3000);
         cy.get('#design-item_tab-tab').click();
+        cy.wait(3000);
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').should('be.visible');
+        cy.wait(3000);
 
       });
       it('Should view the Item from the Design', () => {
         const testdata = Cypress.env('testData');
         const target = testdata[1].value;
         cy.visit(target);
+        cy.wait(3000);
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
+        cy.wait(3000);
         cy.get('#design-item_tab-tab').click();
+        cy.wait(3000);
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click();
         cy.wait(2000);
       });
@@ -82,23 +89,16 @@ describe('SGBCZ non is design item creation', () => {
         const testdata = Cypress.env('testData');
         const target = testdata[1].value;
         cy.visit(target);
+        cy.wait(3000);
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
+        cy.wait(3000);
         cy.get('#design-item_tab-tab').click();
+        cy.wait(3000);
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click();
         cy.wait(2000);
         cy.get('#item-details > :nth-child(2) > .section-body > :nth-child(2) > form > .frappe-control > .form-group > .control-input-wrapper > .control-value').should('have.text',testdata[21].value);
+        cy.wait(3000);
       });
-      // it('Should check the Attachments', () => {
-      //   const testdata = Cypress.env('testData');
-      //   cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
-      //   cy.get('#design-item_tab-tab').click();
-      //   cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click();
-      //   cy.wait(2000);
-        // cy.get('#page-Item > .page-body > .page-wrapper > .page-content > .layout-main > .col-lg-2 > .form-sidebar > .form-attachments > .attachments-actions')
-        //   .children()  // Select all child elements
-        //   .should('have.length', 0);  // Assert that there are no child elements
-
-      // });
     });
     describe('Tear off', () => {
       it('Should Remove the Design from the Item', () => {
