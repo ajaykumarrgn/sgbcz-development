@@ -89,6 +89,7 @@ frappe.ui.form.on('Design', {
     //the new design form >>(ISS-2024-00133)
     //Reseting the framework functionality of carrying 
     //the filter value to the full form on creating new document
+    
     onload(frm) {
         if(frm.is_new() && frm.doc.status !== 'Draft'){
 	        frm.set_value('status', 'Draft');
