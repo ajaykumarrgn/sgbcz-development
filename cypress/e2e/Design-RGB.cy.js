@@ -83,7 +83,7 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().clear().wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click();
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click();
         });
         
@@ -93,7 +93,7 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force: true}).clear({force: true}).wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force: true}).wait(1000);
-            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[5].Value,'{enter}').wait(5000); //enter the correct hv value 3000
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click({force: true});
          });
 
@@ -103,7 +103,7 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force: true}).clear({force: true}).wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force: true}).wait(1000);
-            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[10].Value,'{enter}'); //enter the wrong value 150
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[10].Value,'{enter}'); //enter the wrong value 150
             // cy.get('#design-__details > :nth-child(3) > .section-head').click();
             // cy.get('.btn-modal-close').should('be.visible');
         });
@@ -113,7 +113,7 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force: true}).clear({force: true}).wait(500).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force: true}).wait(1000);
-            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[11].Value,'{enter}').wait(3000); //enter the wrong second value 300/400
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[11].Value,'{enter}').wait(3000); //enter the wrong second value 300/400
         
         });
         it('Should accept the correct LV value', () => {
@@ -122,7 +122,7 @@ describe('Testing RGB factory for design', () => {
             cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force: true}).clear({force: true}).wait(2000).type(testdata[2].Value).wait(4000); //factory
             cy.get('#design-__details > :nth-child(3) > .section-head').click({force: true});
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force: true}).wait(1000);
-            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[12].Value,'{enter}').wait(5000); //enter the correct hv value 300
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[12].Value,'{enter}').wait(5000); //enter the correct hv value 300
             // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .clearfix > .control-label').click();
               });
         
