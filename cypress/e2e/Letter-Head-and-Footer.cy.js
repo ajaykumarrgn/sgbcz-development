@@ -27,6 +27,11 @@ describe('Letter Head and Footer for all factories', () => {
           .should('have.value', testdata[3].Value);
       cy.wait(3000)
       cy.get('.awesomplete > .input-with-feedback').should('have.value', testdata[4].Value)
+      cy.wait(300);
+      // Logout after each test case
+      cy.get('.nav-link > .avatar').click();
+      cy.get('[onclick="return frappe.app.logout()"]').click();
+      cy.wait(300);
     })
     })
     it('Should have the SGBCZ logo at top right corner', () => {
@@ -51,6 +56,11 @@ describe('Letter Head and Footer for all factories', () => {
             expect(position.top).to.be.closeTo(0, 50); // Top position should be near 0
             expect(position.right).to.be.closeTo(window.innerWidth, 800);
           })
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
         })
       })
      
@@ -75,7 +85,11 @@ describe('Letter Head and Footer for all factories', () => {
           expect(position.top).to.be.closeTo(0, 50); // Top position near 0
           expect(position.left).to.be.closeTo(0, 60); // Left position near 0
         });
-
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
     })
     it('Should have correct SGBCZ company address', () => {
@@ -94,8 +108,12 @@ describe('Letter Head and Footer for all factories', () => {
         .and('contain', testdata[8].Value)
         .and('contain', testdata[9].Value)
         .and('contain', testdata[10].Value)
-        .and('contain', testdata[11].Value)
-
+        .and('contain', testdata[11].Value);
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
     })
     
@@ -123,7 +141,11 @@ describe('Letter Head and Footer for all factories', () => {
           // Assert it's horizontally centered
           expect(position.left + position.width / 2).to.be.closeTo(parentWidth / 2, 10); // Centered horizontally
         });
-
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
 
       })
@@ -144,8 +166,12 @@ describe('Letter Head and Footer for all factories', () => {
         .and('contain', testdata[9].Value)
         .and('contain', testdata[10].Value)
         .and('contain', testdata[11].Value)
-        .and('contain', testdata[12].Value)
-
+        .and('contain', testdata[12].Value);
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
 
       })
@@ -161,6 +187,11 @@ describe('Letter Head and Footer for all factories', () => {
           .should('have.value', testdata[3].Value);
       cy.wait(3000)
       cy.get('.awesomplete > .input-with-feedback').should('have.value', testdata[14].Value)
+      cy.wait(300);
+      // Logout after each test case
+      cy.get('.nav-link > .avatar').click();
+      cy.get('[onclick="return frappe.app.logout()"]').click();
+      cy.wait(300);
     })
     })
     it('Should have the SGB RGB logo at top right corner', () => {
@@ -184,7 +215,12 @@ describe('Letter Head and Footer for all factories', () => {
             const position = $img[0].getBoundingClientRect();
             expect(position.top).to.be.closeTo(0, 50); // Top position should be near 0
             expect(position.right).to.be.closeTo(window.innerWidth, 800);
-          })
+          });
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
         })
       })
      
@@ -209,7 +245,11 @@ describe('Letter Head and Footer for all factories', () => {
           expect(position.top).to.be.closeTo(0, 50); // Top position near 0
           expect(position.left).to.be.closeTo(0, 60); // Left position near 0
         });
-
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
     })
     it('Should have correct SGB RGB company address', () => {
@@ -228,7 +268,12 @@ describe('Letter Head and Footer for all factories', () => {
         .and('contain', testdata[18].Value)
         .and('contain', testdata[19].Value)
         .and('contain', testdata[20].Value)
-        .and('contain', testdata[23].Value)
+        .and('contain', testdata[23].Value);
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
 
       })
     })
@@ -257,7 +302,11 @@ describe('Letter Head and Footer for all factories', () => {
           // Assert it's horizontally centered
           expect(position.left + position.width / 2).to.be.closeTo(parentWidth / 2, 10); // Centered horizontally
         });
-
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
 
       })
@@ -274,7 +323,12 @@ describe('Letter Head and Footer for all factories', () => {
         .should('not.be.empty') // Ensure the iframe body is loaded
         .and('contain', testdata[18].Value)
         .and('contain', testdata[22].Value)
-        .and('contain', testdata[21].Value)
+        .and('contain', testdata[21].Value);
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
 
       })
@@ -289,7 +343,12 @@ describe('Letter Head and Footer for all factories', () => {
           .select(testdata[3].Value) 
           .should('have.value', testdata[3].Value);
       cy.wait(3000)
-      cy.get('.awesomplete > .input-with-feedback').should('have.value', testdata[25].Value)
+      cy.get('.awesomplete > .input-with-feedback').should('have.value', testdata[25].Value);
+      cy.wait(300);
+      // Logout after each test case
+      cy.get('.nav-link > .avatar').click();
+      cy.get('[onclick="return frappe.app.logout()"]').click();
+      cy.wait(300);
     })
     })
     it('Should have the SGB NEU logo at top right corner', () => {
@@ -313,7 +372,12 @@ describe('Letter Head and Footer for all factories', () => {
             const position = $img[0].getBoundingClientRect();
             expect(position.top).to.be.closeTo(0, 50); // Top position should be near 0
             expect(position.right).to.be.closeTo(window.innerWidth, 800);
-          })
+          });
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
         })
       })
      
@@ -338,6 +402,11 @@ describe('Letter Head and Footer for all factories', () => {
           expect(position.top).to.be.closeTo(0, 50); // Top position near 0
           expect(position.left).to.be.closeTo(0, 60); // Left position near 0
         });
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
 
       })
     })
@@ -359,7 +428,12 @@ describe('Letter Head and Footer for all factories', () => {
         .and('contain', testdata[29].Value)
         .and('contain', testdata[30].Value)
         .and('contain', testdata[31].Value)
-        .and('contain', testdata[32].Value)
+        .and('contain', testdata[32].Value);
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
 
       })
     })
@@ -388,7 +462,11 @@ describe('Letter Head and Footer for all factories', () => {
           // Assert it's horizontally centered
           expect(position.left + position.width / 2).to.be.closeTo(parentWidth / 2, 10); // Centered horizontally
         });
-
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
 
       })
@@ -406,7 +484,12 @@ describe('Letter Head and Footer for all factories', () => {
         .and('contain', testdata[33].Value)
         .and('contain', testdata[34].Value)
         .and('contain', testdata[31].Value)
-        .and('contain', testdata[32].Value)
+        .and('contain', testdata[32].Value);
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       })
 
       })
