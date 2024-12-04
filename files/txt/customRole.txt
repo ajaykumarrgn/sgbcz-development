@@ -13,6 +13,5 @@
 # Log Message: "Role updating process is skipped as per the txt file."
 
 #Skip
-
 LL CRM Manager.json
 LL German User.json
