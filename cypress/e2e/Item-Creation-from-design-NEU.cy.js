@@ -44,19 +44,19 @@ describe('Checking Creation of Item from Design NEU', () => {
 
           cy.get('#design-__details > :nth-child(3) > .section-head').click();
 
-          cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(4000);
+          // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(4000);
 
-          cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[5].Value,'{enter}').wait(3000); //enter the correct hv value 3000
+          // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[5].Value,'{enter}').wait(3000); //enter the correct hv value 3000
 
-          cy.get('#design-__details > :nth-child(3) > .section-head').click();
+          // cy.get('#design-__details > :nth-child(3) > .section-head').click();
 
-          cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
+          // cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
 
-          cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[34].Value,'{enter}').wait(3000); //enter the correct lv value 300
+          // cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[34].Value,'{enter}').wait(3000); //enter the correct lv value 300
 
-          cy.get(':nth-child(7) > .section-body > .form-column > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[69].Value).wait(4000);
+          // cy.get(':nth-child(7) > .section-body > .form-column > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[69].Value).wait(4000);
 
-          cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click();
+          // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click();
 
           cy.url().then((currentUrl) => {
 
@@ -69,6 +69,11 @@ describe('Checking Creation of Item from Design NEU', () => {
               cy.url().should('eq', currentUrl); // URL should remain unchanged
 
             });});
+          cy.wait(300);
+          // Logout after each test case
+          cy.get('.nav-link > .avatar').click();
+          cy.get('[onclick="return frappe.app.logout()"]').click();
+          cy.wait(300);
 
       });
 
@@ -76,21 +81,34 @@ describe('Checking Creation of Item from Design NEU', () => {
 
         const testdata = Cypress.env('testData');
 
-        cy.get('.primary-action').click().wait(5000);
-
-        cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().clear().wait(500).type(testdata[2].Value).wait(4000); //factory
-
+        cy.get('.primary-action').click().wait(4000);
+        cy.wait(6000)
+        cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click().wait(500).clear({force:true}).wait(5000).type(testdata[2].Value,{force:true}).wait(4000); //factory
         cy.get('#design-__details > :nth-child(3) > .section-head').click();
-
-        cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(4000);
-
-        cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[5].Value,'{enter}').wait(3000); //enter the correct hv value 3000
-
+        cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
+        // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(3000).type(testdata[5].Value).wait(3000);
+        // Alias the element to avoid lengthy selectors
+        cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+        .as('inputField');
+        // Click the element
+        cy.get('@inputField').click().wait(3000);
+        // Re-fetch the element and type the value
+        cy.get('@inputField').type(testdata[5].Value, { force: true }).wait(4000);
+        // .wait(5000) // wait before typing again
+        // .type(testdata[5].Value, { force: true }) // type the correct HV value
+        // .wait(3000);//enter the correct hv value 3000
+        cy.wait(6000);
         cy.get('#design-__details > :nth-child(3) > .section-head').click();
-
         cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000);
+        //cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[34].Value,'{enter}').wait(3000); //enter the correct lv value 300
+        cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+        .as('inputField');
+        // Click the element
+        cy.get('@inputField').click().wait(3000);
+        // Re-fetch the element and type the value
+        cy.get('@inputField').type(testdata[34].Value, { force: true }).wait(3000);
 
-        cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[34].Value,'{enter}').wait(3000); //enter the correct lv value 300
+        cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click();
 
         cy.get(':nth-child(7) > .section-body > .form-column > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[69].Value).wait(4000);
 
@@ -101,6 +119,11 @@ describe('Checking Creation of Item from Design NEU', () => {
         cy.get('.custom-actions > .btn').click()
 
         cy.wait(6000);
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
 
       });
 
@@ -112,11 +135,16 @@ describe('Checking Creation of Item from Design NEU', () => {
         const testdata = Cypress.env('testData');
 
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
-
+        cy.wait(3000);
         cy.get('#design-item_tab-tab').click();
 
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').should('be.visible').should('not.be.empty');
-
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
+      
       });
 
       it('Should view the Item from the Design', () => {
@@ -124,12 +152,16 @@ describe('Checking Creation of Item from Design NEU', () => {
         const testdata = Cypress.env('testData');
 
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
-
+        cy.wait(3000);
         cy.get('#design-item_tab-tab').click();
 
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click();
 
         cy.wait(2000);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
 
       });
 
@@ -141,7 +173,7 @@ describe('Checking Creation of Item from Design NEU', () => {
         const testdata = Cypress.env('testData');
 
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
-
+        cy.wait(3000);
         cy.get('#design-item_tab-tab').click();
 
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click();
@@ -149,7 +181,11 @@ describe('Checking Creation of Item from Design NEU', () => {
         cy.wait(2000);
 
         cy.get('#item-details > :nth-child(2) > .section-body > :nth-child(2) > form > .frappe-control > .form-group > .control-input-wrapper > .control-value').should('have.text',testdata[69].Value);
-
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       });
   });
 describe('Tear off', () => {
@@ -161,7 +197,7 @@ describe('Tear off', () => {
       cy.wait(2000);
 
       cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
-
+      cy.wait(3000);
       cy.get('#design-item_tab-tab').click();
 
       cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click();
@@ -187,7 +223,10 @@ describe('Tear off', () => {
         cy.get('#page-Item > .page-head > .container > .row > .col > .standard-actions > .primary-action').click();
 
         cy.wait(20000)
-
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       // cy.go('back');
 
     });
@@ -196,7 +235,7 @@ describe('Tear off', () => {
 
       cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
 
-      cy.wait(3000)
+      cy.wait(3000);
 
       cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .menu-btn-group > .btn').click({force:true});
 
@@ -204,7 +243,11 @@ describe('Tear off', () => {
 
       cy.get('.modal-footer > .standard-actions > .btn-primary').click({force:true}).wait(3000); //yes
 
-      cy.wait(3000)
+      cy.wait(3000);
+      // Logout after each test case
+      cy.get('.nav-link > .avatar').click();
+      cy.get('[onclick="return frappe.app.logout()"]').click();
+      cy.wait(300);
 
       //cy.get('.btn-modal-close').click({force:true}).wait(2000);
 
@@ -215,7 +258,7 @@ describe('Tear off', () => {
       const testdata = Cypress.env('testData');
 
       cy.visit(testdata[70].Value);
-
+      cy.wait(3000);
       cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .select-like > .list-row-checkbox').click();
 
       cy.get('.actions-btn-group > .btn > :nth-child(1)').click();
@@ -224,7 +267,11 @@ describe('Tear off', () => {
 
       cy.get('.modal-footer > .standard-actions > .btn-primary').click({force:true});
 
-      cy.wait(3000)
+      cy.wait(3000);
+      // Logout after each test case
+      cy.get('.nav-link > .avatar').click();
+      cy.get('[onclick="return frappe.app.logout()"]').click();
+      cy.wait(300);
 
     });
 
