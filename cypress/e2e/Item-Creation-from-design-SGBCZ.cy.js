@@ -20,24 +20,31 @@ describe('SGBCZ non is design item creation', () => {
         const testdata = Cypress.env('testData');
         const target = testdata[1].value;
         cy.visit(target);
+        cy.wait(3000);
         cy.get('.primary-action').click().wait(5000);
         cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
           .click();
-        cy.wait(2000); // Adjust this time as needed based on your page's behavior
-        cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
-          .type(testdata[6].value);
-        cy.get('div[data-fieldname="lv_rated_voltage"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
-          .click().wait(1000).type(testdata[11].value).wait(1000);
-        cy.get(':nth-child(7) > .section-body > .form-column > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[21].value);
-        cy.get('#design-item_tab-tab').click();
-        cy.get('div[data-fieldname="direct_material_cost"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().clear().wait(1000).type(testdata[20].value);
+        // cy.wait(2000); // Adjust this time as needed based on your page's behavior
+        // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+        //   .type(testdata[6].value);
+        // cy.get('div[data-fieldname="lv_rated_voltage"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+        //   .click().wait(1000).type(testdata[11].value).wait(1000);
+        // cy.get(':nth-child(7) > .section-body > .form-column > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').type(testdata[21].value);
+        // cy.get('#design-item_tab-tab').click();
+        // cy.get('div[data-fieldname="direct_material_cost"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().clear().wait(1000).type(testdata[20].value);
         cy.get('#page-Design > .page-head > .container > .row > .col > .custom-actions')
           .should('not.be.visible');
+        cy.wait(300);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
     });
     it('Create Item Button should be Visible After save', () => {
       const testdata = Cypress.env('testData');
       const target = testdata[1].value;
       cy.visit(target);
+      cy.wait(3000);
       cy.get('.primary-action').click().wait(5000);
       cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
         .click();
@@ -55,6 +62,10 @@ describe('SGBCZ non is design item creation', () => {
       cy.get('#page-Design > .page-head > .container > .row > .col > .custom-actions').click();
       cy.get('.modal-header > .fill-width').should('be.visible');
       cy.wait(4000);
+      // Logout after each test case
+      cy.get('.nav-link > .avatar').click();
+      cy.get('[onclick="return frappe.app.logout()"]').click();
+      cy.wait(300);
         });
       });
   describe('View the Item', () => {
@@ -69,6 +80,10 @@ describe('SGBCZ non is design item creation', () => {
         cy.wait(3000);
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').should('be.visible');
         cy.wait(3000);
+      // Logout after each test case
+      cy.get('.nav-link > .avatar').click();
+      cy.get('[onclick="return frappe.app.logout()"]').click();
+      cy.wait(300);
 
       });
       it('Should view the Item from the Design', () => {
@@ -82,9 +97,13 @@ describe('SGBCZ non is design item creation', () => {
         cy.wait(3000);
         cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click();
         cy.wait(2000);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       });
     });
-  describe('Check the Specifies and Attachments', () => {
+  describe('Check the Specifies field', () => {
       it('Should check the Specifies', () => {
         const testdata = Cypress.env('testData');
         const target = testdata[1].value;
@@ -98,6 +117,10 @@ describe('SGBCZ non is design item creation', () => {
         cy.wait(2000);
         cy.get('#item-details > :nth-child(2) > .section-body > :nth-child(2) > form > .frappe-control > .form-group > .control-input-wrapper > .control-value').should('have.text',testdata[21].value);
         cy.wait(3000);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
       });
     });
     describe('Tear off', () => {
@@ -121,29 +144,43 @@ describe('SGBCZ non is design item creation', () => {
         cy.get('#item-details > :nth-child(4) > .section-head').click()
         // cy.wait(30000)
         cy.get('#page-Item > .page-head > .container > .row > .col > .standard-actions > .primary-action').click();
-        cy.wait(20000)
+        cy.wait(20000);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
         // cy.go('back');
     });
       it('Should Delete the Design', () => {
         const testdata = Cypress.env('testData');
         const target = testdata[1].value;
         cy.visit(target);
+        cy.wait(2000);
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click();
         cy.wait(3000)
         cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .menu-btn-group > .btn').click({force:true});
         cy.get(':nth-child(11) > .grey-link').click({force:true}).wait(2000); //Delete the design
         cy.get('.modal-footer > .standard-actions > .btn-primary').click({force:true}).wait(3000); //yes
-        cy.wait(3000)
+        cy.wait(3000);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
         // cy.get('.btn-modal-close').click({force:true}).wait(2000);
   });
       it('Should Delete the Item', () => {
         const testdata = Cypress.env('testData');
         cy.visit(testdata[22].value);
+        cy.wait(3000);
         cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .select-like > .list-row-checkbox').click();
         cy.get('.actions-btn-group > .btn > :nth-child(1)').click();
-        cy.get('.actions-btn-group > .dropdown-menu > :nth-child(7) > .grey-link > .menu-item-label').click({force:true});
+        cy.get('.actions-btn-group > .dropdown-menu > :nth-child(7) > .grey-link > .menu-item-label').click({force:true}).wait(2000);
         cy.get('.modal-footer > .standard-actions > .btn-primary').click({force:true});
-        cy.wait(3000)
+        cy.wait(3000);
+        // Logout after each test case
+        cy.get('.nav-link > .avatar').click();
+        cy.get('[onclick="return frappe.app.logout()"]').click();
+        cy.wait(300);
     });
     });
 

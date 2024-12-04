@@ -26,6 +26,11 @@ describe('SGBCZ factory non is design', () => {
                   .should('have.value',testdata[3].value);
                 cy.get(':nth-child(3) > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback')
                   .should('have.value',testdata[4].value);
+                cy.wait(300);
+                // Logout after each test case
+                cy.get('.nav-link > .avatar').click();
+                cy.get('[onclick="return frappe.app.logout()"]').click();
+                cy.wait(300);
             });
         });
 
@@ -38,8 +43,10 @@ describe('SGBCZ factory non is design', () => {
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
               .click().type(testdata[5].value,'enter',{force:true}).wait(2000);
             cy.get('div[data-fieldname="lv_rated_voltage"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click();
+            cy.wait(600);
             cy.get('.modal-title').should('be.visible');
             cy.get('.btn-modal-close').click();
+            cy.wait(300);
             // cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
             //   .click().clear().type(testdata[6].value,{force: true}).wait(2000);
             cy.get(':nth-child(3) > .section-body > :nth-child(2) > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
@@ -48,6 +55,11 @@ describe('SGBCZ factory non is design', () => {
               .should('have.value',testdata[8].value);
             cy.get(':nth-child(3) > .section-body > :nth-child(4) > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
               .should('have.value',testdata[9].value);
+            cy.wait(300)
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
         });
     });
 
@@ -59,10 +71,16 @@ describe('SGBCZ factory non is design', () => {
             cy.get('.primary-action').click().wait(4000);
             cy.get('div[data-fieldname="lv_rated_voltage"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click().wait(1000).type(testdata[10].value,'enter').wait(1000);
             cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click();
+            cy.wait(600);
             cy.get('.modal-header > .fill-width').should('be.visible');
             cy.get('.btn-modal-close').click();
             // cy.get('div[data-fieldname="lv_rated_voltage"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
             //   .click({force: true}).clear().type(testdata[11].value,{force:true}).wait(1000);
+            cy.wait(300);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
         });
         it('should check the dependent values of LV', () => {
             const testdata = Cypress.env('testData');
@@ -77,6 +95,11 @@ describe('SGBCZ factory non is design', () => {
               .should('have.value',testdata[14].value);
             cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
               .should('have.value',testdata[15].value);
+            cy.wait(300);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
 
         });
     });
@@ -94,6 +117,11 @@ describe('SGBCZ factory non is design', () => {
               .should('have.value',testdata[18].value);
             cy.get(':nth-child(5) > .section-body > :nth-child(4) > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
               .should('have.value',testdata[19].value);
+            cy.wait(300);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
          });
         it('should Check the Parallel coil field is visible', () => {
             const testdata = Cypress.env('testData');
@@ -101,6 +129,11 @@ describe('SGBCZ factory non is design', () => {
             cy.visit(target);
             cy.get('.primary-action').click().wait(4000);
             cy.get(':nth-child(2) > form > .form-group.frappe-control > .checkbox > label > .label-area').should('be.visible');
+            cy.wait(300);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
 
         });
     });
@@ -129,6 +162,11 @@ describe('SGBCZ factory non is design', () => {
             cy.get('#page-Design > .page-head > .container > .row > .col > .standard-actions > .menu-btn-group > .btn').click({force:true});
             cy.get(':nth-child(11) > .grey-link').click({force:true}).wait(2000); //Delete the design
             cy.get('.modal-footer > .standard-actions > .btn-primary').click({force:true}).wait(3000); //yes
+            cy.wait(300);
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();
+            cy.wait(300);
         });
         
     });
