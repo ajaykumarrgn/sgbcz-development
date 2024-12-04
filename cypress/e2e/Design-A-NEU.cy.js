@@ -18,6 +18,7 @@ describe('Testing NEU factory for design', () => {
         });
     });
     describe('Should add the design and test the hv value', () => {
+
         it('should test the design can be save and delete by filling the mandatory fields', () => {
             const testdata = Cypress.env('testData');
             cy.get('.primary-action').click().wait(4000);
@@ -94,7 +95,12 @@ describe('Testing NEU factory for design', () => {
             // cy.get('.btn-modal-close').should('be.visible');
 
             cy.wait(4000)
-             
+            
+            cy.get('.btn-modal-close').click({ force:true })
+            
+            //Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();  
 
         });
 
@@ -134,6 +140,11 @@ describe('Testing NEU factory for design', () => {
             // cy.get('.btn-modal-close').should('be.visible');
 
             cy.wait(4000)
+            cy.get('.btn-modal-close').click({ force:true })
+            
+            //Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();  
            
 
         });
@@ -206,7 +217,6 @@ describe('Testing NEU factory for design', () => {
         });
 
 
-
         it('Should Validate the wrong lv value', () => {
 
             const testdata = Cypress.env('testData');
@@ -237,7 +247,62 @@ describe('Testing NEU factory for design', () => {
             cy.wait(4000)
               
 
+        });it('Should accept the correct lv value', () => {
+
+            const testdata = Cypress.env('testData');
+
+            cy.get('.primary-action').click().wait(4000);
+            cy.wait(4000);
+
+            cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force:true}).clear({force:true}).wait(500).type(testdata[2].Value).wait(4000); //factory
+
+            cy.get('#design-__details > :nth-child(3) > .section-head').click();
+
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click({force:true}).wait(1000);
+
+            //cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback', { timeout: 10000 }).should('exist').type(testdata[34].Value,'{enter}').wait(3000); //enter the correct lv value 300
+
+            cy.get(':nth-child(4) > .section-body > :nth-child(1) > form > [data-fieldtype="HTML"] > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
+            .as('inputField');
+
+            // Click the element
+            cy.get('@inputField').click().wait(3000);
+
+            // Re-fetch the element and type the value
+            cy.get('@inputField').type(testdata[34].Value, { force: true }).wait(3000);
+
+            cy.get(':nth-child(3) > .section-body > :nth-child(1) > form > div[data-fieldtype="Select"] > .form-group > .clearfix > .control-label').click({force:true});
+
+            cy.wait(4000)
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();     
+
         });
+
+
+
+        it('should Check the all the Transformer Environment for factory NEU', () => {
+
+            const testdata = Cypress.env('testData');
+
+            cy.get('.primary-action').click().wait(4000);
+            cy.wait(4000);
+
+            cy.get(':nth-child(1) > form > div[data-fieldtype="Link"] > .form-group > .control-input-wrapper > .control-input > .link-field > .awesomplete > .input-with-feedback').click({force:true}).clear({force:true}).wait(500).type(testdata[2].Value).wait(4000); //factory
+
+            cy.get('#design-transformer_environment_tab-tab').click({force:true}).wait(3000);
+
+            cy.get('div[data-fieldname="temperature_rise_oil"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').should('have.value',testdata[63].Value);
+
+            cy.get('div[data-fieldname="temperature_rise_winding"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').should('have.value',testdata[68].Value);
+
+            cy.wait(4000)
+            // Logout after each test case
+            cy.get('.nav-link > .avatar').click();
+            cy.get('[onclick="return frappe.app.logout()"]').click();     
+
+        }); //Transformer Environment    
 
 
 
