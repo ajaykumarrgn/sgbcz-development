@@ -397,7 +397,6 @@ describe('Testing NEU factory for design', () => {
         }); //Transformer Environment    
  
     });
-
-
-
 });
+
+#Skipping the test
