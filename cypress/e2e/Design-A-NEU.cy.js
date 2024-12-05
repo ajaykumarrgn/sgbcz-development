@@ -398,5 +398,3 @@ describe('Testing NEU factory for design', () => {
  
     });
 });
-
-#Skipping the test
