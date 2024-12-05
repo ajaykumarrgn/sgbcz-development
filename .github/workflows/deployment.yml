@@ -18,7 +18,7 @@ jobs:
   code_quality_check:
     runs-on: ubuntu-latest
     if: |
-      !contains(github.event.head_commit.message, '[skip cy]') &&
+      !contains(github.event.head_commit.message, '[skip ci]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
@@ -200,7 +200,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: quality
     if: |
-      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, '[skipcy]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
