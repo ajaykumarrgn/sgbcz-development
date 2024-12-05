@@ -200,7 +200,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: quality
     if: |
-      !contains(github.event.head_commit.message, '[skipcy]') &&
+      !contains(github.event.head_commit.message, 'skipcy') &&
+      !contains(github.event.head_commit.message, '[skip ci]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
@@ -294,7 +295,7 @@ jobs:
 
   wait_for_approval:
     runs-on: ubuntu-latest
-    needs: cypress_test
+    needs: quality
     if: |
       !contains(github.event.head_commit.message, '[skip ci]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
