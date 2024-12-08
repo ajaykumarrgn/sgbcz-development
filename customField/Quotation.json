@@ -230,7 +230,7 @@
   {
     "name": "Quotation-custom_factory",
     "docstatus": 0,
-    "idx": 6,
+    "idx": 7,
     "is_system_generated": 0,
     "dt": "Quotation",
     "module": null,
@@ -287,7 +287,7 @@
   {
     "name": "Quotation-custom_quotation_reference_number",
     "docstatus": 0,
-    "idx": 142,
+    "idx": 143,
     "is_system_generated": 0,
     "dt": "Quotation",
     "module": null,
@@ -1211,9 +1211,9 @@
     "precision": "",
     "hide_seconds": 0,
     "hide_days": 0,
-    "options": "24\n36\n48\n60\n72\n84",
+    "options": "24\n36\n48\n60\n72\n84\n90\n96",
     "fetch_from": "party_name.warranty",
-    "fetch_if_empty": 1,
+    "fetch_if_empty": 0,
     "collapsible": 0,
     "collapsible_depends_on": null,
     "default": null,
@@ -1256,7 +1256,7 @@
   {
     "name": "Quotation-workflow_state",
     "docstatus": 0,
-    "idx": 136,
+    "idx": 137,
     "is_system_generated": 0,
     "dt": "Quotation",
     "module": null,
