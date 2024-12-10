@@ -17,11 +17,11 @@ describe('Testcase for the SGB Warranty Options', () => {
           cy.location('pathname', { timeout: 30000 }).should('include', '/app');          
       });
   });
-  afterEach(() => {
-      // Logout after each test case
-      cy.get('.nav-link > .avatar').click();
-      cy.get('[onclick="return frappe.app.logout()"]').click();
-  });
+  // afterEach(() => {
+  //     // Logout after each test case
+  //     cy.get('.nav-link > .avatar').click();
+  //     cy.get('[onclick="return frappe.app.logout()"]').click();
+  // });
   describe('Verify that the new warranty options were added', () => {
       it('Should Check the Warranty field Value in Customer group', () => {
           const LA_TESTDATA = Cypress.env('testData');
@@ -39,6 +39,10 @@ describe('Testcase for the SGB Warranty Options', () => {
             .find('option')
             .contains(LA_TESTDATA[6].value) // Check for option with text '96'
             .should('exist');
+
+          //Logout after each test case
+          cy.get('.nav-link > .avatar').click();
+          cy.get('[onclick="return frappe.app.logout()"]').click(); 
       });
 
       it('Should save the Customer with new Warranty Options', () => {
@@ -67,7 +71,10 @@ describe('Testcase for the SGB Warranty Options', () => {
           cy.get(':nth-child(2) > form > div[data-fieldtype="Select"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback')
             .select(option.text());
               });
-          cy.get('#page-Customer > .page-head > .container > .row > .col > .standard-actions > .primary-action').click({force:true});           
+          cy.get('#page-Customer > .page-head > .container > .row > .col > .standard-actions > .primary-action').click({force:true});  
+          //Logout after each test case
+          cy.get('.nav-link > .avatar').click();
+          cy.get('[onclick="return frappe.app.logout()"]').click();          
       });
   
       it('Should Check the Warranrty in sales order with the customer', () => {
@@ -94,7 +101,9 @@ describe('Testcase for the SGB Warranty Options', () => {
           cy.get('div[data-fieldname="delivery_date"] > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click();
           cy.get('#sales-order-payment_schedule_section-tab').click({force:true});
           cy.get(':nth-child(1) > .section-body > :nth-child(3) > form > .frappe-control > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').should('have.value',LA_TESTDATA[6].value);
-
+          //Logout after each test case
+          cy.get('.nav-link > .avatar').click();
+          cy.get('[onclick="return frappe.app.logout()"]').click(); 
       });
  
       it('Should Check the Warranrty in quotation with the customer', () => {
@@ -115,8 +124,11 @@ describe('Testcase for the SGB Warranty Options', () => {
           // cy.get(':nth-child(2) > form > .has-error > .form-group > .control-input-wrapper > .control-input > .input-with-feedback').click();
           cy.get('#quotation-terms_tab-tab').click();
           cy.get('#quotation-terms_tab > :nth-child(2) > .section-body > :nth-child(3) > form > .input-max-width > .form-group > .control-input-wrapper > .control-value').should('have.text',LA_TESTDATA[6].value);
-      });
-      it('Should revert the Customer with earlier Warranty Options', () => {
+          //Logout after each test case
+          cy.get('.nav-link > .avatar').click();
+          cy.get('[onclick="return frappe.app.logout()"]').click(); 
+        });
+       it('Should revert the Customer with earlier Warranty Options', () => {
           const LA_TESTDATA = Cypress.env('testData');
           cy.visit(LA_TESTDATA[2].value);
           // Wait for the window to load (optional but good practice for dynamic content)
@@ -145,6 +157,9 @@ describe('Testcase for the SGB Warranty Options', () => {
               });
               // save
           cy.get('#page-Customer > .page-head > .container > .row > .col > .standard-actions > .primary-action').click({force:true});           
-      });
+          //Logout after each test case
+          cy.get('.nav-link > .avatar').click();
+          cy.get('[onclick="return frappe.app.logout()"]').click(); 
+        });
   });
 });
