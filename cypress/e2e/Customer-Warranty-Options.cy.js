@@ -2,7 +2,7 @@ describe('Testcase for the SGB Warranty Options', () => {
 
   beforeEach(() => {
       cy.task('readExcelFile', { 
-          filePath: '/home/emp23002/Cypress/cypress/e2e/variables/Warranty.xlsx', 
+          filePath: 'cypress/e2e/variables/Warranty.xlsx', 
           sheetName: 'Sheet1' 
       }).then((LA_TESTDATA) => { // eslint-disable-line
           // Store the loaded Excel data in Cypress environment variables
@@ -17,11 +17,6 @@ describe('Testcase for the SGB Warranty Options', () => {
           cy.location('pathname', { timeout: 30000 }).should('include', '/app');          
       });
   });
-  // afterEach(() => {
-  //     // Logout after each test case
-  //     cy.get('.nav-link > .avatar').click();
-  //     cy.get('[onclick="return frappe.app.logout()"]').click();
-  // });
   describe('Verify that the new warranty options were added', () => {
       it('Should Check the Warranty field Value in Customer group', () => {
           const LA_TESTDATA = Cypress.env('testData');
