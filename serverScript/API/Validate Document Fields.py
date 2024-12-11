@@ -16,7 +16,7 @@ def fn_add_error_message(ia_response, code, msg, field_name):
     field_label = fn_convert_fieldname_to_label(field_name)
     ia_response.append({
         "code": code,
-        "msg": f"{msg} {field_label}",
+        "msg": _(f"{msg} {field_label}"),
         "msgtype": "Error"
     })
 
