@@ -9,52 +9,52 @@ frappe.ui.form.on('Design', {
 });
  
 function fnResetValues(frm) {
-    
-    function fnResetFields(iFields, defaultValue = '') {
-        for (let field of iFields) {
-            frm.set_value(field, defaultValue);
+    //function to reset the field with default as empty
+    function fnResetFields(iaFields, defaultValue = '') {
+        for (let lField of iaFields) {
+            frm.set_value(lField, defaultValue);
         }
     }
-    
-    function fnResetItemTabFields(iFields) {
-        for (let field of iFields) {
-            frm.set_value(field, '');
+    //reset item tab fields for changing the behaviour of the factory 
+    function fnResetItemTabFields(iaFields) {
+        for (let iField of iaFields) {
+            frm.set_value(iField, '');
             if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
-                // If factory is 'SGBCZ' and not is_design, 
-                //make the field visible and editable
-                frm.set_df_property(field, "hidden", field !== 'direct_material_cost');
-                frm.set_df_property(field, "read_only", false);
+                //Make the field visible and editable
+                //when the factory is 'SGBCZ' and also is not the design, 
+                frm.set_df_property(iField, "hidden", iField !== 'direct_material_cost');
+                frm.set_df_property(iField, "read_only", false);
             } else {
-                // Otherwise, hide the field and make it read-only
-                frm.set_df_property(field, "hidden", true);
-                frm.set_df_property(field, "read_only", true);
+                // Otherwise, hide the field and make it as read-only
+                frm.set_df_property(iField, "hidden", true);
+                frm.set_df_property(iField, "read_only", true);
             }
         }
     }
 
-    // Internal function to clear HTML fields
-    function fnResetHtmlFields(iFields) {
-        for (let field of iFields) {
-            let htmlInput = $(frm.fields_dict[field].wrapper).find('input');
+    //To clear HTML fields when changing the one factory to another.
+    function fnResetHtmlFields(iaFields) {
+        for (let lField of iaFields) {
+            let htmlInput = $(frm.fields_dict[lField].wrapper).find('input');
             htmlInput.val('');
         }
     }
 
-    // Internal function to reset fields to their 
-    //default values as specified in the metadata
-    function fnResetToDefault(iFields) {
-        for (let fieldname of iFields) {
+    // Restore the default values after resetting the factory values
+    
+    function fnResetToDefault(iaFields) {
+        for (let lFieldname of iaFields) {
             const FIELD_META = frm.meta.fields.find(field => 
-                    field.fieldname === fieldname);
+                    field.fieldname === lFieldname);
             if (FIELD_META) {
-                frm.set_value(fieldname, FIELD_META.default);
+                frm.set_value(lFieldname, FIELD_META.default);
             }
         }
     }
 
     if (frm.doc.status === 'Draft') {
         
-        // Resetting specific fields to empty
+        // Resetting the specific fields to empty when the factory is "SGBCZ"
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             fnResetFields([
                 'hv_rated_voltage', 'highest_operation_voltage_hv', 
@@ -62,36 +62,38 @@ function fnResetValues(frm) {
             ]);
         }
         
-        //clear only if two lv are there for SGBCZ
+        // In SGBCZ have only one LV value 
+        // So clear the two lv for SGBCZ
         if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
             fnResetFields([
                 'lv_rated_voltage', 'lv1', 'lv_2']);
         }
 
-        // Resetting item tab fields
+        // Resetting item tab fields when shifting the factory
         fnResetItemTabFields([
             "direct_material_cost", "labour", "production_overhead", 
             "cost_of_goods", "sales_overhead", "administrative_overhead", "total_cost"
         ]);
-
+        //reset to meta data default
         fnResetToDefault(['tapping_plus_step', 'impedance']);
         
        
         if(!frm.doc.is_design){
+            //reset to meta data default
             fnResetToDefault(['rating']);
         }
             
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
-            // Clearing HTML fields
+            // Clearing HTML field values
             fnResetHtmlFields(['hv_html']);
         }
         
         if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
-            // Clearing HTML fields
+            // Clearing HTML field values
             fnResetHtmlFields(['lv_html']);
         }
 
-        //onchange of factory clear every field
+        //onchange of each factory clear every field
         if(frm.doc.factory != 'SGBCZ'){
             fnResetHtmlFields(['hv_html', 'lv_html', 'power_lv']);
             fnResetFields([

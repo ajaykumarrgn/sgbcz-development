@@ -1,41 +1,44 @@
-//The design form displays the save alert twice (ISS-2024-00133)
+// Change Reference
+// Create the new design without following the exist filters:>>(ISS-2024-00133)
+// Design form saved twice:>>(ISS-2024-00133)
+
 frappe.ui.form.on('Design', {
-    fngetAttributeOptionAndDefault(frm, iAttributeLabel, 
+    fnGetAttributeOptionAndDefault(frm, iAttributeLabel, 
             iAttributeName, iTransformerType, iIsDesign, iReset = false) {
-        const DOCTYPE = "Gitra Settings";
-         // Initialize the model with doctype Gitra Settings
-        frappe.model.with_doc(DOCTYPE, DOCTYPE, function() {
+        const L_DOCTYPE = "Gitra Settings";
+        // Initialize the model with doctype Gitra Settings
+        frappe.model.with_doc(L_DOCTYPE, L_DOCTYPE, function() {
             // Then from the model get the list. This will
             // return all attributes of the model including child table
-            let ldDoc = frappe.model.get_list(DOCTYPE);
+            let ldDoc = frappe.model.get_list(L_DOCTYPE);
             // Find the specific attribute based on the attribute_label
             //and transformer_type
             let ldAttribute = ldDoc[0].attributes.find(attr => 
                 attr.parameter === iAttributeLabel 
                 && attr.transformer_type === iTransformerType
                 && attr.is_design === iIsDesign);
-                
-            //If ldAttribute has a default value and options,
+            //Get the default value and options from the Gitra Attribute,
             if(ldAttribute && ldAttribute.default && ldAttribute.options){
-                // set the field's option with ldAttribute.options
+                // set the field's option from the Gitra attribute options
                 frm.set_df_property(iAttributeName, 'options', ldAttribute.options);
                 //if form status is Draft and value is empty or reset is true
-                //set the default value
+                //set the default value into the field
                 if((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft'){
                     frm.set_value(iAttributeName, ldAttribute.default);
                 }
                 frm.refresh_field(iAttributeName);
-                
             }else{
-                //call the fngetAttributeOptionFromItemAttribute
+                // If attributes not there in the Gitra settings
+                // then it will get from the Item attribute
                 frm.events.fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, 
             iAttributeName, iReset);
             }
-            
         });
     },
     
-    //this function call get_attribute_value_from_item_attribute api
+    //get values from item attribute through 
+    //api "get_attribute_value_from_item_attribute"
+    //argument as Attribute Name
     fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
         frappe.call({
             method: 'get_attribute_value_from_item_attribute',
@@ -54,10 +57,9 @@ frappe.ui.form.on('Design', {
                 frm.refresh_field(iAttributeName);
             }
         });
-
     },
     
-fnSetOptionsAndDefault(frm, iReset = false) {
+    fnSetOptionsAndDefault(frm, iReset = false) {
         //Attribute mapping
         const LA_ATTRIBUTES = [
             ['Bushings HV', 'bushing_hv'],
@@ -75,17 +77,23 @@ fnSetOptionsAndDefault(frm, iReset = false) {
             ['Environmental class', 'environmental_class'],
             ['Transformer IP', 'ip_protection']
         ];
-
         //looping the LA_ATTRIBUTES
         LA_ATTRIBUTES.forEach(laAttribute => {
-            // Get the vector group Lv1 and Vector Group LV2 when only LV2 is present
-            if (frm.doc.lv_2 > 0 || !['vector_group_lv1', 'vector_group_lv2'].includes(laAttribute[1])) { //<<ISS-2024-00133
-                frm.events.fngetAttributeOptionAndDefault(frm, laAttribute[0], laAttribute[1], frm.doc.transformer_type, frm.doc.is_design, iReset);
-            }
+            frm.events.fnGetAttributeOptionAndDefault(frm, laAttribute[0], laAttribute[1], frm.doc.transformer_type, frm.doc.is_design, iReset);
         });
     },
 
-    refresh(frm) {
+    //refresh(frm) { //Commented this line for the issue (<<ISS-2024-00133)
+    //Issue: Form saved twice in the draft status (>>ISS-2024-00133)
+    //Clear the exist status filters when enter into 
+    //the new design form >>(ISS-2024-00133)
+    //Reseting the framework functionality of carrying 
+    //the filter value to the full form on creating new document
+    
+    onload(frm) {
+        if(frm.is_new() && frm.doc.status !== 'Draft'){
+	        frm.set_value('status', 'Draft');
+	    }
         frm.events.fnSetOptionsAndDefault(frm);
     },
 
@@ -99,6 +107,5 @@ fnSetOptionsAndDefault(frm, iReset = false) {
 
     transformer_type(frm) {
         frm.events.fnSetOptionsAndDefault(frm);
-    }
-
+    },
 });

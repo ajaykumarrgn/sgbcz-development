@@ -6,10 +6,13 @@ on:
       - main
       - r2
       - hot-fix
-      - develop
-      - offer-workflow
+      - hot-fix-release
     paths-ignore: # Avoid triggering on PR merges with specific commit messages
-      - '**/cypress/**'  
+      - '**/cypress/**'
+      - '.github/**'
+      - '.pylintrc'
+      - 'eslint.config.js'
+      - 'eslint-plugin-custom-rules.js' 
 
 jobs:
   code_quality_check:
@@ -19,13 +22,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     steps:
       - name: Use Node.js v20
@@ -77,13 +80,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     needs: code_quality_check
     env:
@@ -97,6 +100,7 @@ jobs:
       PERM_END_POINT: ${{ vars.QA_PERM_END_POINT }}
       CUSTOM_FIELD_END_POINT: ${{ vars.QA_CUSTOM_FIELD_END_POINT }}
       DOCTYPE_END_POINT: ${{ vars.QA_DOCTYPE_END_POINT }}
+      USER_PERMISSION : ${{ vars.QA_USER_PERMISSION }}
       KEY: ${{ vars.QA_KEY }}
 
     steps:
@@ -146,6 +150,17 @@ jobs:
             exit 0
           fi
 
+      - name: Upload User Permission
+        run: |
+          if grep -q "user_permission" ci/migrate.txt; then
+            echo "Allows the User Permission Configuration job to proceed."
+            npm i
+            npm run update_user_permission
+          else
+            echo "Does not allow the User Permission Configuration job to proceed, skipping."
+            exit 0
+          fi
+
       - name: Upload Letterhead and Printformat
         run: |
           if grep -q "print_format" ci/migrate.txt; then
@@ -167,7 +182,17 @@ jobs:
             echo "Does not allow the Documents Configuration job to proceed, skipping."
             exit 0
           fi
-          
+
+      - name: Delete Files
+        run: |
+          if grep -q "delete_files" ci/migrate.txt; then
+            echo "Allows the Deletion of Files to proceed"
+            npm i
+            npm run delete_record
+          else
+            echo "Does not allows the Deletion of Files to proceed, skipping."
+            exit 0
+          fi
 
   ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
@@ -175,17 +200,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: quality
     if: |
+      !contains(github.event.head_commit.message, 'skipcy') &&
       !contains(github.event.head_commit.message, '[skip ci]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     env:
       USER_NAME: ${{ secrets.TEST_USER_NAME }}
@@ -202,6 +228,7 @@ jobs:
         with:
           submodules: true
           token: ${{ secrets.TEST_REPO_KEY }}
+          fetch-depth: 0 # fetch full history
 
       - name: Read Commit Hash
         id: read_commit_hash
@@ -211,7 +238,7 @@ jobs:
 
       - name: Initialize and Update Submodule to Specific Commit
         run: |
-          git submodule update --init --recursive
+          git submodule update --init --recursive --remote
           cd testAutomate
           git fetch origin
           git checkout ${{ env.COMMIT_HASH }}
@@ -268,7 +295,7 @@ jobs:
 
   wait_for_approval:
     runs-on: ubuntu-latest
-    needs: cypress_test
+    needs: quality
     if: |
       !contains(github.event.head_commit.message, '[skip ci]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
@@ -283,7 +310,7 @@ jobs:
         (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
       )
 
     steps:
@@ -312,7 +339,7 @@ jobs:
         (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
       )
     env:
       HOST: ${{ vars.PROD_HOST }}
@@ -325,6 +352,7 @@ jobs:
       PERM_END_POINT: ${{ vars.PROD_PERM_END_POINT }}
       CUSTOM_FIELD_END_POINT: ${{ vars.PROD_CUSTOM_FIELD_END_POINT }}
       DOCTYPE_END_POINT: ${{ vars.PROD_DOCTYPE_END_POINT }}
+      USER_PERMISSION : ${{ vars.PROD_USER_PERMISSION }}
       KEY: ${{ vars.PROD_KEY }}
 
     steps:
@@ -376,6 +404,17 @@ jobs:
             exit 0
           fi
 
+      - name: Upload User Permission
+        run: |
+          if grep -q "user_permission" ci/migrate.txt; then
+            echo "Allows the User Permission Configuration job to proceed."
+            npm i
+            npm run update_user_permission
+          else
+            echo "Does not allow the User Permission Configuration job to proceed, skipping."
+            exit 0
+          fi
+
       - name: Upload Letterhead and Printformat
         run: |
           if grep -q "print_format" ci/migrate.txt; then
@@ -395,5 +434,27 @@ jobs:
             npm run update_document
           else
             echo "Does not allow the Documents Configuration job to proceed, skipping."
+            exit 0
+          fi
+      
+      - name: Delete Files
+        run: |
+          if grep -q "delete_files" ci/migrate.txt; then
+            echo "Allows the Deletion of Files to proceed"
+            npm i
+            npm run delete_record
+          else
+            echo "Does not allows the Deletion of Files to proceed, skipping."
+            exit 0
+          fi
+
+      - name: Update Property Setter
+        run: |
+          if grep -q "update_property_setter" ci/migrate.txt; then
+            echo "Allows the Updation of Core Doc Fields to proceed"
+            npm i
+            npm run update_property_setter
+          else
+            echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
             exit 0
           fi
