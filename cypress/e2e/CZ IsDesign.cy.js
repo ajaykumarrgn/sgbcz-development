@@ -195,7 +195,7 @@ describe('Testing Is Design Scenarios', () => {
     describe('Validate the Parallel Design', () => {
         it('Run Node Script After Design created', () => {
         // Change directory, install dependencies, and execute the Node.js scripts
-        cy.exec('cd "/home/emp23002/lens-test-automation/gitraTesting" && npm i && node getGitraDesign2.js && node updateDesign.js', { failOnNonZeroExit: false }).wait(10000)
+        cy.exec('cd "gitraTesting" && npm i && node getGitraDesign2.js && node updateDesign.js', { failOnNonZeroExit: false }).wait(10000)
             .then((result) => {
             Cypress.log({ message: `Script output: ${result.stdout}`, log: true }); 
             });
