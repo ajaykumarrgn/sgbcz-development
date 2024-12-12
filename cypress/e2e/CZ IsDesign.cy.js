@@ -244,9 +244,9 @@ describe('Testing Is Design Scenarios', () => {
             cy.get('.custom-actions > .btn').click(); //view item
             cy.wait(3000)
             //cy.get('[data-fieldname="item"] > .form-group > .control-input-wrapper > .control-value > a').click().wait(2000);
-            cy.get('#item-variants_section-tab').click().wait(500);
+            cy.get('#item-variants_section-tab').click().wait(2000);
             cy.get('.data-row > .bold > .static-area > a').should('contain.text', 'Parallel coil');
-            cy.get('[data-name="f1d98904a5"] > .data-row > .bold > .static-area > a').should('contain.text', 'YES').wait(4000);
+            cy.get('.data-row > [data-fieldname="attribute_value"] > .static-area').should('contain.text', 'YES').wait(4000);
            // Tear off
             //Go to the item 
             cy.visit(target4);
