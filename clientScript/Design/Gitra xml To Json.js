@@ -19,7 +19,8 @@ frappe.ui.form.on("Design", {
         };
   
         // create a script node in the html document
-        //equivalent to <script src="https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js" type="text/javascript"></script>
+        //equivalent to <script src="https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js" 
+        //type="text/javascript"></script>
         let LD_DOMScriptEle = document.createElement("script");
   
         LD_DOMScriptEle.setAttribute("src", lFileUrl);
