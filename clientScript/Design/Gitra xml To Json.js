@@ -2,7 +2,8 @@
 //TASK-2024-00299: To calculate the direct material cost with 200, 
 //considering the design based on the parallel coil.
 //Change References
-//The parallel design value is not set in the item code generated from the design item (ISS-2024-00130).
+//The parallel design value is not set in the item code generated
+// from the design item (ISS-2024-00130).
 frappe.ui.form.on("Design", {
     refresh(frm) {
       /*
@@ -50,7 +51,8 @@ frappe.ui.form.on("Design", {
           );
   
           //>>TASK-2024-00299
-          //If a parallel coil appears in the design, add 200 to the direct material cost
+          //If a parallel coil appears in the design, add 200 
+          //to the direct material cost
           const LA_TGTSPULE =
             LD_JSONDATA.sgb.TGtWickelzettel.TGtWickelzettelSystemeListe
               .TGtWickelzettelSystem[1].TGtWicklungenListe.TGtWicklung

@@ -216,6 +216,8 @@ jobs:
     env:
       USER_NAME: ${{ secrets.TEST_USER_NAME }}
       PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      BASE_URL: ${{ secrets.TEST_BASE_URL }}
+      KEY: ${{ secrets.TEST_KEY}}
 
     steps:
       - name: Use Node.js v20
