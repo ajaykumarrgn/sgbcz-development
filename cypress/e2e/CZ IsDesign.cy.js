@@ -224,7 +224,7 @@ describe('Testing Is Design Scenarios', () => {
             const target = testdata[1].Value;
 
             cy.get('[data-original-title="Title"] > .input-with-feedback').click()
-            cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click()
+            cy.get(':nth-child(3) > .list-row > .level-left > .list-subject > .bold > .ellipsis').click().wait(4000)
             cy.get('.custom-actions > .btn').click(); //create item
 
             cy.wait(20000)
