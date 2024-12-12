@@ -5,13 +5,14 @@
 frappe.ui.form.on('Quotation', {
     onload(frm) {
         // Check if the quotation is new and not in warranty
-        if (frm.is_new() && !frm.doc.warranty && frm.doc.items && frm.doc.items.length > 0) {
+        if (frm.is_new() && frm.doc.items && frm.doc.items.length > 0) {
             fnFetchWarrantyFromCustomer(frm);
         }
     },
     
-    // Fetch warranty from the selected Customer when the customer is changed
+    //On change of the customer event (i.e, party_name)
     party_name(frm) {
+        // Fetch warranty from the selected Customer when the customer is changed
         fnFetchWarrantyFromCustomer(frm);
     }
 });
