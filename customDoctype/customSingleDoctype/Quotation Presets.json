@@ -43,7 +43,6 @@
   "show_preview_popup": 0,
   "index_web_pages_for_search": 1,
   "doctype": "DocType",
-  "actions": [],
   "fields": [
     {
       "docstatus": 0,
@@ -678,7 +677,7 @@
       "parenttype": "DocType",
       "idx": 14,
       "fieldname": "price_recalculation_frequency",
-      "label": "Price Recalculation Frequency (in days)",
+      "label": "Price Recalculation Frequency (in Days)",
       "fieldtype": "Int",
       "search_index": 0,
       "show_dashboard": 0,
@@ -720,8 +719,7 @@
       "doctype": "DocField"
     }
   ],
-  "links": [],
-  "states": [],
+  "actions": [],
   "permissions": [
     {
       "docstatus": 0,
@@ -749,5 +747,7 @@
       "set_user_permissions": 0,
       "doctype": "DocPerm"
     }
-  ]
+  ],
+  "states": [],
+  "links": []
 }

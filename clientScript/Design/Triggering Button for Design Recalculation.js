@@ -216,7 +216,7 @@ function fnRecalculate(frm){
 
   // Set all fields to empty string
   FIELDSTOCLEAR.forEach(field => frm.set_value(field, ''));
-
+  frm.set_value('is_update_item_prices', 0);
   // Update the status and save the form
   frm.set_value("status", "Perform Calculation");
   frm.save();
