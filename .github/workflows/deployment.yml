@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - r2
+      - release
       - hot-fix
       - hot-fix-release
     paths-ignore: # Avoid triggering on PR merges with specific commit messages
