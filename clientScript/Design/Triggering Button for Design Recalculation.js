@@ -395,10 +395,3 @@ function fnViewItem(frm) {
   frappe.set_route("item", frm.doc.item);
 }
 
-//Hide the Update Pricelist button after setting the total cost into the price list rate
-function fnHideUpdatePricelistButton(frm) {
-    if (frm.doc.is_update_item_prices === 1) {
-        $('.btn:contains("Force Update Pricelist")').hide();
-    }
-  
-}

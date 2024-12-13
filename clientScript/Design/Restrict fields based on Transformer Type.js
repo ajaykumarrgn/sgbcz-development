@@ -4,72 +4,54 @@ frappe.ui.form.on('Design', {
     onload(frm){
         fnSetFormToReadOnly(frm); //<<ISS-2024-00133
     },
-// When factory is changed, fields also changed for that dependent request.
 
-//onchange of factory select field event
-factory: function(frm) {
-  
-    // fnResetValues(frm);
-    
-    //setting the default transformer type
-    //based on factory
-    switch (frm.doc.factory) {
-        case 'SGBCZ':
-            frm.set_df_property('lv_rated_voltage', 'reqd', true);
-            frm.set_value('transformer_type', 'DTTHZ2N');
-            break;
-        case 'RGB':
-            frm.set_df_property('lv_rated_voltage', 'reqd', false);
-            frm.set_value('transformer_type', 'DTTH2N');
-            break;
-        case 'NEU':
-            frm.set_df_property('lv_rated_voltage', 'reqd', false);
-            frm.set_value('transformer_type', 'DOTML');
-            break;
-    }
-    
-    frm.trigger('fnToggleFields');
-    
-},
-
-refresh: function(frm) {
-   //other then Draft, 
-   //the frm should be read only
-    if(frm.doc.status != 'Draft'){
-      setTimeout(function() {
-        fnSetHTMLFieldsToReadOnly();
-    }, 500);
-        frm.set_read_only();
-        frm.disable_save();
-    }
-
-    //is_design based field
-    //restriction
-    if(frm.doc.is_design){
-      
-        fnUpdateFieldBasedOnIsDesign(frm);
-    }
-     
-    if (frm.is_new()) {
-        // Set the default factory as "SGBCZ" and trafo type as "DTTHZ2N" 
-        //when the design form is new
-        frm.set_value('factory', 'SGBCZ');
-        frm.set_value('transformer_type', 'DTTHZ2N');
-        // If factory is SGBCZ, set the LV rated voltage 
-        //as a mandatory field
-        // not for other Trafo.
-        // Other Trafo sometimes have the LV1 and LV2 as mandatory
-        // so that Lv rated Voltage is not mandatory for other factories
-        // Set the LV placeholder when the single LV value is needed.
-        if (frm.doc.factory === 'SGBCZ') {
-            frm.set_df_property('lv_rated_voltage', 'reqd', true);
-            frm.fields_dict.lv_rated_voltage.df.placeholder = 'LV';
+    // When factory is changed, fields also changed for that dependent request.
+    //onchange of factory select field event
+    factory: function(frm) {
+        //setting the default transformer type
+        //based on factory
+        switch (frm.doc.factory) {
+            case 'SGBCZ':
+                frm.set_df_property('lv_rated_voltage', 'reqd', true);
+                frm.set_value('transformer_type', 'DTTHZ2N');
+                break;
+            case 'RGB':
+                frm.set_df_property('lv_rated_voltage', 'reqd', false);
+                frm.set_value('transformer_type', 'DTTH2N');
+                break;
+            case 'NEU':
+                frm.set_df_property('lv_rated_voltage', 'reqd', false);
+                frm.set_value('transformer_type', 'DOTML');
+                break;
         }
-        // Triggering the toggle fields based on the factory by here.
         frm.trigger('fnToggleFields');
-    }
-        // frm.trigger('fnSetTappingsOption');
-        // frm.trigger('fnUpdateInsulationClass');
+    },
+
+    refresh: function(frm) {
+        fnSetFormToReadOnly(frm); //<<ISS-2024-00133
+        //is_design based field
+        //restriction
+        if(frm.doc.is_design){
+            fnUpdateFieldBasedOnIsDesign(frm);
+        }
+        if (frm.is_new()) {
+            // Set the default factory as "SGBCZ" and trafo type as "DTTHZ2N" 
+            //when the design form is new
+            frm.set_value('factory', 'SGBCZ');
+            frm.set_value('transformer_type', 'DTTHZ2N');
+            // If factory is SGBCZ, set the LV rated voltage 
+            //as a mandatory field
+            // not for other Trafo.
+            // Other Trafo sometimes have the LV1 and LV2 as mandatory
+            // so that Lv rated Voltage is not mandatory for other factories
+            // Set the LV placeholder when the single LV value is needed.
+            if (frm.doc.factory === 'SGBCZ') {
+                frm.set_df_property('lv_rated_voltage', 'reqd', true);
+                frm.fields_dict.lv_rated_voltage.df.placeholder = 'LV';
+            }
+            // Triggering the toggle fields based on the factory by here.
+            frm.trigger('fnToggleFields');
+        }
         frm.trigger('fnToggleFields');
     },   
 
@@ -286,6 +268,17 @@ function fnUpdateFieldBasedOnIsDesign(frm){
         frm.doc.factory === 'SGBCZ' && frm.doc.is_design);
 }
 
+function fnSetFormToReadOnly(frm){
+    //Make the form read-only, except 
+    //when the form is not in draft status and is not new.
+    if(frm.doc.status != 'Draft' && !frm.is_new()) { //<<ISS-2024-00133
+        setTimeout(function() {
+        fnSetHTMLFieldsToReadOnly();
+    }, 500);
+        frm.set_read_only();
+        frm.disable_save();
+    }
+}
 
 //function to make html field read_only
 function fnSetHTMLFieldsToReadOnly() {

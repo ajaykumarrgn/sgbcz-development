@@ -1,6 +1,9 @@
 //Change Request
-//TASK-2024-00299: To calculate the direct material cost with 200, considering the design based on the parallel coil.
-//US-2024-0167: Reset the values for Labour and Last calculated on for recalculating the existing design item
+//TASK-2024-00299: To calculate the direct material cost with 200, 
+//considering the design based on the parallel coil.
+//Change References
+//The parallel design value is not set in the item code generated
+// from the design item (ISS-2024-00130).
 frappe.ui.form.on("Design", {
   refresh(frm) {
     /*
@@ -9,18 +12,18 @@ frappe.ui.form.on("Design", {
      * @params {xmlString} string calculated xml received from Gitra
      * @params {fileUrl} string cdn of xml-js javascript library
      */
-    function fnConvertXmlToJson(iXmlString, iFileUrl) {
+    function fnConvertXmlToJson(iXmlString, lFileUrl) {
       const LD_OPTIONS = {
         compact: true,
         ignoreAttributes: true, //ignores attributes and nodes
       };
 
       // create a script node in the html document
-      // equivalent to <script src="https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js" 
-      // type="text/javascript"></script>
+      //equivalent to <script src="https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js" 
+      //type="text/javascript"></script>
       let LD_DOMScriptEle = document.createElement("script");
 
-      LD_DOMScriptEle.setAttribute("src", iFileUrl);
+      LD_DOMScriptEle.setAttribute("src", lFileUrl);
       LD_DOMScriptEle.setAttribute("type", "text/javascript");
 
       document.body.appendChild(LD_DOMScriptEle);
@@ -49,25 +52,27 @@ frappe.ui.form.on("Design", {
         );
 
         //>>TASK-2024-00299
-        //If a parallel coil appears in the design, add 200 to the direct material cost
+        //If a parallel coil appears in the design, add 200 
+        //to the direct material cost
         const LA_TGTSPULE =
           LD_JSONDATA.sgb.TGtWickelzettel.TGtWickelzettelSystemeListe
             .TGtWickelzettelSystem[1].TGtWicklungenListe.TGtWicklung
             .TGtSpulenListe.TGtSpule;
         if (LA_TGTSPULE.length === 2) {
+          // When the parallel design value is retrieved from the Gitra XML and
+          // the parallel coil field is enabled in the design,
+          // it displays '1' in the item code.
+          frm.set_value("parallel_coil", 1); //<<ISS-2024-00130
           frm.set_value(
             "direct_material_cost",
-            parseFloat(
-              LD_JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(",", ".")
+            parseFloat( 
+              LD_JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(
+                ",",
+                "."
+              )
             ) + 200
           );
-          // Reset this value of Labour to zero to ensure the recalculation is triggered
-          frm.set_value("labour", 0);
-          // Clear the last calculated on
-          // for the recalculation scenario
-          frm.set_value("last_calculated_on", "");
         }
-
         //<<TASK-2024-00299
         // refresh changes
         frm.refresh_fields();

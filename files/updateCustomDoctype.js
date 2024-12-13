@@ -3,43 +3,62 @@ import { getEndPointForDoctype } from "./functions.js";
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-
+ 
 dotenv.config({ path: '../.env' });
-
+ 
 const myHeaders = new Headers();
 myHeaders.append("Authorization", process.env.KEY);
-myHeaders.append("Content-Type", "application/json"); // Set the content type
-
+myHeaders.append("Content-Type", "application/json");
+ 
 const current_path = process.cwd();
 const customDoctypeFolderPath = path.join(current_path, '..', 'customDoctype');
-
+ 
+// Read the doctypeList.txt file
+function getAllowedFiles() {
+  const doctypeListPath = path.join(current_path, 'txt',  'doctypeList.txt');
+  try {
+    if (fs.existsSync(doctypeListPath)) {
+      const doctypeList = fs.readFileSync(doctypeListPath, 'utf8');
+      return doctypeList
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .map((fileName) => `${fileName}.json`); // Add .json to each file name
+    } else {
+      console.error('doctypeList.txt not found!');
+      return [];
+    }
+  } catch (error) {
+    console.error('Error reading doctypeList.txt:', error);
+    return [];
+  }
+}
+ 
 // Function to upload a JSON file
 async function uploadJsonFile(filePath) {
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
     const jsonData = JSON.parse(fileContent);
     const baseUrl = getEndPointForDoctype("Custom Doctype");
-    const requestUrl = `${baseUrl}/${jsonData.name}`; // Use the 'name' for the PUT request
-
-    // First try PUT request
+    const requestUrl = `${baseUrl}/${jsonData.name}`;
+ 
+    // Try PUT request first
     const putResponse = await fetch(requestUrl, {
       method: "PUT",
       headers: myHeaders,
-      body: JSON.stringify(jsonData), // Set the body to the JSON data
+      body: JSON.stringify(jsonData),
     });
-
+ 
     if (putResponse.ok) {
       console.log('Updated document:', jsonData.name);
     } else if (putResponse.status === 404) {
       console.log(`Document not found for ${jsonData.name}. Trying to create it with POST...`);
-
-      // Attempt POST since PUT failed with 404
+ 
       const postResponse = await fetch(baseUrl, {
         method: "POST",
         headers: myHeaders,
-        body: JSON.stringify(jsonData), // Set the body to the JSON data
+        body: JSON.stringify(jsonData),
       });
-
+ 
       if (postResponse.ok) {
         console.log('Created document:', jsonData.name);
       } else {
@@ -47,7 +66,6 @@ async function uploadJsonFile(filePath) {
         console.error(`HTTP error on POST! Status: ${postResponse.status}, Message: ${errorMessage}`);
       }
     } else {
-      // Log other error statuses for PUT
       const errorMessage = await putResponse.text();
       console.error(`HTTP error on PUT! Status: ${putResponse.status}, Message: ${errorMessage}`);
     }
@@ -55,53 +73,43 @@ async function uploadJsonFile(filePath) {
     console.error('Error during request:', error);
   }
 }
-
-// Function to process JSON files in the specified order
-async function processJsonFiles(directory) {
+ 
+// Function to process JSON files in all subdirectories
+async function processJsonFiles(directory, allowedFiles) {
   try {
-    // Process the child directory: customChildDoctype
-    const childDirectoryPath = path.join(directory, 'customChildDoctype');
-    if (fs.existsSync(childDirectoryPath)) {
-      const childFiles = fs.readdirSync(childDirectoryPath);
-      for (const file of childFiles) {
-        const filePath = path.join(childDirectoryPath, file);
-        if (file.endsWith('.json') && fs.statSync(filePath).isFile()) {
-          console.log(`Processing child file: ${filePath}`);
-          await uploadJsonFile(filePath); // Upload child JSON files
+    const subDirectories = [
+      'customChildDoctype',
+      'customSingleDoctype',
+      'parent',
+    ];
+ 
+    for (const subDir of subDirectories) {
+      const directoryPath = path.join(directory, subDir);
+      if (fs.existsSync(directoryPath)) {
+        const files = fs.readdirSync(directoryPath);
+        for (const file of files) {
+          if (allowedFiles.includes(file) && fs.statSync(path.join(directoryPath, file)).isFile()) {
+            console.log(`Processing allowed file: ${file}`);
+            await uploadJsonFile(path.join(directoryPath, file));
+          } else {
+            console.log(`Skipping file: ${file}`);
+          }
         }
       }
     }
-
-    // Next, process the single directory: customSingleDoctype
-    const singleDirectoryPath = path.join(directory, 'customSingleDoctype');
-    if (fs.existsSync(singleDirectoryPath)) {
-      const singleFiles = fs.readdirSync(singleDirectoryPath);
-      for (const file of singleFiles) {
-        const filePath = path.join(singleDirectoryPath, file);
-        if (file.endsWith('.json') && fs.statSync(filePath).isFile()) {
-          console.log(`Processing single file: ${filePath}`);
-          await uploadJsonFile(filePath); // Upload single JSON files
-        }
-      }
-    }
-
-    // Finally, process JSON files in the parent directory
-    const parentDirectoryPath = path.join(directory, 'parent');
-    if (fs.existsSync(parentDirectoryPath)) {
-      const parentFiles = fs.readdirSync(parentDirectoryPath);
-      for (const file of parentFiles) {
-        const filePath = path.join(parentDirectoryPath, file);
-        if (file.endsWith('.json') && fs.statSync(filePath).isFile()) {
-          console.log(`Processing parent file: ${filePath}`);
-          await uploadJsonFile(filePath); // Upload each JSON file
-        }
-      }
-    }
-
   } catch (error) {
     console.error('Error processing JSON files:', error);
   }
 }
-
+ 
 // Start processing the JSON files
-processJsonFiles(customDoctypeFolderPath).catch(console.error);
+(async function start() {
+  const allowedFiles = getAllowedFiles();
+  if (allowedFiles.length === 0) {
+    console.error('No files to process!');
+    return;
+  }
+ 
+  await processJsonFiles(customDoctypeFolderPath, allowedFiles);
+})();
+ 
