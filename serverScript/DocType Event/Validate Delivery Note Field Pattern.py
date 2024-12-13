@@ -15,12 +15,28 @@ def validate_serial_number_duplicate(serial_number, schedule, doc):
     if count > 1:
         raise frappe.ValidationError('Duplicate Serial Number')
             
+
+lo_response = frappe.call('validate_document_fields', io_doc=doc)
+ 
+la_error_messages=[]
+ 
+if lo_response.get('message'):
+    
+    for l_message in lo_response['message']:
+        if l_message['code'] != 200:
+          la_error_messages.append(l_message['msg'])
+    if len(la_error_messages) > 0:
+        frappe.throw(
+                title='Error',
+                msg=la_error_messages,
+                as_list=True
+                )
     
 for schedule in doc.delivery_schedule:
-    if schedule.invoice_number:
-        frappe.call('validate_naming_pattern', prefix='781', length=9, field_value=schedule.invoice_number, field='Invoice Number')
+    # if schedule.invoice_number:
+    #     frappe.call('validate_naming_pattern', prefix='781', length=9, field_value=schedule.invoice_number, field='Invoice Number')
     if schedule.serial_number:
-        frappe.call('validate_naming_pattern', prefix='70', length=7, field_value=schedule.serial_number, field='Serial Number')
+        # frappe.call('validate_naming_pattern', prefix='70', length=7, field_value=schedule.serial_number, field='Serial Number')
         try:
             validate_serial_number_duplicate(schedule.serial_number, schedule, doc)
         except Exception as e:
