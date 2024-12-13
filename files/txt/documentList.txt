@@ -5,4 +5,5 @@
 # ex: filters = {"status":"Cancelled}  but be sure to use filters = before 
 
 #document/Translation
-
+Document = Factory
+document/Factory

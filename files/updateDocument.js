@@ -113,4 +113,3 @@ async function processJsonFilesFromList(filePath) {
  
 // Start processing JSON files listed in the documentList.txt
 processJsonFilesFromList(filesListPath).catch(console.error);
- 
