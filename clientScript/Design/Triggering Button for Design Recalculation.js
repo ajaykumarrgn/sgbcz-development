@@ -1,7 +1,7 @@
 frappe.ui.form.on("Design", {
   onload(frm) {
-  
-  // For backward compatibility: Designs created before adding the factory option.
+  // For backward compatibility: Designs created
+  // before adding the factory option.
   // If the status is 'Calculation Received', Factory: 'SGBCZ'
   //Transformer Type: 'DTTHZ2N'
     fnCheckRecalculateDesign(frm);
@@ -17,12 +17,10 @@ frappe.ui.form.on("Design", {
     fnUpdateButtonGroup(frm);
   },
 
-
   refresh(frm) {  
     fnUpdateButtonGroup(frm);
     fnCheckRecalculateDesign(frm);
   },
-
 
   //when is_design checkbox is enabled
   //display only create design button
@@ -32,7 +30,6 @@ frappe.ui.form.on("Design", {
   },
 
   status(frm) {
-    
     // Update button whenever the status field changes
     fnUpdateButtonGroup(frm);
   },
@@ -41,7 +38,6 @@ frappe.ui.form.on("Design", {
   // the status will be changed based on whether the 
   //item was created from design (with gitra calculation)
   // or without gitra calculation.
-
   item(frm){
     if(!frm.doc.item && frm.doc.status === "Item Created"){
         if(frm.doc.is_design === 1){
@@ -61,8 +57,7 @@ frappe.ui.form.on("Design", {
 
 function fnUpdateButtonGroup(frm) {
   const STATUS = frm.doc.status;
-  const LA_BUTTONS = [];
-  
+  const LA_BUTTONS = [];  
   // Determine which buttons to show based on status
   if (STATUS === 'Draft' && frm.doc.is_design === 1) {
     LA_BUTTONS.push({
@@ -76,7 +71,6 @@ function fnUpdateButtonGroup(frm) {
           ACTION: fnCreateItem
       });
   }
-
   if (STATUS === 'Calculation Received' && !frm.doc.item) {
     LA_BUTTONS.push({
           LABEL: 'Recalculate Design',
@@ -85,22 +79,18 @@ function fnUpdateButtonGroup(frm) {
     LA_BUTTONS.push({
           LABEL: 'Create Item',
           ACTION: fnCreateItem
-      });
-      
+      });      
     }
-
   if (STATUS === 'Item Created' && frm.doc.item) {
     LA_BUTTONS.push({
                       LABEL: 'Recalculate Design',
                       ACTION: fnRecalculate
-                  });
-    
+                  });    
     LA_BUTTONS.push({
           LABEL: 'View Item',
           ACTION: fnViewItem
       });
   }
-
   if (STATUS === 'Item Created' && !frm.doc.item) {
     LA_BUTTONS.push({
           LABEL: 'Create Item',
@@ -108,30 +98,28 @@ function fnUpdateButtonGroup(frm) {
       });
   }
   if(STATUS === 'Calculation Received' && frm.doc.item){
-    frm.set_value('status', 'Item Updated')
+    frm.set_value('status', 'Item Updated');
     frm.save();
   }
-
-    if (STATUS === 'Item Updated' && frm.doc.factory === 'SGBCZ') {
-
-        LA_BUTTONS.push({
-          LABEL: 'Recalculate Design',
-          ACTION: fnRecalculate
-        });
-        // Only show the button if the checkbox is not checked
-        if (frm.doc.is_update_item_prices !== 1) {
-          LA_BUTTONS.push({
-            LABEL: 'Force Update Pricelist',
-            ACTION: fnUpdatePricelist
-          });
-        }
-        LA_BUTTONS.push({
-          LABEL: 'View Item',
-          ACTION: fnViewItem
-        });
-      }
-      // Pass the button array to the fnShowButtonGroup function
-      fnShowButtonGroup(frm, LA_BUTTONS);
+  if (STATUS === 'Item Updated' && frm.doc.factory === 'SGBCZ') {
+    LA_BUTTONS.push({
+      LABEL: 'Recalculate Design',
+      ACTION: fnRecalculate
+    });
+    // Only show the button if the checkbox is not checked
+    if (frm.doc.is_update_item_prices !== 1) {
+      LA_BUTTONS.push({
+        LABEL: 'Force Update Pricelist',
+        ACTION: fnUpdatePricelist
+      });
+    }
+    LA_BUTTONS.push({
+      LABEL: 'View Item',
+      ACTION: fnViewItem
+    });
+  }
+  // Pass the button array to the fnShowButtonGroup function
+  fnShowButtonGroup(frm, LA_BUTTONS);
 }
 
 // Function to show or hide multiple buttons
@@ -140,7 +128,6 @@ function fnShowButtonGroup(frm, iaButtonArray) {
   if(frm.doc.status != 'Item Updated'){
     frm.clear_custom_buttons();
   }
-
   if (Array.isArray(iaButtonArray)) {
     iaButtonArray.forEach(function(idButton) {
         const { LABEL, ACTION } = idButton;
@@ -169,28 +156,22 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
     const LREFRESHDATE = ldDoc[0].price_recalculation_frequency;
     const LTODAY = new Date();
     const LLASTCALCULATEDATE = frm.doc.last_calculated_on ? new Date(frm.doc.last_calculated_on) : null;
-
     if (LREFRESHDATE && LLASTCALCULATEDATE) {
         const LTIMEDIFF = Math.abs(LTODAY - LLASTCALCULATEDATE);
         const LDAYDIFF = Math.ceil(LTIMEDIFF / (1000 * 3600 * 24));
-
         if (LDAYDIFF >= LREFRESHDATE) {
             const BUTTONS = [];
-
             if (frm.doc.status == 'Calculation Received' && !frm.doc.item) {
                 frm.set_intro(false);
                 frm.set_intro(__('The calculation is expired by ') + LDAYDIFF + " days from default price recalculation frequency", 'yellow');
-
                 BUTTONS.push({
                     LABEL: 'Recalculate Design',
                     ACTION: fnRecalculate
                 });
             }
-
             if (frm.doc.status == 'Item Created') {
                 frm.set_intro(false);
                 frm.set_intro(__('The calculation is expired by ') + LDAYDIFF + " days from default price recalculation frequency", 'yellow');
-
                 BUTTONS.push({
                     LABEL: 'Recalculate Design',
                     ACTION: fnRecalculate
@@ -213,14 +194,12 @@ function fnRecalculate(frm){
     'upstream_file', 'gitra_xml', 'gitra_xml_downstream',
     'gitra_json_downstream', 'direct_material_cost'
   ];
-
   // Set all fields to empty string
   FIELDSTOCLEAR.forEach(field => frm.set_value(field, ''));
   frm.set_value('is_update_item_prices', 0);
   // Update the status and save the form
   frm.set_value("status", "Perform Calculation");
   frm.save();
-
 }
 
 function fnUpdatePricelist(frm) {
@@ -228,7 +207,6 @@ function fnUpdatePricelist(frm) {
   frappe.db.get_value('Item', frm.doc.item, 'override_price')
     .then(r => {
       const OVERRIDEPRICE = r.message.override_price;
-
       // update the price rate
       const UPDATEPRICE = () => {
         frappe.call({
@@ -241,15 +219,14 @@ function fnUpdatePricelist(frm) {
             if (response.message) {
                 //Once price is updated fot that item into the price list
                 frm.set_value('is_update_item_prices', 1); 
-                frm.save()
-                
-                
+                frm.save();                
             }
           }
         });
       };
 
-      // If override_price is found, show confirmation dialog for proceeding the further step
+      // If override_price is found, show confirmation
+      // dialog for proceeding the further step
       if (OVERRIDEPRICE) {
         frappe.confirm(
           'Item Price Override is Enabled. Do you want to proceed with updating the prices in the Price list?',
@@ -261,11 +238,10 @@ function fnUpdatePricelist(frm) {
       } else {
         // If no override_price, update directly
         UPDATEPRICE();
-        frappe.msgprint("Price list rates updated successfully.")
+        frappe.msgprint(__("Price list rates updated successfully."));
       }
     });
 }
-
 
 function fnCreateItem(frm) {
   //the Item will be created if no load and load loss
@@ -274,7 +250,6 @@ function fnCreateItem(frm) {
     && parseInt(frm.doc.lwa) >= 0 && parseInt(frm.doc.lpa) >= 0 && 
     !(parseInt(frm.doc.lwa) === 0 && parseInt(frm.doc.lpa) === 0)
   ){
-
   //Start of item creation
   frappe.msgprint(__('The item is being created. Please wait a moment.'));
   //Calling the create_item_from_design_beta api
@@ -283,7 +258,6 @@ function fnCreateItem(frm) {
     args: { design: frm.doc.name },
     callback: function (response) {
       if (response.message) {
-
         //after successfull creation displays the alert message
         frappe.show_alert(
           { message: __("Item Created"), indicator: "green" },
@@ -318,8 +292,7 @@ function fnCreateItem(frm) {
                   //that includes a placeholder for language.
                   // Example:'Datasheet_${l_title}_${frm.doc.name}_{language}'
                   // Here, {language} is the placeholder, 
-                  //ensuring the language appears at the end.
-                                      
+                  //ensuring the language appears at the end.                                      
                   // The design title will be used as the filename.
                   let lTitle = frm.doc.title;
                   if (lTitle) {
@@ -335,7 +308,6 @@ function fnCreateItem(frm) {
                       gitraResponse.message.naming_separator
                     );
                   }
-
                   //calling the custom fn_doc_pdf_source_to_target
                   //developed inside the framework
                   frappe.call({
@@ -384,7 +356,8 @@ function fnCreateItem(frm) {
 }
 }
 
-//Enable the create design button and also set the status when design in draft mode.
+//Enable the create design button and also 
+// set the status when design in draft mode.
 function fnCreateDesign(frm) {
   frm.set_value("status", "Perform Calculation");
   frm.save();

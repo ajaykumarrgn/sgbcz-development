@@ -59,6 +59,39 @@ function cleanItem(item) {
   return cleanedItem;
 }
  
+// Function to fetch data for a single document or multiple documents
+async function fetchData(fetchUrl, folderName, fileName) {
+  try {
+    const response = await fetch(fetchUrl, requestOptions);
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorMessage}`);
+    }
+
+    const data = await response.json();
+    if (data && data.data) {
+      const documentDetails = data.data;
+
+      // If it's a single document, handle directly
+      if (!Array.isArray(documentDetails)) {
+        const cleanedItem = cleanItem(documentDetails);
+        await writeToFile(folderName, fileName, cleanedItem);
+      } else {
+        // If it's an array, process each document individually
+        for (const item of documentDetails) {
+          const cleanedItem = cleanItem(item);
+          const individualFileName = item.name;
+          await writeToFile(folderName, individualFileName, cleanedItem);
+        }
+      }
+    } else {
+      console.error('Invalid or empty data received from the API.');
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+  }
+}
+
 // Function to fetch the list of document names
 async function fetchDocumentNames(fetchUrl) {
   try {
@@ -119,7 +152,7 @@ function writeToFile(folderName, fileName, data) {
  
     if (key === 'Single Document') {
       const fetchUrl = `${baseUrl}${value}/${value}?fields=["*"]&limit_page_length=0`;
-      await fetchDocumentDetails(value, 'singleDocument');
+      await fetchData(fetchUrl, 'singleDocument', value);
  
     } else if (key === 'Document') {
       // Step 1: Fetch the list of document names

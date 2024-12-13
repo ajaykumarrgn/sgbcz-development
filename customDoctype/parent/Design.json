@@ -399,7 +399,7 @@
       "fieldtype": "Check",
       "search_index": 0,
       "show_dashboard": 0,
-      "hidden": 0,
+      "hidden": 1,
       "set_only_once": 0,
       "allow_in_quick_entry": 0,
       "print_hide": 0,

@@ -18,11 +18,10 @@ la_item_price_rate = frappe.get_list("Item Price", filters={
 if la_item_price_rate:
     for l_price in la_item_price_rate:
         frappe.db.set_value('Item Price', l_price['name'], 'price_list_rate', l_total_cost)
-    
-    
+
     # Fetch the Item Price documents and save them after updating
     for l_price in la_item_price_rate:
         l_item_price_doc = frappe.get_doc("Item Price", l_price['name'])
-        l_item_price_doc.save() 
-    
+        l_item_price_doc.save()
+
 frappe.response['message'] = la_item_price_rate
