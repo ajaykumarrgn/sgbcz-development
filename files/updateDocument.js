@@ -35,8 +35,8 @@ async function uploadJsonFile(filePath, isSingleDocument, folderName = "") {
       console.log(`Updated document: ${jsonData.name}`);
     } else if (putResponse.status === 404) {
       console.log(`Document not found for ${jsonData.name}. Trying to create it with POST...`);
-
-      const postResponse = await fetch(`${baseUrl}/${folderName}`, {
+      delete jsonData.name;
+      const postResponse = await fetch(`${baseUrl}${folderName}`, {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify(jsonData),
