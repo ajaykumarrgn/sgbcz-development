@@ -36,7 +36,7 @@ async function uploadJsonFile(filePath, isSingleDocument, folderName = "") {
     } else if (putResponse.status === 404) {
       console.log(`Document not found for ${jsonData.name}. Trying to create it with POST...`);
 
-      const postResponse = await fetch(baseUrl, {
+      const postResponse = await fetch(`${baseUrl}/${folderName}`, {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify(jsonData),
