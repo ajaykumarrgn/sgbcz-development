@@ -252,9 +252,9 @@ function fnCreateItem(frm) {
   ){
   //Start of item creation
   frappe.msgprint(__('The item is being created. Please wait a moment.'));
-  //Calling the create_item_from_design_beta api
+  //Calling the create_item_from_design api
   frappe.call({
-    method: "create_item_from_design_beta",
+    method: "create_item_from_design",
     args: { design: frm.doc.name },
     callback: function (response) {
       if (response.message) {
