@@ -347,7 +347,7 @@
       "fieldname": "status",
       "label": "Status",
       "fieldtype": "Select",
-      "options": "Draft\nPerform Calculation\nFile Pulled\nCalculation Received\nItem Created",
+      "options": "Draft\nPerform Calculation\nFile Pulled\nCalculation Received\nItem Created\nItem Updated",
       "search_index": 0,
       "show_dashboard": 0,
       "hidden": 1,
