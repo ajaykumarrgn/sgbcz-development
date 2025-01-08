@@ -137,11 +137,15 @@ frappe.ui.form.on('Design', {
     //onchange of is_design checkbox event
     is_design: function(frm) {
         if (frm.doc.is_design) {
-            //message indicating what are the fields are resetted
-            frappe.msgprint(__('Resetted THDi value to 5 and LPA to 0'));
-            //set the default value for thdi and lpa
-            frm.set_value('thdi', 5);
-            frm.set_value('lpa', 0);
+            // Display an error message when there is a mismatch 
+            // in either the THDi or LPA values
+            if(frm.doc.status == 'Draft' && frm.doc.thdi !== 5 || frm.doc.lpa !==0) {
+                //message indicating what are the fields are resetted
+                frappe.msgprint(__('Resetted THDi value to 5 and LPA to 0'));
+                //set the default value for thdi and lpa
+                frm.set_value('thdi', 5);
+                frm.set_value('lpa', 0);
+            }
             //reset the placeholder of hv_rated_voltage
             frm.set_df_property('hv_rated_voltage', 'placeholder', 'HV');
             //reset the placeholder of lv_rated_voltage
@@ -275,6 +279,9 @@ function fnSetFormToReadOnly(frm){
         setTimeout(function() {
         fnSetHTMLFieldsToReadOnly();
     }, 500);
+    // Sometimes, is_design is not set to a read-only state, 
+    // so it must be explicitly set to read-only.
+        frm.set_df_property("is_design", "read_only", 1);
         frm.set_read_only();
         frm.disable_save();
     }

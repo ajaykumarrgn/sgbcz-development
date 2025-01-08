@@ -190,8 +190,12 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
 
 function fnRecalculate(frm){
 // Clear all the specified fields
+// In order to gitra calculation, should clear the fields 
+// upstream file, Gitra XML downstream, Gitra json Downstream
+// from the xml data tab and labour and direct material cost 
+// from the item tab for calculating total cost.
   const FIELDSTOCLEAR = [
-    'upstream_file', 'gitra_xml', 'gitra_xml_downstream',
+    'upstream_file', 'gitra_xml_downstream', 'labour',
     'gitra_json_downstream', 'direct_material_cost'
   ];
   // Set all fields to empty string
@@ -230,7 +234,11 @@ function fnUpdatePricelist(frm) {
       if (OVERRIDEPRICE) {
         frappe.confirm(
           'Item Price Override is Enabled. Do you want to proceed with updating the prices in the Price list?',
-          UPDATEPRICE,  // Proceed with update on confirmation
+          function () {
+            // Yes: Proceed with updating prices
+            UPDATEPRICE(); // Call the function to update prices
+            frappe.msgprint("Price list rates updated successfully.");
+          }, 
           function() {   // If 'No', show cancellation message
             frappe.msgprint("Pricelist update cancelled.");
           }
