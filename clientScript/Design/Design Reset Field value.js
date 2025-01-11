@@ -52,7 +52,7 @@ function fnResetValues(frm) {
                 // In SGBCZ, Retain the Uk value when transition 
                 // both from non- design to is design 
                 // and from 'Is Design' to non-design.>>(ISS-2024-00129) 
-                if (frm.doc.factory == 'SGBCZ' && lFieldname === 'impedance') {
+                if (frm.doc.factory === 'SGBCZ' && lFieldname === 'impedance') {
                     // Skip resetting the impedance field 
                     // for the current iteration.
                     // Use continue to skip this field only.
