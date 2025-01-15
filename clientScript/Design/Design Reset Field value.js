@@ -1,6 +1,7 @@
 // Change References
-// Retain the UK(%) and IP Protection
-// when switching non design to "Is Design" : >>(ISS-2024-00129)
+// In SGBCZ only, retain the UK (%) and IP Protection values
+// when switching both from non-design to 'Is Design' 
+// and from 'Is Design' to non-design. (ISS-2024-00129)
 
 frappe.ui.form.on('Design', {
     
@@ -48,9 +49,10 @@ function fnResetValues(frm) {
             const FIELD_META = frm.meta.fields.find(field => 
                     field.fieldname === lFieldname);
             if (FIELD_META) {
-                // Retain the Uk value when transition 
-                // from non- design to is design >>(ISS-2024-00129) 
-                if (frm.doc.is_design && lFieldname === 'impedance') {
+                // In SGBCZ, Retain the Uk value when transition 
+                // both from non- design to is design 
+                // and from 'Is Design' to non-design.>>(ISS-2024-00129) 
+                if (frm.doc.factory === 'SGBCZ' && lFieldname === 'impedance') {
                     // Skip resetting the impedance field 
                     // for the current iteration.
                     // Use continue to skip this field only.
