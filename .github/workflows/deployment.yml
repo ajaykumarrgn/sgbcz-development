@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - r2
+      - release
       - hot-fix
       - hot-fix-release
     paths-ignore: # Avoid triggering on PR merges with specific commit messages
@@ -22,13 +22,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     steps:
       - name: Use Node.js v20
@@ -77,16 +77,17 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, '(for production)') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     needs: code_quality_check
     env:
@@ -205,17 +206,19 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release')
       )
     env:
       USER_NAME: ${{ secrets.TEST_USER_NAME }}
       PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      BASE_URL: ${{ secrets.TEST_BASE_URL }}
+      KEY: ${{ secrets.TEST_KEY}}
 
     steps:
       - name: Use Node.js v20
@@ -301,16 +304,16 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
       )
 
     steps:
@@ -330,16 +333,16 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop') &&
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop') &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop')
+        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/r2' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/hot-fix-release'
       )
     env:
       HOST: ${{ vars.PROD_HOST }}
