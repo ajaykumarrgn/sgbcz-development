@@ -1,4 +1,4 @@
-print_format
 custom_fields
 custom_doctype
 documents
+print_format
