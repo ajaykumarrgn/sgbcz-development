@@ -1,3 +1,8 @@
+// Change References
+// In SGBCZ only, retain the UK (%) and IP Protection values
+// when switching both from non-design to 'Is Design' 
+// and from 'Is Design' to non-design. (ISS-2024-00129)
+
 frappe.ui.form.on('Design', {
     
 	factory(frm){
@@ -31,7 +36,6 @@ function fnResetValues(frm) {
             }
         }
     }
-
     //To clear HTML fields when changing the one factory to another.
     function fnResetHtmlFields(iaFields) {
         for (let lField of iaFields) {
@@ -39,45 +43,56 @@ function fnResetValues(frm) {
             htmlInput.val('');
         }
     }
-
     // Restore the default values after resetting the factory values
-    
     function fnResetToDefault(iaFields) {
         for (let lFieldname of iaFields) {
             const FIELD_META = frm.meta.fields.find(field => 
                     field.fieldname === lFieldname);
             if (FIELD_META) {
+                // In SGBCZ, Retain the Uk value when transition 
+                // both from non- design to is design 
+                // and from 'Is Design' to non-design.>>(ISS-2024-00129) 
+                if (frm.doc.factory === 'SGBCZ' && lFieldname === 'impedance') {
+                    // Skip resetting the impedance field 
+                    // for the current iteration.
+                    // Use continue to skip this field only.
+                    // Reset the remaining fields as usual.
+                    continue; 
+                }
+                //<<(ISS-2024-00129)
                 frm.set_value(lFieldname, FIELD_META.default);
             }
         }
     }
-
     if (frm.doc.status === 'Draft') {
-        
-        // Resetting the specific fields to empty when the factory is "SGBCZ"
+        // When the factory is 'SGBCZ' and 
+        // switches from non-design to is_design, 
+        // reset specific fields to empty, as hv2 is not present in is_design.
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             fnResetFields([
                 'hv_rated_voltage', 'highest_operation_voltage_hv', 
                 'ac_phase_hv', 'li_phase_hv', 'hv1', 'hv2'
             ]);
         }
-        
-        // In SGBCZ have only one LV value 
-        // So clear the two lv for SGBCZ
+        // In SGBCZ, only one LV value is allowed. 
+        // When switching from the other two factories,
+        // such as RGB and NEU, 
+        // reset the LV-related fields mentioned below to empty.
         if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
             fnResetFields([
                 'lv_rated_voltage', 'lv1', 'lv_2']);
         }
-
+        
         // Resetting item tab fields when shifting the factory
         fnResetItemTabFields([
             "direct_material_cost", "labour", "production_overhead", 
-            "cost_of_goods", "sales_overhead", "administrative_overhead", "total_cost"
+            "cost_of_goods", "sales_overhead", "administrative_overhead",
+            "total_cost"
         ]);
+        
         //reset to meta data default
         fnResetToDefault(['tapping_plus_step', 'impedance']);
         
-       
         if(!frm.doc.is_design){
             //reset to meta data default
             fnResetToDefault(['rating']);

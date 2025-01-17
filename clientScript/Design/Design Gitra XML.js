@@ -1,6 +1,7 @@
 //In earlier, we have set the value 5 or 20 for the Gitra Calculation
 //By using the K4 factor.
 //But now we have directly set that the value into the field THDi
+//Calculation not received from the Gitra, with incorrect Upstream Gitra XML value <<ISS-2024-00148
 frappe.ui.form.on("Design", {
   validate(frm) {
     if (
@@ -60,10 +61,18 @@ frappe.ui.form.on("Design", {
           var ldTappingNode = { spannung: "" };
           var lTappingStep = iTapping + "_step";
           ldTappingNode.spannung =
-            frm.doc.hv_rated_voltage +
-            (iSign * i * frm.doc[lTappingStep] * frm.doc.hv_rated_voltage) /
-              100;
-          iaTappingNodes.push(ldTappingNode);
+            //Comment this block for the issue :>>ISS-2024-00148
+              //frm.doc.hv_rated_voltage +
+              //(iSign * i * frm.doc[lTappingStep] * frm.doc.hv_rated_voltage) /
+              // 100;
+            //<<ISS-2024-00148
+
+            //>>ISS-2024-00148: Convert the string into an integer and a float.
+            parseInt(frm.doc.hv_rated_voltage) +
+            parseFloat((iSign * i * frm.doc[lTappingStep] * frm.doc.hv_rated_voltage) /
+              100);
+            //<<ISS-2024-00148
+            iaTappingNodes.push(ldTappingNode);
         }
         return iaTappingNodes;
       }
