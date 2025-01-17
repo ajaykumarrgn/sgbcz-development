@@ -92,7 +92,10 @@ frappe.ui.form.on("Design", {
     } // Convert XML to JSON
 
     // update the last file pulled date to last changed on.
-    if (frm.doc.upstream_file && !frm.doc.last_calculated_on) {
+    // Commented this line of code Update the last calculated date 
+    // when recalculating the item design
+    // if (frm.doc.upstream_file && !frm.doc.last_calculated_on) {
+    if (frm.doc.upstream_file && (frm.doc.last_calculated_on !== frm.doc.upstream_file.split('_')[1])) {
       const L_DATEPART = frm.doc.upstream_file.split("_")[1]; // Extract the date part
       frm.set_value("last_calculated_on", L_DATEPART);
       // refresh changes
