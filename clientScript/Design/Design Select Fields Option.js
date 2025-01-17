@@ -1,6 +1,8 @@
 // Change Reference
 // Create the new design without following the exist filters:>>(ISS-2024-00133)
 // Design form saved twice:>>(ISS-2024-00133)
+// Retain the UK(%) and IP Protection 
+// when switching non design to "Is Design" : >>(ISS-2024-00129)
 
 frappe.ui.form.on('Design', {
     fnGetAttributeOptionAndDefault(frm, iAttributeLabel, 
@@ -59,7 +61,7 @@ frappe.ui.form.on('Design', {
         });
     },
     
-    fnSetOptionsAndDefault(frm, iReset = false) {
+    fnSetOptionsAndDefault(frm, iReset = false, iIpProtection = false) {
         //Attribute mapping
         const LA_ATTRIBUTES = [
             ['Bushings HV', 'bushing_hv'],
@@ -77,8 +79,21 @@ frappe.ui.form.on('Design', {
             ['Environmental class', 'environmental_class'],
             ['Transformer IP', 'ip_protection']
         ];
-        //looping the LA_ATTRIBUTES
+        
         LA_ATTRIBUTES.forEach(laAttribute => {
+            // Retain the ip protection value
+            // When switches from the non-design to is_design
+            // If the attribute is 'ip_protection' 
+            // Set the iIpProtection flag to true.
+            // do not reset the default value in this field. >>(ISS-2024-00129)
+            if (laAttribute[1] === 'ip_protection' && iIpProtection) {
+                return; // Skip resetting the ip_protection field
+            } //<<(ISS-2024-00129)
+
+            // Retrieve attribute options and default values 
+            // for the specified transformer type
+            // and update the fields accordingly, 
+            // based on the reset flag.
             frm.events.fnGetAttributeOptionAndDefault(frm, laAttribute[0], laAttribute[1], frm.doc.transformer_type, frm.doc.is_design, iReset);
         });
     },
@@ -96,13 +111,13 @@ frappe.ui.form.on('Design', {
 	    }
         frm.events.fnSetOptionsAndDefault(frm);
     },
-
+    
     is_design(frm) {
-        frm.events.fnSetOptionsAndDefault(frm, true);
+        frm.events.fnSetOptionsAndDefault(frm, true, true); //<<(ISS-2024-00129)
     },
-
+    
     factory(frm) {
-        frm.events.fnSetOptionsAndDefault(frm, true);
+        frm.events.fnSetOptionsAndDefault(frm, true, false); //<<(ISS-2024-00129)
     },
 
     transformer_type(frm) {

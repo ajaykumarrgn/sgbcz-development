@@ -1,0 +1,17 @@
+{
+  "name": "Quotation Presets",
+  "docstatus": 0,
+  "idx": "0",
+  "default_validity": 30,
+  "delivery_time": "12 - 16",
+  "packaging": "Without Packaging",
+  "delivery_text": "weeks from design approval.",
+  "l1_value": 200000,
+  "l2_value": 500000,
+  "l3_value": 1000000,
+  "l1_discount_limit": 10,
+  "l2_discount_limit": 15,
+  "l3_discount_limit": 20,
+  "price_recalculation_frequency": 90,
+  "doctype": "Quotation Presets"
+}
