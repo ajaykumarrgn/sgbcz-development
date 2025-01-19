@@ -2,4 +2,3 @@ custom_fields
 custom_doctype
 documents
 print_format
-roles_permission
