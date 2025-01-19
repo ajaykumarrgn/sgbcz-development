@@ -4,12 +4,4 @@
 # Optional filters can be added for fetching the doctype's document
 # ex: filters = {"status":"Cancelled}  but be sure to use filters = before 
 
-#Document = Translation
-#filters = {"modified": ["Between", ["2024-12-17", "2024-12-17"]]}
-
 #document/Translation
-
-Document = Factory
-document/Factory
-Single Document = Quotation Presets
-document/singleDocument/Quotation Presets.json
