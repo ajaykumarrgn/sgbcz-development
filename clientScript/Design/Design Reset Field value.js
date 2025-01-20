@@ -4,8 +4,7 @@
 // and from 'Is Design' to non-design. (ISS-2024-00129)
 
 frappe.ui.form.on('Design', {
-    
-	factory(frm){
+    factory(frm){
 	    fnResetValues(frm);
 	},
 	is_design(frm){
