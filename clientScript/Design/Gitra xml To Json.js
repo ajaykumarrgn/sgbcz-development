@@ -1,5 +1,5 @@
 //Change Request
-//TASK-2024-00299: To calculate the direct material cost with 200, 
+//TASK-2024-00299: To calculate the direct material cost with 200,
 //considering the design based on the parallel coil.
 //Change References
 //The parallel design value is not set in the item code generated
@@ -19,7 +19,7 @@ frappe.ui.form.on("Design", {
       };
 
       // create a script node in the html document
-      //equivalent to <script src="https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js" 
+      //equivalent to <script src="https://unpkg.com/xml-js@1.6.11/dist/xml-js.min.js"
       //type="text/javascript"></script>
       let LD_DOMScriptEle = document.createElement("script");
 
@@ -52,7 +52,7 @@ frappe.ui.form.on("Design", {
         );
 
         //>>TASK-2024-00299
-        //If a parallel coil appears in the design, add 200 
+        //If a parallel coil appears in the design, add 200
         //to the direct material cost
         const LA_TGTSPULE =
           LD_JSONDATA.sgb.TGtWickelzettel.TGtWickelzettelSystemeListe
@@ -65,7 +65,7 @@ frappe.ui.form.on("Design", {
           frm.set_value("parallel_coil", 1); //<<ISS-2024-00130
           frm.set_value(
             "direct_material_cost",
-            parseFloat( 
+            parseFloat(
               LD_JSONDATA.sgb.TGtWickelzettel.preisauseds._text.replace(
                 ",",
                 "."
@@ -92,12 +92,16 @@ frappe.ui.form.on("Design", {
     } // Convert XML to JSON
 
     // update the last file pulled date to last changed on.
-    // Commented this line of code Update the last calculated date 
+    // Commented this line of code Update the last calculated date
     // when recalculating the item design
     // if (frm.doc.upstream_file && !frm.doc.last_calculated_on) {
-    // Include the new condition: if the existing last calculated date 
-    // does not match the new calculated date, update it.
-    if (frm.doc.upstream_file && (frm.doc.last_calculated_on !== frm.doc.upstream_file.split('_')[1])) {
+    // Include the new condition: if the existing last calculated date
+    // does not match the new calculated date in upstream file, update it.
+    if (
+      frm.doc.upstream_file &&
+      frm.doc.last_calculated_on.replaceAll("-", "") !==
+        frm.doc.upstream_file.split("_")[1]
+    ) {
       const L_DATEPART = frm.doc.upstream_file.split("_")[1]; // Extract the date part
       frm.set_value("last_calculated_on", L_DATEPART);
       // refresh changes
