@@ -1,3 +1,10 @@
 # Each line represents a custom doctype name (e.g., Design.).
 # Example:
+
 # Design
+
+Factory
+Field Validation Rules
+Quotation Presets
+Design
+

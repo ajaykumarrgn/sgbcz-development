@@ -2,7 +2,7 @@
   {
     "name": "Sales Order-agent",
     "docstatus": 0,
-    "idx": 116,
+    "idx": 118,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -59,7 +59,7 @@
   {
     "name": "Sales Order-comments",
     "docstatus": 0,
-    "idx": 93,
+    "idx": 95,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -116,7 +116,7 @@
   {
     "name": "Sales Order-company_guarantee",
     "docstatus": 0,
-    "idx": 20,
+    "idx": 22,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -173,7 +173,7 @@
   {
     "name": "Sales Order-custom_column_break_av5it",
     "docstatus": 0,
-    "idx": 119,
+    "idx": 122,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -230,7 +230,7 @@
   {
     "name": "Sales Order-custom_column_break_o1owx",
     "docstatus": 0,
-    "idx": 0,
+    "idx": 124,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -287,7 +287,7 @@
   {
     "name": "Sales Order-custom_confirmation_date",
     "docstatus": 0,
-    "idx": 17,
+    "idx": 18,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -314,12 +314,12 @@
     "is_virtual": 0,
     "read_only": 0,
     "ignore_user_permissions": 0,
-    "hidden": 0,
+    "hidden": 1,
     "print_hide": 0,
     "print_hide_if_no_value": 0,
     "print_width": null,
     "no_copy": 0,
-    "allow_on_submit": 0,
+    "allow_on_submit": 1,
     "in_list_view": 0,
     "in_standard_filter": 0,
     "in_global_search": 0,
@@ -344,7 +344,7 @@
   {
     "name": "Sales Order-custom_factory",
     "docstatus": 0,
-    "idx": 16,
+    "idx": 17,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -401,7 +401,7 @@
   {
     "name": "Sales Order-custom_packaging",
     "docstatus": 0,
-    "idx": 121,
+    "idx": 123,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -458,7 +458,7 @@
   {
     "name": "Sales Order-custom_quotation_reference_number",
     "docstatus": 0,
-    "idx": 118,
+    "idx": 121,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -515,7 +515,7 @@
   {
     "name": "Sales Order-custom_warranty",
     "docstatus": 0,
-    "idx": 170,
+    "idx": 125,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -527,7 +527,7 @@
     "precision": "",
     "hide_seconds": 0,
     "hide_days": 0,
-    "options": "\n24\n36\n48\n60\n72\n84",
+    "options": "\n24\n36\n48\n60\n72\n84\n90\n96",
     "fetch_from": null,
     "fetch_if_empty": 0,
     "collapsible": 0,
@@ -572,7 +572,7 @@
   {
     "name": "Sales Order-documentation_language",
     "docstatus": 0,
-    "idx": 21,
+    "idx": 23,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -629,7 +629,7 @@
   {
     "name": "Sales Order-incoterms",
     "docstatus": 0,
-    "idx": 118,
+    "idx": 120,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -971,7 +971,7 @@
   {
     "name": "Sales Order-second_language",
     "docstatus": 0,
-    "idx": 22,
+    "idx": 24,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,
@@ -1028,7 +1028,7 @@
   {
     "name": "Sales Order-section_break_85",
     "docstatus": 0,
-    "idx": 92,
+    "idx": 94,
     "is_system_generated": 0,
     "dt": "Sales Order",
     "module": null,

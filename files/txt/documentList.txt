@@ -5,3 +5,12 @@
 # ex: filters = {"status":"Cancelled}  but be sure to use filters = before 
 
 #document/Translation
+# To get the document, we use the format "Document = Doctype."
+# To update the document, we use the format "document/doctype."
+
+document/Translation
+Document = Factory
+document/Factory
+Single Document = Quotation Presets
+document/singleDocument/Quotation Presets.json
+

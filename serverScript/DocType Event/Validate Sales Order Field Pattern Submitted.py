@@ -1,24 +1,15 @@
-def validate_sap_ref_pattern(input_string):
-    if input_string[9] == '/':
-        # Check if the last two characters are digits
-        if input_string[10:].isdigit():
-            # Convert the last two characters to an integer
-            last_two_digits = int(input_string[10:])
-            # Check if the last two digits are multiples of 10
-            if last_two_digits % 10 == 0:
-                return True
-    raise frappe.ValidationError('SAP Reference Number Pattern Error')
-for item in doc.items:
-    if item.rdg_number:
-        frappe.call('validate_naming_pattern', prefix='RDG', length=11, field_value=item.rdg_number, field='RDG Number')
-    if item.sap_reference:
-        # Split the SAP Reference at / to the get the first part and validate its length and pattern
-        sap_reference = item.sap_reference.split('/')
-        frappe.call('validate_naming_pattern', prefix='742', length=9, field_value=sap_reference[0], field='SAP Reference' )
-        try:
-            validate_sap_ref_pattern(item.sap_reference) 
-        except Exception as e:
-            # Handle the exception and return an error response
-            frappe.log_error(str(e))  # Log the error for debugging purposes
-            frappe.response['message'] =  'Unsuccessful'
-            frappe.throw( title='SAP Reference', msg=str(e))
+# Call the API function as "validate_document_fields" for validating
+# SAP reference and RDG number
+lo_response = frappe.call("validate_document_fields", io_doc=doc)
+la_error_messages = []
+# Get all the reponse messages from the API and
+# add the error message to the error message list
+if lo_response.get("message"):
+    for l_message in lo_response["message"]:
+        # Add error messages to the list if they indicate failure.
+        if l_message["code"] != 200:
+            la_error_messages.append(l_message["i_msg"])
+
+    # If there are error messages, throw an error with the list of messages
+    if len(la_error_messages) > 0:
+        frappe.throw(title="Error", msg=la_error_messages, as_list=True)

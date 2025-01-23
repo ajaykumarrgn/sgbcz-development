@@ -1,0 +1,31 @@
+{
+  "name": "NEU",
+  "docstatus": 0,
+  "idx": 0,
+  "factory": "NEU",
+  "letter_head": "SGB NEU",
+  "print_language": "de",
+  "doctype": "Factory",
+  "field_validation_rules": [
+    {
+      "docstatus": 0,
+      "idx": 1,
+      "doctype_name": "Sales Order",
+      "is_child": 1,
+      "child_field_name": "items",
+      "field_name": "sap_reference",
+      "separator": "/",
+      "prefix": "212",
+      "part_1_length": 9,
+      "part_1_condition": 0,
+      "part_1_type": "int",
+      "part_2_length": 0,
+      "part_2_condition": 10,
+      "part_2_type": "int",
+      "parent": "NEU",
+      "parentfield": "field_validation_rules",
+      "parenttype": "Factory",
+      "doctype": "Field Validation Rules"
+    }
+  ]
+}
