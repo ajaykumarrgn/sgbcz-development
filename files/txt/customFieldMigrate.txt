@@ -12,9 +12,4 @@
 # Skip
 # Log Message: "Role updating process is skipped as per the txt file."
 
-Customer Group.json
-Quotation.json
-Sales Order.json
 Delivery Note.json
-Customer.json
-
