@@ -4,6 +4,7 @@
 //Change References
 //The parallel design value is not set in the item code generated
 // from the design item (ISS-2024-00130).
+//Unable to create item from new design (ISS-2025-00023)
 frappe.ui.form.on("Design", {
   refresh(frm) {
     /*
@@ -30,7 +31,7 @@ frappe.ui.form.on("Design", {
 
       // success event
       LD_DOMScriptEle.addEventListener("load", () => {
-        // Call the xml2json from the xml-js library and parse the as Json object
+        //Call the xml2json from the xml-js library and parse the as Json object
         const LD_JSONDATA = JSON.parse(xml2json(iXmlString, LD_OPTIONS));
         //console.log()
         // convert to string so that it can be stored to the code field
@@ -97,10 +98,13 @@ frappe.ui.form.on("Design", {
     // if (frm.doc.upstream_file && !frm.doc.last_calculated_on) {
     // Include the new condition: if the existing last calculated date
     // does not match the new calculated date in upstream file, update it.
+    // Earlier, update the 'Last Calculated On' date only if it already exists. 
+    // Expand the condition to include the last calculated date on new design, 
+    // and also update the new date when it is recalculated.(ISS-2025-00023)
     if (
-      frm.doc.upstream_file &&
-      frm.doc.last_calculated_on.replaceAll("-", "") !==
-        frm.doc.upstream_file.split("_")[1]
+      (frm.doc.upstream_file && !frm.doc.last_calculated_on) ||
+      (frm.doc.upstream_file &&
+       frm.doc.last_calculated_on.replaceAll("-", "") !== frm.doc.upstream_file.split("_")[1])
     ) {
       const L_DATEPART = frm.doc.upstream_file.split("_")[1]; // Extract the date part
       frm.set_value("last_calculated_on", L_DATEPART);
