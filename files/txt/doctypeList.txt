@@ -3,7 +3,3 @@
 
 # Design
 
-Factory
-Field Validation Rules
-Quotation Presets
-Design
