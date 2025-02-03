@@ -1,4 +1,4 @@
-# Submitted Delivery Note from Amended document is
+# Submitted Delivery Note from Amended document
 # not getting  updated (<<ISS-2025-00021)
 
 
