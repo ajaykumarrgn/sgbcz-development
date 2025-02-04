@@ -1,7 +1,7 @@
 # Submitted Delivery Note from Amended document
 # not getting  updated (<<ISS-2025-00021)
 
-def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
+def fn_validate_serial_number_duplicate(i_serial_number, id_schedule, doc):
     # Validate if the serial number exists in a confirmed Delivery Schedule
     if i_serial_number:
         # Check if the serial number exists in any other confirmed Delivery Schedules
@@ -16,7 +16,7 @@ def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
                 "Delivery Schedule",
                 {
                     "serial_number": i_serial_number,
-                    "parent": ["!=", i_schedule.parent],
+                    "parent": ["!=", id_schedule.parent],
                     "docstatus": 1,
                 },  # <<ISS-2025-00021
             )

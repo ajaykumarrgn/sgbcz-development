@@ -1,4 +1,4 @@
-def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
+def fn_validate_serial_number_duplicate(i_serial_number, id_schedule, doc):
     # Validate if the serial number exists in a confirmed Delivery Schedule
     if i_serial_number:
         l_duplicate = frappe.db.exists(
@@ -9,7 +9,7 @@ def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
             # Check if the serial number is present in other Delivery Note schedules
             l_count = frappe.db.count(
                 "Delivery Schedule",
-                {"serial_number": i_serial_number, "parent": ["!=", i_schedule.parent]},
+                {"serial_number": i_serial_number, "parent": ["!=", id_schedule.parent]},
             )
             # If there is an entry raise error
             if l_count > 0:
