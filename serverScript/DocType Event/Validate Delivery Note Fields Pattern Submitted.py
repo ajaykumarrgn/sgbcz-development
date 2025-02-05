@@ -1,4 +1,7 @@
-def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
+# Submitted Delivery Note from Amended document
+# not getting  updated (<<ISS-2025-00021)
+
+def fn_validate_serial_number_duplicate(i_serial_number, id_schedule, doc):
     # Validate if the serial number exists in a confirmed Delivery Schedule
     if i_serial_number:
         # Check if the serial number exists in any other confirmed Delivery Schedules
@@ -6,25 +9,30 @@ def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
             "Delivery Schedule", {"serial_number": i_serial_number, "docstatus": 1}
         )
         if l_duplicate:
-            # Check if the serial number is found in other Delivery Schedules 
+            # Check if the serial number is found in other Delivery Schedules
+            # Validating the duplication only on the submitted Delivery Note
             # (excluding the current schedule)
             l_count = frappe.db.count(
                 "Delivery Schedule",
-                {"serial_number": i_serial_number, "parent": ["!=", i_schedule.parent]},
+                {
+                    "serial_number": i_serial_number,
+                    "parent": ["!=", id_schedule.parent],
+                    "docstatus": 1,
+                },  # <<ISS-2025-00021
             )
             # If there is an entry raise error
             if l_count > 0:
-                raise frappe.ValidationError("Duplicate Serial Number")
+                raise frappe.ValidationError(_("Duplicate Serial Number"))
 
     # Check if the Serial number is present in schedule lines of current document
     l_count = sum(
         1
-        for schedule_item in doc.delivery_schedule
-        if schedule_item.serial_number == i_serial_number
+        for ld_schedule_item in doc.delivery_schedule
+        if ld_schedule_item.serial_number == i_serial_number
     )
     # If there are more than one entries then raise error
     if l_count > 1:
-        raise frappe.ValidationError("Duplicate Serial Number")
+        raise frappe.ValidationError(_("Duplicate Serial Number"))
 
 
 # Call the API function as "validate_document_fields" for validating
@@ -44,13 +52,17 @@ if lo_response.get("message"):
         frappe.throw(title="Error", msg=la_error_messages, as_list=True)
 
 
-for i_schedule in doc.delivery_schedule:
+for ld_schedule in doc.delivery_schedule:
     # if i_schedule.invoice_number:
-    #     frappe.call('validate_naming_pattern', prefix='781', length=9, field_value=i_schedule.invoice_number, field='Invoice Number')
-    if i_schedule.serial_number:
-        # frappe.call('validate_naming_pattern', prefix='70', length=7, field_value=i_schedule.serial_number, field='Serial Number')
+    #     frappe.call('validate_naming_pattern', prefix='781', length=9,
+    #               field_value=i_schedule.invoice_number, field='Invoice Number')
+    if ld_schedule.serial_number:
+        # frappe.call('validate_naming_pattern', prefix='70', length=7,
+        #           field_value=i_schedule.serial_number, field='Serial Number')
         try:
-            fn_validate_serial_number_duplicate(i_schedule.serial_number, i_schedule, doc)
+            fn_validate_serial_number_duplicate(
+                ld_schedule.serial_number, ld_schedule, doc
+            )
         except Exception as e:
-            title = ("Serial Number:" + i_schedule.serial_number,)
+            title = ("Serial Number:" + ld_schedule.serial_number,)
             frappe.throw(title=title, msg=str(e))
