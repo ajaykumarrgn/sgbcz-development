@@ -1,4 +1,4 @@
-def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
+def fn_validate_serial_number_duplicate(i_serial_number, id_schedule, doc):
     # Validate if the serial number exists in a confirmed Delivery Schedule
     if i_serial_number:
         l_duplicate = frappe.db.exists(
@@ -9,11 +9,11 @@ def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
             # Check if the serial number is present in other Delivery Note schedules
             l_count = frappe.db.count(
                 "Delivery Schedule",
-                {"serial_number": i_serial_number, "parent": ["!=", i_schedule.parent]},
+                {"serial_number": i_serial_number, "parent": ["!=", id_schedule.parent]},
             )
             # If there is an entry raise error
             if l_count > 0:
-                raise frappe.ValidationError("Duplicate Serial Number")
+                raise frappe.ValidationError(_("Duplicate Serial Number"))
     # Check if the Serial number is present in schedule lines of current document
     l_count = sum(
         1
@@ -22,7 +22,7 @@ def fn_validate_serial_number_duplicate(i_serial_number, i_schedule, doc):
     )
     # If there are more than one entries then raise error
     if l_count > 1:
-        raise frappe.ValidationError("Duplicate Serial Number")
+        raise frappe.ValidationError(_("Duplicate Serial Number"))
 
 
 # Call the API function as "validate_document_fields" for validating
