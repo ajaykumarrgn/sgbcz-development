@@ -81,7 +81,7 @@ function fnUpdateButtonGroup(frm) {
           ACTION: fnCreateItem
       });      
     }
-  if (STATUS === 'Item Created' && frm.doc.item) {
+  if (STATUS === 'Item Created' && frm.doc.item && frm.doc.is_design === 1) {
     LA_BUTTONS.push({
                       LABEL: 'Recalculate Design',
                       ACTION: fnRecalculate
@@ -90,6 +90,12 @@ function fnUpdateButtonGroup(frm) {
           LABEL: 'View Item',
           ACTION: fnViewItem
       });
+  }
+  if (STATUS === 'Item Created' && frm.doc.item) {
+    LA_BUTTONS.push({
+      LABEL: 'View Item',
+      ACTION: fnViewItem
+    });
   }
   if (STATUS === 'Item Created' && !frm.doc.item) {
     LA_BUTTONS.push({
@@ -263,7 +269,7 @@ function fnCreateItem(frm) {
   //Calling the create_item_from_design api
   frappe.call({
     method: "create_item_from_design",
-    args: { design: frm.doc.name },
+    args: { design: frm.doc.name , method: 'GET'},
     callback: function (response) {
       if (response.message) {
         //after successfull creation displays the alert message
