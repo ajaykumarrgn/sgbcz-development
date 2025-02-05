@@ -22,7 +22,7 @@ def fn_validate_serial_number_duplicate(i_serial_number, id_schedule, doc):
             )
             # If there is an entry raise error
             if l_count > 0:
-                raise frappe.ValidationError("Duplicate Serial Number")
+                raise frappe.ValidationError(_("Duplicate Serial Number"))
 
     # Check if the Serial number is present in schedule lines of current document
     l_count = sum(
@@ -32,7 +32,7 @@ def fn_validate_serial_number_duplicate(i_serial_number, id_schedule, doc):
     )
     # If there are more than one entries then raise error
     if l_count > 1:
-        raise frappe.ValidationError("Duplicate Serial Number")
+        raise frappe.ValidationError(_("Duplicate Serial Number"))
 
 
 # Call the API function as "validate_document_fields" for validating
