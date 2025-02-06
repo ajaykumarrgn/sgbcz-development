@@ -3,7 +3,9 @@ frappe.ui.form.on("Design", {
   // For backward compatibility: Designs created
   // before adding the factory option.
   // If the status is 'Calculation Received', Factory: 'SGBCZ'
-  //Transformer Type: 'DTTHZ2N'
+  // Transformer Type: 'DTTHZ2N'
+  // Recalculate design button appearing for non designs (<<ISS-2025-00030)
+  
     fnCheckRecalculateDesign(frm);
     if(!frm.is_new()){
       if (frm.doc.status === 'Calculation Received' && 
@@ -56,22 +58,22 @@ frappe.ui.form.on("Design", {
 });
 
 function fnUpdateButtonGroup(frm) {
-  const STATUS = frm.doc.status;
+  const L_STATUS = frm.doc.status;
   const LA_BUTTONS = [];  
   // Determine which buttons to show based on status
-  if (STATUS === 'Draft' && frm.doc.is_design === 1) {
+  if (L_STATUS === 'Draft' && frm.doc.is_design === 1) {
     LA_BUTTONS.push({
           LABEL: 'Create Design',
           ACTION: fnCreateDesign
       });
   }
-  if (STATUS === 'Draft' && frm.doc.is_design === 0) {
+  if (L_STATUS === 'Draft' && frm.doc.is_design === 0) {
     LA_BUTTONS.push({
           LABEL: 'Create Item',
           ACTION: fnCreateItem
       });
   }
-  if (STATUS === 'Calculation Received' && !frm.doc.item) {
+  if (L_STATUS === 'Calculation Received' && !frm.doc.item) {
     LA_BUTTONS.push({
           LABEL: 'Recalculate Design',
           ACTION: fnRecalculate
@@ -81,7 +83,9 @@ function fnUpdateButtonGroup(frm) {
           ACTION: fnCreateItem
       });      
     }
-  if (STATUS === 'Item Created' && frm.doc.item && frm.doc.is_design === 1) {
+  // Previously, Recalculate button was visible for all factories.
+  // Now it only shows for SGBCZ is-design factory.
+  if (L_STATUS === 'Item Created' && frm.doc.item && frm.doc.is_design === 1) { //<<ISS-2025-00030
     LA_BUTTONS.push({
                       LABEL: 'Recalculate Design',
                       ACTION: fnRecalculate
@@ -91,23 +95,26 @@ function fnUpdateButtonGroup(frm) {
           ACTION: fnViewItem
       });
   }
-  if (STATUS === 'Item Created' && frm.doc.item) {
+   //>>ISS-2025-00030
+  //Display View button when item is created, but only for non-design items
+  if (L_STATUS === 'Item Created' && frm.doc.item) {
     LA_BUTTONS.push({
       LABEL: 'View Item',
       ACTION: fnViewItem
     });
   }
-  if (STATUS === 'Item Created' && !frm.doc.item) {
+  //<<ISS-2025-00030
+  if (L_STATUS === 'Item Created' && !frm.doc.item) {
     LA_BUTTONS.push({
           LABEL: 'Create Item',
           ACTION: fnCreateItem
       });
   }
-  if(STATUS === 'Calculation Received' && frm.doc.item){
+  if(L_STATUS === 'Calculation Received' && frm.doc.item){
     frm.set_value('status', 'Item Updated');
     frm.save();
   }
-  if (STATUS === 'Item Updated' && frm.doc.factory === 'SGBCZ') {
+  if (L_STATUS === 'Item Updated' && frm.doc.factory === 'SGBCZ') {
     LA_BUTTONS.push({
       LABEL: 'Recalculate Design',
       ACTION: fnRecalculate
@@ -166,11 +173,11 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
         const LTIMEDIFF = Math.abs(LTODAY - LLASTCALCULATEDATE);
         const LDAYDIFF = Math.ceil(LTIMEDIFF / (1000 * 3600 * 24));
         if (LDAYDIFF >= LREFRESHDATE) {
-            const BUTTONS = [];
+            const LA_BUTTONS = [];
             if (frm.doc.status == 'Calculation Received' && !frm.doc.item) {
                 frm.set_intro(false);
                 frm.set_intro(__('The calculation is expired by ') + LDAYDIFF + " days from default price recalculation frequency", 'yellow');
-                BUTTONS.push({
+                LA_BUTTONS.push({
                     LABEL: 'Recalculate Design',
                     ACTION: fnRecalculate
                 });
@@ -178,17 +185,17 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
             if (frm.doc.status == 'Item Created') {
                 frm.set_intro(false);
                 frm.set_intro(__('The calculation is expired by ') + LDAYDIFF + " days from default price recalculation frequency", 'yellow');
-                BUTTONS.push({
+                LA_BUTTONS.push({
                     LABEL: 'Recalculate Design',
                     ACTION: fnRecalculate
                 });
-                BUTTONS.push({
+                LA_BUTTONS.push({
                     LABEL: 'View Item',
                     ACTION: fnViewItem
                 });
             }
             // Pass the button array to the function
-            fnShowButtonGroup(frm, BUTTONS);
+            fnShowButtonGroup(frm, LA_BUTTONS);
           }
         }
     });
@@ -200,12 +207,12 @@ function fnRecalculate(frm){
 // upstream file, Gitra XML downstream, Gitra json Downstream
 // from the xml data tab and labour and direct material cost 
 // from the item tab for calculating total cost.
-  const FIELDSTOCLEAR = [
+  const LA_FIELDSTOCLEAR = [
     'upstream_file', 'gitra_xml_downstream', 'labour',
     'gitra_json_downstream', 'direct_material_cost'
   ];
   // Set all fields to empty string
-  FIELDSTOCLEAR.forEach(field => frm.set_value(field, ''));
+  LA_FIELDSTOCLEAR.forEach(field => frm.set_value(field, ''));
   frm.set_value('is_update_item_prices', 0);
   // Update the status and save the form
   frm.set_value("status", "Perform Calculation");
@@ -306,7 +313,7 @@ function fnCreateItem(frm) {
                   //that includes a placeholder for language.
                   // Example:'Datasheet_${l_title}_${frm.doc.name}_{language}'
                   // Here, {language} is the placeholder, 
-                  //ensuring the language appears at the end.                                      
+                  // ensuring the language appears at the end.                                      
                   // The design title will be used as the filename.
                   let lTitle = frm.doc.title;
                   if (lTitle) {
