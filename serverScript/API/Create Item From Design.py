@@ -237,7 +237,9 @@ def fn_convert_to_kv(i_value):
 
 
 # Fetch the design details from the request
-l_design_id = frappe.form_dict.get("design")
+l_design_id = frappe.form_dict.get("i_design")
+l_method = frappe.form_dict.get("i_method")
+
 ld_design = frappe.get_doc("Design", l_design_id)  # Define design here
 
 la_parameter_map_def = fn_get_parameter_mapping_def()
@@ -589,5 +591,22 @@ ld_item_new.item_technical_name = (
 
 ld_item_new.item_code = fn_get_item_code_from_attributes(ld_item_new).replace(".", ",")
 
-ld_item_new.insert()
-frappe.response["message"] = ld_item_new
+# ld_item_new.insert()
+# frappe.response["message"] = ld_item_new
+
+ld_item_code_formation = ld_item_new.item_code
+ 
+if l_method == "GET":
+    l_exist = frappe.db.exists("Item", {"item_code": ld_item_code_formation})
+    if l_exist:
+        frappe.response["message"] = "Item already exists"
+    else:
+        frappe.response["message"] = "No Item"
+        
+        
+elif l_method == "POST":
+    ld_item_new.insert()
+    frappe.response["message"] = {"item_code": ld_item_new.name}
+ 
+else:
+    frappe.response["message"] = "Invalid method"

@@ -2,6 +2,8 @@
 // In SGBCZ only, retain the UK (%) and IP Protection values
 // when switching both from non-design to 'Is Design' 
 // and from 'Is Design' to non-design. (ISS-2024-00129)
+// Retain the single HV value from the non-design (i.e., HV1/HV2)
+// to the is-design (i.e., HV1) (ISS-2025-00030).
 
 frappe.ui.form.on('Design', {
     factory(frm){
@@ -38,16 +40,16 @@ function fnResetValues(frm) {
     //To clear HTML fields when changing the one factory to another.
     function fnResetHtmlFields(iaFields) {
         for (let lField of iaFields) {
-            let htmlInput = $(frm.fields_dict[lField].wrapper).find('input');
-            htmlInput.val('');
+            let lHtmlInput = $(frm.fields_dict[lField].wrapper).find('input');
+            lHtmlInput.val('');
         }
     }
     // Restore the default values after resetting the factory values
     function fnResetToDefault(iaFields) {
         for (let lFieldname of iaFields) {
-            const FIELD_META = frm.meta.fields.find(field => 
+            const L_FIELD_META = frm.meta.fields.find(field => 
                     field.fieldname === lFieldname);
-            if (FIELD_META) {
+            if (L_FIELD_META) {
                 // In SGBCZ, Retain the Uk value when transition 
                 // both from non- design to is design 
                 // and from 'Is Design' to non-design.>>(ISS-2024-00129) 
@@ -59,7 +61,7 @@ function fnResetValues(frm) {
                     continue; 
                 }
                 //<<(ISS-2024-00129)
-                frm.set_value(lFieldname, FIELD_META.default);
+                frm.set_value(lFieldname, L_FIELD_META.default);
             }
         }
     }
@@ -67,11 +69,16 @@ function fnResetValues(frm) {
         // When the factory is 'SGBCZ' and 
         // switches from non-design to is_design, 
         // reset specific fields to empty, as hv2 is not present in is_design.
+        // If hv2 is present, do not clear other fields 
+        // when switching from non-design to design 
+        // to retain the hv value and its dependent fields (ISS-2025-00030)
         if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
             fnResetFields([
-                'hv_rated_voltage', 'highest_operation_voltage_hv', 
-                'ac_phase_hv', 'li_phase_hv', 'hv1', 'hv2'
+                // 'hv_rated_voltage', 'highest_operation_voltage_hv', 
+                // 'ac_phase_hv', 'li_phase_hv', 'hv1', 
+                'hv2' 
             ]);
+            frm.set_value('hv_rated_voltage', frm.doc.hv1); //(<<ISS-2025-00030)
         }
         // In SGBCZ, only one LV value is allowed. 
         // When switching from the other two factories,
