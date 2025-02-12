@@ -1,3 +1,4 @@
+# Not able to create Item from the duplicate Design (ISS-2025-00030)
 def fn_get_attribute(i_variant_of, i_attribute, i_attribute_value):
     ld_child_doc = frappe.new_doc("Item Variant Attribute")
     ld_child_doc.variant_of = i_variant_of
@@ -238,6 +239,7 @@ def fn_convert_to_kv(i_value):
 
 # Fetch the design details from the request
 l_design_id = frappe.form_dict.get("i_design")
+# Process the API code based on the GET and POST method
 l_method = frappe.form_dict.get("i_method")
 
 ld_design = frappe.get_doc("Design", l_design_id)  # Define design here
@@ -594,6 +596,8 @@ ld_item_new.item_code = fn_get_item_code_from_attributes(ld_item_new).replace(".
 # ld_item_new.insert()
 # frappe.response["message"] = ld_item_new
 
+# For the GET method, check if an item already exists for the given design.
+# If it doesn't exist, create a new item for the specific design (>>ISS-2025-00030).
 ld_item_code_formation = ld_item_new.item_code
  
 if l_method == "GET":
@@ -610,3 +614,4 @@ elif l_method == "POST":
  
 else:
     frappe.response["message"] = "Invalid method"
+#<<ISS-2025-00030

@@ -27,13 +27,17 @@ frappe.ui.form.on("Design", {
           method: "create_item_from_design",
           args: { i_design: frm.doc.name, i_method: "GET" },
           callback: function (response) {
-              if (response.message) {
-                  if (response.message === 'Item already exists') {
-                      // Disable the Create Item button and 
-                      // make it readonly if item already exists
-                      $("button:contains('Create Item')").prop('disabled', true).css('pointer-events', 'none');
-                  } 
-              }
+            if (response.message) {
+              if (response.message === 'Item already exists') {
+                  // Disable the Create Item button and make it readonly if item already exists
+                  // $("button:contains('Create Item')").prop('disabled', true).css('pointer-events', 'none').hide();
+                  frm.clear_custom_buttons();
+                  frappe.show_alert({
+                    message: __("The item has already been created for this design."),
+                    indicator: 'red'
+                });
+              } 
+            }
           }
       });
     } //(<<ISS-2025-00029)
@@ -238,16 +242,27 @@ function fnRecalculate(frm){
 // upstream file, Gitra XML downstream, Gitra json Downstream
 // from the xml data tab and labour and direct material cost 
 // from the item tab for calculating total cost.
-  const LA_FIELDSTOCLEAR = [
-    'upstream_file', 'gitra_xml_downstream', 'labour',
-    'gitra_json_downstream', 'direct_material_cost'
-  ];
-  // Set all fields to empty string
-  LA_FIELDSTOCLEAR.forEach(field => frm.set_value(field, ''));
-  frm.set_value('is_update_item_prices', 0);
-  // Update the status and save the form
-  frm.set_value("status", "Perform Calculation");
-  frm.save();
+// Get the confirmation from the user for recalculating the design price
+  frappe.confirm(
+    'Are you sure you want to recalculate this design?',
+    function() {
+      // If 'Yes', proceed with recalculation
+      const LA_FIELDSTOCLEAR = [
+        'upstream_file', 'gitra_xml_downstream', 'labour',
+        'gitra_json_downstream', 'direct_material_cost'
+      ];
+      // Set all fields to empty string
+      LA_FIELDSTOCLEAR.forEach(field => frm.set_value(field, ''));
+      frm.set_value('is_update_item_prices', 0);
+      // Update the status and save the form
+      frm.set_value("status", "Perform Calculation");
+      frm.save();
+      },
+      function() {
+      // If 'No', skip recalculation
+      frappe.msgprint("Recalculation has been canceled. No action was taken.");
+    }
+  );
 }
 
 function fnUpdatePricelist(frm) {
