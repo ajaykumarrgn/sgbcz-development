@@ -1,4 +1,4 @@
-# Not able to create Item from the duplicate Design (ISS-2025-00030)
+# Not allow to create Item from the duplicate Design (ISS-2025-00030)
 def fn_get_attribute(i_variant_of, i_attribute, i_attribute_value):
     ld_child_doc = frappe.new_doc("Item Variant Attribute")
     ld_child_doc.variant_of = i_variant_of

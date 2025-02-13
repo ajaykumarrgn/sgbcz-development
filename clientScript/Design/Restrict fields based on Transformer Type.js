@@ -173,15 +173,15 @@ frappe.ui.form.on('Design', {
     // it exceeds this value arise the error message
     //onchange of thdi int field event
     thdi: function(frm) {
-        let thdiValue = frm.doc.thdi;
+        let lThdiValue = frm.doc.thdi;
         //the thdi value can either be 5 or 20 
         //for SGBCZ is_design condition
         if (frm.doc.is_design) {
-            if (![5, 20].includes(thdiValue)) {
+            if (![5, 20].includes(lThdiValue)) {
                 frappe.msgprint(__('Enter the THDi Value as 5 or 20'));
             }
         } else {
-            if (thdiValue < 5 || thdiValue > 99) {
+            if (lThdiValue < 5 || lThdiValue > 99) {
                 frappe.msgprint(__('Enter a THDi value between 5 and 99'));
             }
         }
@@ -192,13 +192,13 @@ frappe.ui.form.on('Design', {
         //When there is double voltage on HV then Parallel coil 
         //should be hidden for SGBCZ.
         if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
-            const SHOULD_HIDE_PARALLEL_COIL = frm.doc.hv2 > 0;
+            const L_SHOULD_HIDE_PARALLEL_COIL = frm.doc.hv2 > 0;
             // Set the 'parallel_coil' field to hidden or 
             //visible based on hv2 value
-            frm.set_df_property('parallel_coil', 'hidden', SHOULD_HIDE_PARALLEL_COIL);
+            frm.set_df_property('parallel_coil', 'hidden', L_SHOULD_HIDE_PARALLEL_COIL);
             // If hidden, set the 'parallel_coil' 
             //field value to 0
-            if (SHOULD_HIDE_PARALLEL_COIL) {
+            if (L_SHOULD_HIDE_PARALLEL_COIL) {
                 frm.set_value('parallel_coil', 0);
             }
         }
