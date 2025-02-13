@@ -1,4 +1,7 @@
-//Make the form editable only on draft status(ISS-2024-00133)
+// Make the form editable only on draft status(ISS-2024-00133)
+// Set the electrostatic screen field to a read-only state 
+// when it is not in the draft state. (ISS-2025-00030)
+
 frappe.ui.form.on('Design', {
 
     onload(frm){
@@ -279,9 +282,11 @@ function fnSetFormToReadOnly(frm){
         setTimeout(function() {
         fnSetHTMLFieldsToReadOnly();
     }, 500);
-    // Sometimes, is_design is not set to a read-only state, 
+    // Sometimes, is_design and electrostatic screen
+    // was not set to a read-only state, 
     // so it must be explicitly set to read-only.
         frm.set_df_property("is_design", "read_only", 1);
+        frm.set_df_property("electrostatic_screen", "read_only", 1); //<<ISS-2025-00030
         frm.set_read_only();
         frm.disable_save();
     }
