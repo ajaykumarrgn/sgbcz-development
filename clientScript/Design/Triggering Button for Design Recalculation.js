@@ -20,7 +20,7 @@ frappe.ui.form.on("Design", {
   },
 
   refresh(frm) { 
-    if (!frm.is_new()) {
+    if (!frm.is_new() && frm.doc.status === 'Draft') {
       // Check if the item already exists when the form is not new
       // by using the "GET" method (>>ISS-2025-00029)
       frappe.call({
@@ -28,14 +28,12 @@ frappe.ui.form.on("Design", {
           args: { i_design: frm.doc.name, i_method: "GET" },
           callback: function (response) {
             if (response.message) {
+              // If duplicate item exist, disable the Create Item button 
+              // as well as hide the "Recalculate Design" button
               if (response.message === 'Item already exists') {
                   // Disable the Create Item button and make it readonly if item already exists
-                  // $("button:contains('Create Item')").prop('disabled', true).css('pointer-events', 'none').hide();
-                  frm.clear_custom_buttons();
-                  frappe.show_alert({
-                    message: __("The item has already been created for this design."),
-                    indicator: 'red'
-                });
+                  $("button:contains('Create Item')").prop('disabled', true).css('pointer-events', 'none');
+                  $("button:contains('Recalculate Design')").prop('disabled', true).css('pointer-events', 'none').hide();
               } 
             }
           }
@@ -244,7 +242,7 @@ function fnRecalculate(frm){
 // from the item tab for calculating total cost.
 // Get the confirmation from the user for recalculating the design price
   frappe.confirm(
-    'Are you sure you want to recalculate this design?',
+    'This will Recalculate the Price for the Design again. Do you want to proceed?',
     function() {
       // If 'Yes', proceed with recalculation
       const LA_FIELDSTOCLEAR = [
@@ -260,7 +258,6 @@ function fnRecalculate(frm){
       },
       function() {
       // If 'No', skip recalculation
-      frappe.msgprint("Recalculation has been canceled. No action was taken.");
     }
   );
 }
