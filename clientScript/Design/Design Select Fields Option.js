@@ -17,10 +17,10 @@ frappe.ui.form.on('Design', {
             let laDoc = frappe.model.get_list(L_DOCTYPE);
             // Find the specific attribute based on the attribute_label
             //and transformer_type
-            let ldAttribute = laDoc[0].attributes.find(attr => 
-                attr.parameter === iAttributeLabel 
-                && attr.transformer_type === iTransformerType
-                && attr.is_design === iIsDesign);
+            let ldAttribute = laDoc[0].attributes.find( ldAttribute=> 
+                ldAttribute.parameter === iAttributeLabel 
+                && ldAttribute.transformer_type === iTransformerType
+                && ldAttribute.is_design === iIsDesign);
             //Get the default value and options from the Gitra Attribute,
             if(ldAttribute && ldAttribute.default && ldAttribute.options){
                 // set the field's option from the Gitra attribute options

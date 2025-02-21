@@ -296,9 +296,9 @@ function fnSetFormToReadOnly(frm){
 function fnSetHTMLFieldsToReadOnly() {
     //looping through each fields
     Object.keys(cur_frm.fields_dict).forEach(fieldname => {
-        let lHtmlField = cur_frm.fields_dict[fieldname].$wrapper;
-        if (lHtmlField) {
-            lHtmlField.find('.control-input').each(function() {
+        let laHtmlField = cur_frm.fields_dict[fieldname].$wrapper;
+        if (laHtmlField) {
+            laHtmlField.find('.control-input').each(function() {
                 // Find the parent .form-group and then 
                 //hide the .control-input div
                 let lParentFormGroup = $(this).closest('.form-group');

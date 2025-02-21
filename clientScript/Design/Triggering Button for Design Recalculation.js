@@ -1,11 +1,11 @@
+  // Recalculate design button appearing for non designs (ISS-2025-00030)
+  // Disable the Create Item Button when Duplicate exists (ISS-2025-00029)
 frappe.ui.form.on("Design", {
   onload(frm) {
   // For backward compatibility: Designs created
   // before adding the factory option.
   // If the status is 'Calculation Received', Factory: 'SGBCZ'
   // Transformer Type: 'DTTHZ2N'
-  // Recalculate design button appearing for non designs (ISS-2025-00030)
-  // Disable the Create Item Button when Duplicate exists (ISS-2025-00029)
   fnCheckRecalculateDesign(frm);
     if(!frm.is_new()){
       if (frm.doc.status === 'Calculation Received' && 
@@ -32,8 +32,11 @@ frappe.ui.form.on("Design", {
               // as well as hide the "Recalculate Design" button
               if (ldResponse.message === 'Item already exists') {
                   // Disable the Create Item button and make it readonly if item already exists
-                  $("button:contains('Create Item')").prop('disabled', true).css('pointer-events', 'none');
-                  $("button:contains('Recalculate Design')").prop('disabled', true).css('pointer-events', 'none').hide();
+                  var lCreateItemButton = __("Create Item");// Disable the "Create Item" button
+                  var lRecalculateButton = __("Recalculate Design"); //Disable the "Recalculate Design" button
+                  $("button:contains('" + lCreateItemButton + "')").prop('disabled', true).css('pointer-events', 'none');
+                  $("button:contains('" + lRecalculateButton + "')").prop('disabled', true).css('pointer-events', 'none').hide();
+              
               } 
             }
           }
@@ -265,8 +268,8 @@ function fnRecalculate(frm){
 function fnUpdatePricelist(frm) {
   // Fetch the override price field from the Item doctype for the selected item
   frappe.db.get_value('Item', frm.doc.item, 'override_price')
-    .then(r => {
-      const L_OVERRIDEPRICE = r.message.override_price;
+    .then(ldResponse => {
+      const L_OVERRIDEPRICE = ldResponse.message.override_price;
       // update the price rate
       const L_UPDATEPRICE = () => {
         frappe.call({

@@ -47,9 +47,9 @@ function fnResetValues(frm) {
     // Restore the default values after resetting the factory values
     function fnResetToDefault(iaFields) {
         for (let lFieldname of iaFields) {
-            const L_FIELD_META = frm.meta.fields.find(lField => 
-                    lField.fieldname === lFieldname);
-            if (L_FIELD_META) {
+            const LD_FIELD_META = frm.meta.fields.find(ldField => 
+                    ldField.fieldname === lFieldname);
+            if (LD_FIELD_META) {
                 // In SGBCZ, Retain the Uk value when transition 
                 // both from non- design to is design 
                 // and from 'Is Design' to non-design.>>(ISS-2024-00129) 
@@ -61,7 +61,7 @@ function fnResetValues(frm) {
                     continue; 
                 }
                 //<<(ISS-2024-00129)
-                frm.set_value(lFieldname, L_FIELD_META.default);
+                frm.set_value(lFieldname, LD_FIELD_META.default);
             }
         }
     }
