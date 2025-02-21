@@ -301,11 +301,11 @@ function fnSetHTMLFieldsToReadOnly() {
             laHtmlField.find('.control-input').each(function() {
                 // Find the parent .form-group and then 
                 //hide the .control-input div
-                let lParentFormGroup = $(this).closest('.form-group');
+                let laParentFormGroup = $(this).closest('.form-group');
                 $(this).hide();
                 // Show the next immediate sibling of the 
                 //parent .form-group div
-                lParentFormGroup.find('.control-value').show();
+                laParentFormGroup.find('.control-value').show();
             });
         } else {
             //console.error(`${fieldname} not found`);

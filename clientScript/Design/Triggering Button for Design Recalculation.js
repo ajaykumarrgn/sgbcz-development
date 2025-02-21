@@ -1,3 +1,4 @@
+  // Issues
   // Recalculate design button appearing for non designs (ISS-2025-00030)
   // Disable the Create Item Button when Duplicate exists (ISS-2025-00029)
 frappe.ui.form.on("Design", {
@@ -85,23 +86,23 @@ function fnUpdateButtonGroup(frm) {
   // Determine which buttons to show based on status
   if (L_STATUS === 'Draft' && frm.doc.is_design === 1) {
     LA_BUTTONS.push({
-          L_LABEL: 'Create Design',
+          L_LABEL: __('Create Design'),
           L_ACTION: fnCreateDesign
       });
   }
   if (L_STATUS === 'Draft' && frm.doc.is_design === 0) {
     LA_BUTTONS.push({
-          L_LABEL: 'Create Item',
+          L_LABEL: __('Create Item'),
           L_ACTION: fnCreateItem
       });
   }
   if (L_STATUS === 'Calculation Received' && !frm.doc.item) {
     LA_BUTTONS.push({
-          L_LABEL: 'Recalculate Design',
+          L_LABEL: __('Recalculate Design'),
           L_ACTION: fnRecalculate
         });
     LA_BUTTONS.push({
-          L_LABEL: 'Create Item',
+          L_LABEL: __('Create Item'),
           L_ACTION: fnCreateItem
       });      
     }
@@ -109,11 +110,11 @@ function fnUpdateButtonGroup(frm) {
   // Now it only shows for SGBCZ is-design factory.
   if (L_STATUS === 'Item Created' && frm.doc.item && frm.doc.is_design === 1) { //<<ISS-2025-00030
     LA_BUTTONS.push({
-                      L_LABEL: 'Recalculate Design',
+                      L_LABEL: __('Recalculate Design'),
                       L_ACTION: fnRecalculate
                   });    
     LA_BUTTONS.push({
-          L_LABEL: 'View Item',
+          L_LABEL: __('View Item'),
           L_ACTION: fnViewItem
       });
   }
@@ -121,14 +122,14 @@ function fnUpdateButtonGroup(frm) {
   //Display View button when item is created, but only for non-design items
   if (L_STATUS === 'Item Created' && frm.doc.item) {
     LA_BUTTONS.push({
-      L_LABEL: 'View Item',
+      L_LABEL: __('View Item'),
       L_ACTION: fnViewItem
     });
   }
   //<<ISS-2025-00030
   if (L_STATUS === 'Item Created' && !frm.doc.item) {
     LA_BUTTONS.push({
-          L_LABEL: 'Create Item',
+          L_LABEL: __('Create Item'),
           L_ACTION: fnCreateItem
       });
   }
@@ -140,18 +141,18 @@ function fnUpdateButtonGroup(frm) {
   // to the "Item Recalculated" state (ISS-2025-00030)
   if (L_STATUS === 'Item Recalculated' && frm.doc.factory === 'SGBCZ') {
     LA_BUTTONS.push({
-      L_LABEL: 'Recalculate Design',
+      L_LABEL: __('Recalculate Design'),
       L_ACTION: fnRecalculate
     });
     // Only show the button if the checkbox is not checked
     if (frm.doc.is_update_item_prices !== 1) {
       LA_BUTTONS.push({
-        L_LABEL: 'Force Update Pricelist',
+        L_LABEL:  __('Force Update Pricelist'),
         L_ACTION: fnUpdatePricelist
       });
     }
     LA_BUTTONS.push({
-      L_LABEL: 'View Item',
+      L_LABEL:  __('View Item'),
       L_ACTION: fnViewItem
     });
   }
@@ -159,11 +160,11 @@ function fnUpdateButtonGroup(frm) {
   // into pricelist (ISS-2025-00030)
   if (L_STATUS === 'Item Updated' && frm.doc.factory === 'SGBCZ') {
     LA_BUTTONS.push({
-      L_LABEL: 'Recalculate Design',
+      L_LABEL:  __('Recalculate Design'),
       L_ACTION: fnRecalculate
     });
     LA_BUTTONS.push({
-      L_LABEL: 'View Item',
+      L_LABEL:  __('View Item'),
       L_ACTION: fnViewItem
     });
   }
@@ -214,7 +215,7 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
                 frm.set_intro(false);
                 frm.set_intro(__('The calculation is expired by ') + L_DAYDIFF + __(' days from default price recalculation frequency'), 'yellow');
                 LA_BUTTONS.push({
-                    L_LABEL: 'Recalculate Design',
+                    L_LABEL:  __('Recalculate Design'),
                     L_ACTION: fnRecalculate
                 });
             }
@@ -222,11 +223,11 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
                 frm.set_intro(false);
                 frm.set_intro(__('The calculation is expired by ') + L_DAYDIFF + __(' days from default price recalculation frequency'), 'yellow');
                 LA_BUTTONS.push({
-                    L_LABEL: 'Recalculate Design',
+                    L_LABEL:  __('Recalculate Design'),
                     L_ACTION: fnRecalculate
                 });
                 LA_BUTTONS.push({
-                    L_LABEL: 'View Item',
+                    L_LABEL:  __('View Item'),
                     L_ACTION: fnViewItem
                 });
             }
@@ -359,7 +360,7 @@ function fnCreateItem(frm) {
                   const LD_DATASHEETLANGUAGES =
                     ldGitraResponse.message.datasheet_languages;
                   const LA_LANGUAGES = LD_DATASHEETLANGUAGES.map(
-                    (lang) => lang.language
+                    (ldlanguage) => ldlanguage.language
                   );
                   //the filename is generated using the argument
                   // im_file_name, which takes a string 
