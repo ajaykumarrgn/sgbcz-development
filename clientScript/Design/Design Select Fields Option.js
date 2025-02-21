@@ -14,10 +14,10 @@ frappe.ui.form.on('Design', {
         frappe.model.with_doc(L_DOCTYPE, L_DOCTYPE, function() {
             // Then from the model get the list. This will
             // return all attributes of the model including child table
-            let ldDoc = frappe.model.get_list(L_DOCTYPE);
+            let laDoc = frappe.model.get_list(L_DOCTYPE);
             // Find the specific attribute based on the attribute_label
             //and transformer_type
-            let ldAttribute = ldDoc[0].attributes.find(attr => 
+            let ldAttribute = laDoc[0].attributes.find(attr => 
                 attr.parameter === iAttributeLabel 
                 && attr.transformer_type === iTransformerType
                 && attr.is_design === iIsDesign);
@@ -49,12 +49,12 @@ frappe.ui.form.on('Design', {
             args: {
                 'attribute': iAttributeLabel
             },
-            callback: function(response) {
-                let laOptions = response.message.la_options;
+            callback: function(ldResponse) {
+                let laOptions = ldResponse.message.la_options;
                 //set the field's options
                 frm.set_df_property(iAttributeName, 'options', laOptions.join('\n'));
                 //if form status is Draft and value is empty or reset is true
-                //set the first index of the response
+                //set the first index of the ldResponse
                 if ((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft') {
                     frm.set_value(iAttributeName, laOptions[0]);
                 }

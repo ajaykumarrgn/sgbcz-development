@@ -26,11 +26,11 @@ frappe.ui.form.on("Design", {
       frappe.call({
           method: "create_item_from_design",
           args: { i_design: frm.doc.name, i_method: "GET" },
-          callback: function (response) {
-            if (response.message) {
+          callback: function (ldResponse) {
+            if (ldResponse.message) {
               // If duplicate item exist, disable the Create Item button 
               // as well as hide the "Recalculate Design" button
-              if (response.message === 'Item already exists') {
+              if (ldResponse.message === 'Item already exists') {
                   // Disable the Create Item button and make it readonly if item already exists
                   $("button:contains('Create Item')").prop('disabled', true).css('pointer-events', 'none');
                   $("button:contains('Recalculate Design')").prop('disabled', true).css('pointer-events', 'none').hide();
@@ -198,8 +198,8 @@ function fnShowButtonGroup(frm, iaButtonArray) {
 //Get the list of quotation preset with the design recalculated frequency
 function fnCheckRecalculateDesign(frm) {
 frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
-    let ldDoc = frappe.model.get_list("Quotation Presets");
-    const L_REFRESHDATE = ldDoc[0].price_recalculation_frequency;
+    let laDoc = frappe.model.get_list("Quotation Presets");
+    const L_REFRESHDATE = laDoc[0].price_recalculation_frequency;
     const L_TODAY = new Date();
     const L_LASTCALCULATEDATE = frm.doc.last_calculated_on ? new Date(frm.doc.last_calculated_on) : null;
     if (L_REFRESHDATE && L_LASTCALCULATEDATE) {
@@ -209,7 +209,7 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
             const LA_BUTTONS = [];
             if (frm.doc.status == 'Calculation Received' && !frm.doc.item) {
                 frm.set_intro(false);
-                frm.set_intro(__('The calculation is expired by ') + L_DAYDIFF + " days from default price recalculation frequency", 'yellow');
+                frm.set_intro(__('The calculation is expired by ') + L_DAYDIFF + __(' days from default price recalculation frequency'), 'yellow');
                 LA_BUTTONS.push({
                     L_LABEL: 'Recalculate Design',
                     L_ACTION: fnRecalculate
@@ -217,7 +217,7 @@ frappe.model.with_doc("Quotation Presets", "Quotation Presets", function() {
             }
             if (frm.doc.status == 'Item Created') {
                 frm.set_intro(false);
-                frm.set_intro(__('The calculation is expired by ') + L_DAYDIFF + " days from default price recalculation frequency", 'yellow');
+                frm.set_intro(__('The calculation is expired by ') + L_DAYDIFF + __(' days from default price recalculation frequency'), 'yellow');
                 LA_BUTTONS.push({
                     L_LABEL: 'Recalculate Design',
                     L_ACTION: fnRecalculate
@@ -242,7 +242,7 @@ function fnRecalculate(frm){
 // from the item tab for calculating total cost.
 // Get the confirmation from the user for recalculating the design price
   frappe.confirm(
-    'This will Recalculate the Price for the Design again. Do you want to proceed?',
+    __('This will Recalculate the Price for the Design again. Do you want to proceed?'),
     function() {
       // If 'Yes', proceed with recalculation
       const LA_FIELDSTOCLEAR = [
@@ -275,8 +275,8 @@ function fnUpdatePricelist(frm) {
             i_item_code: frm.doc.item,
             i_design_id: frm.doc.name
           },
-          callback: function(response) {
-            if (response.message) {
+          callback: function(ldResponse) {
+            if (ldResponse.message) {
                 //Once price is updated fot that item into the price list
                 frm.set_value('is_update_item_prices', 1); 
                 // After updating the price, set the status into Item Updated
@@ -292,14 +292,14 @@ function fnUpdatePricelist(frm) {
       // dialog for proceeding the further step
       if (L_OVERRIDEPRICE) {
         frappe.confirm(
-          'Item Price Override is Enabled. Do you want to proceed with updating the prices in the Price list?',
+          __('Item Price Override is Enabled. Do you want to proceed with updating the prices in the Price list?'),
           function () {
             // Yes: Proceed with updating prices
             L_UPDATEPRICE(); // Call the function to update prices
-            frappe.msgprint("Price list rates updated successfully.");
+            frappe.msgprint(__('Price list rates updated successfully.'));
           }, 
           function() {   // If 'No', show cancellation message
-            frappe.msgprint("Pricelist update cancelled.");
+            frappe.msgprint(__('Pricelist update cancelled'));
           }
         );
       } else {
@@ -327,15 +327,15 @@ function fnCreateItem(frm) {
   frappe.call({
     method: "create_item_from_design",
     args: { i_design: frm.doc.name , i_method: 'POST'},
-    callback: function (response) {
-      if (response.message) {
+    callback: function (ldResponse) {
+      if (ldResponse.message) {
         //after successfull creation displays the alert message
         frappe.show_alert(
           { message: __("Item Created"), indicator: "green" },
           5
         );
         //setting the item field
-        frm.set_value("item", response.message.item_code);
+        frm.set_value("item", ldResponse.message.item_code);
         frm.set_value("status", "Item Created");
         frm.refresh_fields();
         //pdf creation is enabled for "is design" SGBCZ transformer
@@ -351,10 +351,10 @@ function fnCreateItem(frm) {
             frappe.call({
               method: "frappe.client.get",
               args: { doctype: "Gitra Settings" },
-              callback: function (gitraResponse) {
-                if (gitraResponse.message) {
+              callback: function (ldGitraResponse) { 
+                if (ldGitraResponse.message) {
                   const LD_DATASHEETLANGUAGES =
-                    gitraResponse.message.datasheet_languages;
+                    ldGitraResponse.message.datasheet_languages;
                   const LA_LANGUAGES = LD_DATASHEETLANGUAGES.map(
                     (lang) => lang.language
                   );
@@ -376,7 +376,7 @@ function fnCreateItem(frm) {
                       // Replace slashes with gitra separator
                     lTitle = lTitle.replace(
                       /\//g,
-                      gitraResponse.message.naming_separator
+                      ldGitraResponse.message.naming_separator
                     );
                   }
                   //calling the custom fn_doc_pdf_source_to_target
@@ -389,11 +389,11 @@ function fnCreateItem(frm) {
                       im_languages: LA_LANGUAGES,
                       im_letter_head: "Data Sheet",
                       im_target_doc_type: "Item",
-                      im_target_doc_name: response.message.item_code,
+                      im_target_doc_name: ldResponse.message.item_code,
                       im_file_name: `Datasheet_${lTitle}_${frm.doc.name}_{language}`,
                     },
-                    callback: function (pdfResponse) {
-                      if (pdfResponse.message) {
+                    callback: function (ldPdfResponse) {
+                      if (ldPdfResponse.message) {
                         //update the status
                         frappe.hide_progress();
                         frm.set_value('status', 'Item Created');

@@ -54,7 +54,7 @@ frappe.ui.form.on('Design', {
             }
             // Triggering the toggle fields based on the factory by here.
             frm.trigger('fnToggleFields');
-        }
+        }" days from default price recalculation frequency"
         frm.trigger('fnToggleFields');
     },   
 
@@ -71,7 +71,7 @@ frappe.ui.form.on('Design', {
             'temperature_rise_datasheet', 'temperature_rise_gitra',
             'parallel_coil','ip_protection','type_lv'
         ];
-        LA_FIELDS.forEach(field => frm.toggle_display(field, false));
+        LA_FIELDS.forEach(lField => frm.toggle_display(lField, false));
         let laShowFields = [];
         switch (frm.doc.factory) {
             //the mentioned fields will be hide from display
@@ -85,29 +85,29 @@ frappe.ui.form.on('Design', {
                                 'parallel_coil','type_lv'];
                 break;
             case 'RGB':
-                laShowFields = LA_FIELDS.filter(field => ![
+                laShowFields = LA_FIELDS.filter(lField => ![
                             'lv_rated_voltage', 'bushing_hv',
                             'cooling_method', 'type_cooling',
                             'uk_hv_lv', 'temperature_rise_oil',
                             'temperature_rise_winding',
                             'temperature_rise_datasheet',
                             'temperature_rise_gitra',
-                            'parallel_coil'].includes(field));
+                            'parallel_coil'].includes(lField));
                 laShowFields.push('temperature_rise');
                 break;
             case 'NEU':
-                laShowFields = LA_FIELDS.filter(field => ![
+                laShowFields = LA_FIELDS.filter(lField => ![
                             'lv_rated_voltage', 'uk_lv',
                             'temperature_rise', 'climatic_class',
                             'environmental_class','ip_protection',
                             'temperature_rise_datasheet','type_lv',
                             'temperature_rise_gitra',
-                            'parallel_coil'].includes(field));
+                            'parallel_coil'].includes(lField));
                 laShowFields.push('temperature_rise_oil', 
                                 'temperature_rise_winding');
                 break;
         }
-        laShowFields.forEach(field => frm.toggle_display(field, true));
+        laShowFields.forEach(lField => frm.toggle_display(lField, true));
         //at RGB hide parallel_coil
         //hide uk_hv_lv, impedance based on the presence of lv 2 value
         if (frm.doc.factory === 'RGB') {

@@ -16,9 +16,9 @@ frappe.ui.form.on('Design', {
  
 function fnResetValues(frm) {
     //function to reset the field with default as empty
-    function fnResetFields(iaFields, defaultValue = '') {
+    function fnResetFields(iaFields, iDefaultValue = '') {
         for (let lField of iaFields) {
-            frm.set_value(lField, defaultValue);
+            frm.set_value(lField, iDefaultValue);
         }
     }
     //reset item tab fields for changing the behaviour of the factory 
@@ -47,8 +47,8 @@ function fnResetValues(frm) {
     // Restore the default values after resetting the factory values
     function fnResetToDefault(iaFields) {
         for (let lFieldname of iaFields) {
-            const L_FIELD_META = frm.meta.fields.find(field => 
-                    field.fieldname === lFieldname);
+            const L_FIELD_META = frm.meta.fields.find(lField => 
+                    lField.fieldname === lFieldname);
             if (L_FIELD_META) {
                 // In SGBCZ, Retain the Uk value when transition 
                 // both from non- design to is design 
