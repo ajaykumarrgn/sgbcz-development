@@ -86,6 +86,18 @@ function processFilesInFolder(folderPath, baseFolder) {
       } else if (fileExtension !== '.meta' && !errorFile.has(file.replace(new RegExp(`\\${fileExtension}$`), ''))) {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
         const encodedFilename = encodeURIComponent(file.replace(new RegExp(`\\${fileExtension}$`), ''));
+        const metaFilePath = path.join(baseFolder, folderName, `${folderName}.meta`);
+        let metaContent = fs.readFileSync(metaFilePath, 'utf-8');
+                metaContent = JSON.parse(metaContent);
+                delete metaContent.name;
+                delete metaContent.owner;
+                delete metaContent.modified;
+                delete metaContent.modified_by;
+                delete metaContent.roles;
+                delete metaContent.creation;
+                delete metaContent.columns;
+                delete metaContent.roles;
+                delete metaContent.filters;
 
         const requestOptions = {
           method: 'PUT',
@@ -93,6 +105,7 @@ function processFilesInFolder(folderPath, baseFolder) {
           body: JSON.stringify({
             filename: encodedFilename,
             [fileExtension === '.js' ? 'javascript' : (fileExtension === '.py' ? 'report_script' : 'query')]: fileContent,
+            ...metaContent
           }),
           redirect: 'follow',
         };
@@ -104,21 +117,21 @@ function processFilesInFolder(folderPath, baseFolder) {
             if (!response.ok) {
               if (response.status === 404) {
                 // If the file doesn't exist, create a new report and retry the PUT request
-                const metaFilePath = path.join(baseFolder, folderName, `${folderName}.meta`);
+                // const metaFilePath = path.join(baseFolder, folderName, `${folderName}.meta`);
                 const jsFilePath = path.join(baseFolder, folderName, `${folderName}.js`);
                 const pyFilePath = path.join(baseFolder, folderName, `${folderName}.py`);
                 const sqlFilePath = path.join(baseFolder, folderName, `${folderName}.sql`);
-                let metaContent = fs.readFileSync(metaFilePath, 'utf-8');
-                metaContent = JSON.parse(metaContent);
-                delete metaContent.name;
-                delete metaContent.owner;
-                delete metaContent.modified;
-                delete metaContent.modified_by;
-                delete metaContent.roles;
-                delete metaContent.creation;
-                delete metaContent.columns;
-                delete metaContent.roles;
-                delete metaContent.filters;
+                // let metaContent = fs.readFileSync(metaFilePath, 'utf-8');
+                // metaContent = JSON.parse(metaContent);
+                // delete metaContent.name;
+                // delete metaContent.owner;
+                // delete metaContent.modified;
+                // delete metaContent.modified_by;
+                // delete metaContent.roles;
+                // delete metaContent.creation;
+                // delete metaContent.columns;
+                // delete metaContent.roles;
+                // delete metaContent.filters;
                 const jsContent = readContent(jsFilePath);
                 const pyContent = readContent(pyFilePath);
                 const sqlContent = readContent(sqlFilePath);
