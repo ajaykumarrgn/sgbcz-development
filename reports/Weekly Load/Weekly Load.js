@@ -98,7 +98,7 @@ function fnGetLastDayOfYear() {
   // If 31st December is not a Sunday,
   // If it is not, move back to the last Sunday
   if (lLastDay.isoWeekday() !== 7) {
-    lLastDay.isoWeekday(-1);
+    lLastDay.isoWeekday(0);
   }
   //Return the formatted date
   return lLastDay.format("YYYY-MM-DD");
