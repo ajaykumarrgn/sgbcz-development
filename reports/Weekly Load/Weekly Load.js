@@ -29,8 +29,10 @@ frappe.query_reports["Weekly Load"] = {
     },
     //<< ISS-2024-00007)
   ],
-  get_datatable_options: function (options) {
-    return Object.assign(options, {
+  // get_datatable_options is a built-in Frappe function used 
+  // to enable checkboxes for each row in a datatable.
+  get_datatable_options: function (iOptions) {
+    return Object.assign(iOptions, {
       checkboxColumn: true,
     });
   },
@@ -84,6 +86,8 @@ frappe.query_reports["Weekly Load"] = {
 //>>ISS-2025-00046
 //Set the from date as the first monday of the current year
 function fnGetFirstWeekStart() {
+  // moment.js (built-in frappe function) is used 
+  // for converting dates into date objects
   let lFirstWeekStart = moment(frappe.datetime.year_start());
   // find the first Monday in january
   if (lFirstWeekStart.isoWeekday() !== 1) {
@@ -98,7 +102,7 @@ function fnGetLastDayOfYear() {
   // If 31st December is not a Sunday,
   // If it is not, move back to the last Sunday
   if (lLastDay.isoWeekday() !== 7) {
-    lLastDay.isoWeekday(0);
+    lLastDay.isoWeekday(-1);
   }
   //Return the formatted date
   return lLastDay.format("YYYY-MM-DD");
