@@ -29,7 +29,7 @@ frappe.query_reports["Weekly Load"] = {
     },
     //<< ISS-2024-00007)
   ],
-  
+
   // get_datatable_options is a built-in Frappe function used 
   // to enable checkboxes for each row in a datatable.
   get_datatable_options: function (iOptions) {
@@ -97,6 +97,7 @@ function fnGetFirstWeekStart() {
   }
   return lFirstWeekStart.format("YYYY-MM-DD");
 }
+
 //Set the to date as the last sunday of the current year
 function fnGetLastDayOfYear() {
   let lLastDay = moment(frappe.datetime.year_end());
