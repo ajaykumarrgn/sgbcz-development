@@ -320,7 +320,7 @@ jobs:
         (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70')
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70''
+        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70'
       )
 
     steps:
