@@ -2,6 +2,7 @@
 // In SGBCZ only, retain the UK (%) and IP Protection values
 // when switching both from non-design to 'Is Design' 
 // and from 'Is Design' to non-design. (ISS-2024-00129)
+// Displayed tapping step as 25% instead of 2.5%((ISS-2025-00043))
 
 frappe.ui.form.on('Design', {
     factory(frm){
@@ -14,9 +15,9 @@ frappe.ui.form.on('Design', {
  
 function fnResetValues(frm) {
     //function to reset the field with default as empty
-    function fnResetFields(iaFields, defaultValue = '') {
+    function fnResetFields(iaFields, iDefaultValue = '') {
         for (let lField of iaFields) {
-            frm.set_value(lField, defaultValue);
+            frm.set_value(lField, iDefaultValue);
         }
     }
     //reset item tab fields for changing the behaviour of the factory 
@@ -38,16 +39,25 @@ function fnResetValues(frm) {
     //To clear HTML fields when changing the one factory to another.
     function fnResetHtmlFields(iaFields) {
         for (let lField of iaFields) {
-            let htmlInput = $(frm.fields_dict[lField].wrapper).find('input');
-            htmlInput.val('');
+            let lHtmlInput = $(frm.fields_dict[lField].wrapper).find('input');
+            lHtmlInput.val('');
         }
     }
     // Restore the default values after resetting the factory values
     function fnResetToDefault(iaFields) {
         for (let lFieldname of iaFields) {
-            const FIELD_META = frm.meta.fields.find(field => 
-                    field.fieldname === lFieldname);
-            if (FIELD_META) {
+            const LD_FIELD_META = frm.meta.fields.find(ldField => 
+                    ldField.fieldname === lFieldname);
+            if (LD_FIELD_META) {
+                // If the field type is 'Percent', 
+                // parse its default value as a float.
+                // Otherwise, use the default value as it. 
+                // since the tapping_plus_step field took 25 instead 2,5
+                //(>>ISS-2025-00043)   
+                let lDefault = LD_FIELD_META.fieldtype === 'Percent' 
+                ? parseFloat(LD_FIELD_META.default)
+                : LD_FIELD_META.default;
+                //(<<ISS-2025-00043)   
                 // In SGBCZ, Retain the Uk value when transition 
                 // both from non- design to is design 
                 // and from 'Is Design' to non-design.>>(ISS-2024-00129) 
@@ -59,7 +69,12 @@ function fnResetValues(frm) {
                     continue; 
                 }
                 //<<(ISS-2024-00129)
-                frm.set_value(lFieldname, FIELD_META.default);
+                // Commented this line of code for 
+                // converting the percent into float type.
+                // frm.set_value(lFieldname, LD_FIELD_META.default);//(<<ISS-2025-00043)
+
+                // Set the field value to its default
+                frm.set_value(lFieldname, lDefault); //<<(ISS-2025-00043)
             }
         }
     }
@@ -72,6 +87,7 @@ function fnResetValues(frm) {
                 'hv_rated_voltage', 'highest_operation_voltage_hv', 
                 'ac_phase_hv', 'li_phase_hv', 'hv1', 'hv2'
             ]);
+            fnResetHtmlFields(['hv_html']);
         }
         // In SGBCZ, only one LV value is allowed. 
         // When switching from the other two factories,
@@ -80,6 +96,7 @@ function fnResetValues(frm) {
         if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
             fnResetFields([
                 'lv_rated_voltage', 'lv1', 'lv_2']);
+            fnResetHtmlFields(['lv_html']);
         }
         
         // Resetting item tab fields when shifting the factory
@@ -96,16 +113,17 @@ function fnResetValues(frm) {
             //reset to meta data default
             fnResetToDefault(['rating']);
         }
-            
-        if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
-            // Clearing HTML field values
-            fnResetHtmlFields(['hv_html']);
-        }
+        //Commented this block of code for avoiding repetition 
+        // This is Deployed as part of this issue (>>ISS-2025-00043)    
+        // if (frm.doc.hv2 && frm.doc.factory === 'SGBCZ') {
+        //     // Clearing HTML field values
+        //     fnResetHtmlFields(['hv_html']);
+        // }
         
-        if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
-            // Clearing HTML field values
-            fnResetHtmlFields(['lv_html']);
-        }
+        // if(frm.doc.lv_2 && frm.doc.factory === 'SGBCZ'){
+        //     // Clearing HTML field values
+        //     fnResetHtmlFields(['lv_html']);
+        // }
 
         //onchange of each factory clear every field
         if(frm.doc.factory != 'SGBCZ'){

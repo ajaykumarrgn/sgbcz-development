@@ -1,6 +1,8 @@
 # Transformer with status Purchsing or Purchasing/Stock only :(Issue : ISS-2024-00033)
-# The chart's total weekly capacity doesn't consider the deduction from parallel coils :(Issue : ISS-2024-00035)
-# Set the filter to enable the checkbox for setting the weekly capacity chart size to 40. (Issue : ISS-2024-00007)
+# The chart's total weekly capacity doesn't consider
+# the deduction from parallel coils :(Issue : ISS-2024-00035)
+# Set the filter to enable the checkbox for setting
+# the weekly capacity chart size to 40. (Issue : ISS-2024-00007)
 # Throw error message if years are different in the from and to date filters(Issue : ISS-2024-00054)
 # Show only the Submitted documents in the weekly load report (Issue : ISS-2024-00120)
 
@@ -12,7 +14,8 @@ def fn_get_columns(id_filters):
         # Return the Calendar Week as a String
         return str(l_date.isocalendar()[1])
 
-    # commented the section of code because it would execute before displaying the error message.>>ISS-2024-00054.
+    # commented the section of code because it would execute
+    # before displaying the error message.>>ISS-2024-00054.
     #  def get_calander_year(i_date):
     #     date = frappe.utils.getdate(i_date)
     #     return (str(date.isocalendar()[0]))
@@ -35,9 +38,7 @@ def fn_get_columns(id_filters):
     la_columnswk = []
     # Get the Calendar Week based on the "from_date" and "to_date" filters.
     l_from_week = fn_get_calander_week(id_filters["from_date"])
-    
     l_to_week = fn_get_calander_week(id_filters["to_date"])
-    
     # Loop through calendar weeks between the "from_date" and "to_date".
     for l_week in range(int(l_from_week), int(l_to_week)):
         ld_column = dict(
@@ -46,11 +47,11 @@ def fn_get_columns(id_filters):
         la_columnswk.append(ld_column)
     la_columns.extend(la_columnswk)
     # Add the last column for Rating Weekly capacity
-    # column = dict({"fieldname": "weekly_capacity", "label" : _("Weekly Capacity"), "fieldtype": "Int", "width": 50 })
+    # column = dict({"fieldname": "weekly_capacity",
+    # "label" : _("Weekly Capacity"), "fieldtype": "Int", "width": 50 })
     # Append the Column to the list of Week Columns
     la_columns.append(ld_column)
     return la_columns
-
 
 #
 # Main function to process the data for the final report
@@ -62,7 +63,8 @@ def fn_get_final_data(id_filters):
     # Get the from date and to date for the year
     def fn_get_calander_year(i_date):
         l_date = frappe.utils.getdate(i_date)
-        # Returns the week number of the year by using the ISO calendar and especially returns the [0] only for the year
+        # Returns the week number of the year by using the ISO calendar
+        # and especially returns the [0] only for the year
         return str(l_date.isocalendar()[0])
 
     l_from_date = id_filters["from_date"]
@@ -86,7 +88,8 @@ def fn_get_final_data(id_filters):
     def fn_get_planning_row_dict(i_from_date, i_to_date):
         l_from_week = fn_get_calander_week(i_from_date)
         l_to_week = fn_get_calander_week(i_to_date)
-        # add 1 week more for the planning row as sometimes the calander week for the to date will be a week less
+        # add 1 week more for the planning row as sometimes
+        # the calander week for the to date will be a week less
         ld_planning_row = {
             str(week): 0 for week in range(int(l_from_week), (int(l_to_week) + 1))
         }
@@ -104,7 +107,8 @@ def fn_get_final_data(id_filters):
                             from `tabDelivery Schedule`
                             where planned_production_end_date BETWEEN %(from_date)s AND %(to_date)s
                             # >> ISS-2024-00033
-                            # Filter the data based on the status being 'Purchasing' or 'Purchasing/Stock'.
+                            # Filter the data based on the status 
+                            # being 'Purchasing' or 'Purchasing/Stock'.
                             and status IN ('Purchasing', 'Purchasing/Stock')
                             """,
             # << ISS-2024-00033
@@ -125,7 +129,8 @@ def fn_get_final_data(id_filters):
             "parent": ("IN", ia_delivery_notes),
             "pos": ("IN", ia_unique_pos),
             # In "docstatus != 2," it displays both draft and submitted records.
-            #'docstatus': ("!=", 2), #<< Commented this line for the show only the submitted documents (ISS-2024-00120)
+            #'docstatus': ("!=", 2), #<< Commented this line for the show
+            # only the submitted documents (ISS-2024-00120)
             'docstatus': ("=", 1),  # <<ISS-2024-00120
         }
         # Get delivery items from the 'Delivery Note Item' doctype
@@ -201,21 +206,25 @@ def fn_get_final_data(id_filters):
             # transformers_to_be_reduced  = 0
 
             ## For every 3 parallel coils per week reduce the planned capacity by 1
-            # transformers_to_be_reduced = (int(id_parallel_row[l_week_number])-1) // int(id_planned_capacity.parallel_weekly_capacity)
+            # transformers_to_be_reduced = (int(id_parallel_row[l_week_number])-1) //
+            # int(id_planned_capacity.parallel_weekly_capacity)
 
             # Get the planned weekly capacity and reduce it by the parallel factor from above step
-            # id_planning_row[week_number] = int(ld_weekly_capacity['qty']) - transformers_to_be_reduced
+            # id_planning_row[week_number] = int(ld_weekly_capacity['qty']) -
+            # transformers_to_be_reduced
 
             l_transformers_to_be_reduced = 0
 
             # Check if parallel coils are present and greater than 0
             if id_parallel_row.get(l_week_number, 0) > 0:
-                # Calculate the number of transformers to be reduced for every 3 parallel coils per week
+                # Calculate the number of transformers to be
+                # reduced for every 3 parallel coils per week
                 l_transformers_to_be_reduced = (
                     int(id_parallel_row[l_week_number]) - 1
                 ) // int(id_planned_capacity.parallel_weekly_capacity)
 
-                # Get the planned weekly capacity and reduce it by the parallel factor from above step
+                # Get the planned weekly capacity and reduce it
+                # by the parallel factor from above step
             id_planning_row[l_week_number] = max(
                 0, int(ld_weekly_capacity["qty"]) - l_transformers_to_be_reduced
             )
@@ -293,9 +302,7 @@ def fn_get_final_data(id_filters):
                             l_pl_wk = fn_get_calander_week(
                                 ld_schedule_line["planned_production_end_date"]
                             )
-                           
                             ld_planning_row[l_pl_wk] = ld_planning_row[l_pl_wk] + 1
-
                             ld_parallel_row = fn_get_sum_of_parallel(
                                 ld_planning_row, l_pl_wk, ld_parallel_row
                             )
@@ -395,9 +402,7 @@ def fn_get_final_data(id_filters):
 
     return la_final_data
 
-
 # Getting data for the chart
-
 
 def fn_get_chart_data(i_planning_data, id_filters):
     def fn_get_calander_week(i_date):
@@ -422,7 +427,8 @@ def fn_get_chart_data(i_planning_data, id_filters):
     # commented for the issue of not displaying correct planned data (# ISS-2024-00035)
     # planned_dataset = {}
     # planned_dataset['name'] = "Planned"
-    # planned_dataset['values'] = list([d['qty'] for d in fn_get_planned_capacity(id_filters.from_date)])
+    # planned_dataset['values'] = list([d['qty'] for d in
+    # fn_get_planned_capacity(id_filters.from_date)])
     # planned_dataset['chartType'] = 'line'
     # planned_dataset['type'] = 'line'
     # planned_data = []
@@ -430,23 +436,24 @@ def fn_get_chart_data(i_planning_data, id_filters):
     for l_week in range(int(l_from_week), int(l_to_week)):
         la_labels.append(str(l_week))
 
-    for index, data in enumerate(i_planning_data):
-        # Ignore Row Weekly Capacity and Parallel for stacked bar chart. It is already used in line chart
+    for l_index, ld_data in enumerate(i_planning_data):
+        # Ignore Row Weekly Capacity and Parallel for
+        # stacked bar chart. It is already used in line chart
         # Stack all the power per week
 
-        if data["power"] not in ["Parallel", "Total"]:
+        if ld_data["power"] not in ["Parallel", "Total"]:
             la_values = []
             ld_dataset = {}
 
-            # get the data of the Row weekly capacity and display in line chart
-            if data["power"] == "Weekly Capacity":
+            # get the ld_data of the Row weekly capacity and display in line chart
+            if ld_data["power"] == "Weekly Capacity":
                 if id_filters.weekly_capacity == 1:
-                    ld_dataset["name"] = data["power"]
+                    ld_dataset["name"] = ld_data["power"]
                     ld_dataset["chartType"] = "line"
                     # <<ISS-2024-00035
 
                     for l_week in range(int(l_from_week), int(l_to_week)):
-                        values.append(data.get(str(l_week)))
+                        la_values.append(ld_data.get(str(l_week)))
                     # >> ISS-2024-00007
 
                     ld_dataset["values"] = la_values
@@ -455,11 +462,11 @@ def fn_get_chart_data(i_planning_data, id_filters):
                     # << ISS-2024-00007
             else:
 
-                ld_dataset["name"] = data["power"]
+                ld_dataset["name"] = ld_data["power"]
                 ld_dataset["chartType"] = "bar"
 
                 for l_week in range(int(l_from_week), int(l_to_week)):
-                    la_values.append(data.get(str(l_week)))
+                    la_values.append(ld_data.get(str(l_week)))
 
                 ld_dataset["values"] = la_values
 
