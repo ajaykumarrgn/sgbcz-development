@@ -54,7 +54,7 @@ frappe.ui.form.on('Design', {
             }
             // Triggering the toggle fields based on the factory by here.
             frm.trigger('fnToggleFields');
-        }" days from default price recalculation frequency"
+        }
         frm.trigger('fnToggleFields');
     },   
 

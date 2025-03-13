@@ -3,6 +3,8 @@
 // when switching both from non-design to 'Is Design' 
 // and from 'Is Design' to non-design. (ISS-2024-00129)
 // Displayed tapping step as 25% instead of 2.5%((ISS-2025-00043))
+// Retain the single HV value from the non-design (i.e., HV1/HV2)
+// to the is-design (i.e., HV1) (ISS-2025-00030).
 
 frappe.ui.form.on('Design', {
     factory(frm){
@@ -91,6 +93,7 @@ function fnResetValues(frm) {
                 // 'ac_phase_hv', 'li_phase_hv', 'hv1', 
                 'hv2' 
             ]);
+            frm.set_value('hv_rated_voltage', frm.doc.hv1); //(<<ISS-2025-00030)
             fnResetHtmlFields(['hv_html']);
         }
         // In SGBCZ, only one LV value is allowed. 
