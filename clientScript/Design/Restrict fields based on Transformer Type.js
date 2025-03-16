@@ -1,4 +1,7 @@
-//Make the form editable only on draft status(ISS-2024-00133)
+// Make the form editable only on draft status(ISS-2024-00133)
+// Set the electrostatic screen field to a read-only state 
+// when it is not in the draft state. (ISS-2025-00030)
+
 frappe.ui.form.on('Design', {
 
     onload(frm){
@@ -68,7 +71,7 @@ frappe.ui.form.on('Design', {
             'temperature_rise_datasheet', 'temperature_rise_gitra',
             'parallel_coil','ip_protection','type_lv'
         ];
-        LA_FIELDS.forEach(field => frm.toggle_display(field, false));
+        LA_FIELDS.forEach(lField => frm.toggle_display(lField, false));
         let laShowFields = [];
         switch (frm.doc.factory) {
             //the mentioned fields will be hide from display
@@ -82,29 +85,29 @@ frappe.ui.form.on('Design', {
                                 'parallel_coil','type_lv'];
                 break;
             case 'RGB':
-                laShowFields = LA_FIELDS.filter(field => ![
+                laShowFields = LA_FIELDS.filter(lField => ![
                             'lv_rated_voltage', 'bushing_hv',
                             'cooling_method', 'type_cooling',
                             'uk_hv_lv', 'temperature_rise_oil',
                             'temperature_rise_winding',
                             'temperature_rise_datasheet',
                             'temperature_rise_gitra',
-                            'parallel_coil'].includes(field));
+                            'parallel_coil'].includes(lField));
                 laShowFields.push('temperature_rise');
                 break;
             case 'NEU':
-                laShowFields = LA_FIELDS.filter(field => ![
+                laShowFields = LA_FIELDS.filter(lField => ![
                             'lv_rated_voltage', 'uk_lv',
                             'temperature_rise', 'climatic_class',
                             'environmental_class','ip_protection',
                             'temperature_rise_datasheet','type_lv',
                             'temperature_rise_gitra',
-                            'parallel_coil'].includes(field));
+                            'parallel_coil'].includes(lField));
                 laShowFields.push('temperature_rise_oil', 
                                 'temperature_rise_winding');
                 break;
         }
-        laShowFields.forEach(field => frm.toggle_display(field, true));
+        laShowFields.forEach(lField => frm.toggle_display(lField, true));
         //at RGB hide parallel_coil
         //hide uk_hv_lv, impedance based on the presence of lv 2 value
         if (frm.doc.factory === 'RGB') {
@@ -170,15 +173,15 @@ frappe.ui.form.on('Design', {
     // it exceeds this value arise the error message
     //onchange of thdi int field event
     thdi: function(frm) {
-        let thdiValue = frm.doc.thdi;
+        let lThdiValue = frm.doc.thdi;
         //the thdi value can either be 5 or 20 
         //for SGBCZ is_design condition
         if (frm.doc.is_design) {
-            if (![5, 20].includes(thdiValue)) {
+            if (![5, 20].includes(lThdiValue)) {
                 frappe.msgprint(__('Enter the THDi Value as 5 or 20'));
             }
         } else {
-            if (thdiValue < 5 || thdiValue > 99) {
+            if (lThdiValue < 5 || lThdiValue > 99) {
                 frappe.msgprint(__('Enter a THDi value between 5 and 99'));
             }
         }
@@ -189,13 +192,13 @@ frappe.ui.form.on('Design', {
         //When there is double voltage on HV then Parallel coil 
         //should be hidden for SGBCZ.
         if (frm.doc.factory === 'SGBCZ' && !frm.doc.is_design) {
-            const SHOULD_HIDE_PARALLEL_COIL = frm.doc.hv2 > 0;
+            const L_SHOULD_HIDE_PARALLEL_COIL = frm.doc.hv2 > 0;
             // Set the 'parallel_coil' field to hidden or 
             //visible based on hv2 value
-            frm.set_df_property('parallel_coil', 'hidden', SHOULD_HIDE_PARALLEL_COIL);
+            frm.set_df_property('parallel_coil', 'hidden', L_SHOULD_HIDE_PARALLEL_COIL);
             // If hidden, set the 'parallel_coil' 
             //field value to 0
-            if (SHOULD_HIDE_PARALLEL_COIL) {
+            if (L_SHOULD_HIDE_PARALLEL_COIL) {
                 frm.set_value('parallel_coil', 0);
             }
         }
@@ -279,9 +282,11 @@ function fnSetFormToReadOnly(frm){
         setTimeout(function() {
         fnSetHTMLFieldsToReadOnly();
     }, 500);
-    // Sometimes, is_design is not set to a read-only state, 
+    // Sometimes, is_design and electrostatic screen
+    // was not set to a read-only state, 
     // so it must be explicitly set to read-only.
         frm.set_df_property("is_design", "read_only", 1);
+        frm.set_df_property("electrostatic_screen", "read_only", 1); //<<ISS-2025-00030
         frm.set_read_only();
         frm.disable_save();
     }
@@ -291,16 +296,16 @@ function fnSetFormToReadOnly(frm){
 function fnSetHTMLFieldsToReadOnly() {
     //looping through each fields
     Object.keys(cur_frm.fields_dict).forEach(fieldname => {
-        let lHtmlField = cur_frm.fields_dict[fieldname].$wrapper;
-        if (lHtmlField) {
-            lHtmlField.find('.control-input').each(function() {
+        let laHtmlField = cur_frm.fields_dict[fieldname].$wrapper;
+        if (laHtmlField) {
+            laHtmlField.find('.control-input').each(function() {
                 // Find the parent .form-group and then 
                 //hide the .control-input div
-                let lParentFormGroup = $(this).closest('.form-group');
+                let laParentFormGroup = $(this).closest('.form-group');
                 $(this).hide();
                 // Show the next immediate sibling of the 
                 //parent .form-group div
-                lParentFormGroup.find('.control-value').show();
+                laParentFormGroup.find('.control-value').show();
             });
         } else {
             //console.error(`${fieldname} not found`);
