@@ -29,6 +29,10 @@ frappe.ui.form.on('Design', {
                 //set the default value into the field
                 if((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft'){
                     frm.set_value(iAttributeName, ldAttribute.default);
+                    // Prevent "Not Saved" state in draft due to delayed resetting of options
+                    if (!frm.is_new() && iReset === false) {
+                        frm.save()
+                    }
                 }
                 frm.refresh_field(iAttributeName);
             }else{
@@ -57,6 +61,10 @@ frappe.ui.form.on('Design', {
                 //set the first index of the ldResponse
                 if ((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft') {
                     frm.set_value(iAttributeName, laOptions[0]);
+                    // Prevent "Not Saved" state in draft due to delayed resetting of options
+                    if (!frm.is_new() && iReset === false) {
+                        frm.save()
+                    }
                 }
                 frm.refresh_field(iAttributeName);
             }
