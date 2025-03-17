@@ -3,6 +3,8 @@
 // Design form saved twice:>>(ISS-2024-00133)
 // Retain the UK(%) and IP Protection 
 // when switching non design to "Is Design" : >>(ISS-2024-00129)
+// Create item for RGB and NEU with two default vector values 
+// (i.e) vector group lv1 and vector group lv2 (ISS-2025-00030)
 
 frappe.ui.form.on('Design', {
     fnGetAttributeOptionAndDefault(frm, iAttributeLabel, 
@@ -12,13 +14,13 @@ frappe.ui.form.on('Design', {
         frappe.model.with_doc(L_DOCTYPE, L_DOCTYPE, function() {
             // Then from the model get the list. This will
             // return all attributes of the model including child table
-            let ldDoc = frappe.model.get_list(L_DOCTYPE);
+            let laDoc = frappe.model.get_list(L_DOCTYPE);
             // Find the specific attribute based on the attribute_label
             //and transformer_type
-            let ldAttribute = ldDoc[0].attributes.find(attr => 
-                attr.parameter === iAttributeLabel 
-                && attr.transformer_type === iTransformerType
-                && attr.is_design === iIsDesign);
+            let ldAttribute = laDoc[0].attributes.find( ldAttribute=> 
+                ldAttribute.parameter === iAttributeLabel 
+                && ldAttribute.transformer_type === iTransformerType
+                && ldAttribute.is_design === iIsDesign);
             //Get the default value and options from the Gitra Attribute,
             if(ldAttribute && ldAttribute.default && ldAttribute.options){
                 // set the field's option from the Gitra attribute options
@@ -27,12 +29,16 @@ frappe.ui.form.on('Design', {
                 //set the default value into the field
                 if((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft'){
                     frm.set_value(iAttributeName, ldAttribute.default);
+                    // Prevent "Not Saved" state in draft due to delayed resetting of options
+                    if (!frm.is_new() && iReset === false) {
+                        frm.save()
+                    }
                 }
                 frm.refresh_field(iAttributeName);
             }else{
                 // If attributes not there in the Gitra settings
                 // then it will get from the Item attribute
-                frm.events.fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, 
+                frm.events.fnGetAttributeOptionFromItemAttribute(frm, iAttributeLabel, 
             iAttributeName, iReset);
             }
         });
@@ -41,33 +47,38 @@ frappe.ui.form.on('Design', {
     //get values from item attribute through 
     //api "get_attribute_value_from_item_attribute"
     //argument as Attribute Name
-    fngetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
+    fnGetAttributeOptionFromItemAttribute(frm, iAttributeLabel, iAttributeName, iReset) {
         frappe.call({
             method: 'get_attribute_value_from_item_attribute',
             args: {
                 'attribute': iAttributeLabel
             },
-            callback: function(response) {
-                let laOptions = response.message.la_options;
+            callback: function(ldResponse) {
+                let laOptions = ldResponse.message.la_options;
                 //set the field's options
                 frm.set_df_property(iAttributeName, 'options', laOptions.join('\n'));
                 //if form status is Draft and value is empty or reset is true
-                //set the first index of the response
+                //set the first index of the ldResponse
                 if ((!frm.doc[iAttributeName] || iReset) && frm.doc.status === 'Draft') {
                     frm.set_value(iAttributeName, laOptions[0]);
+                    // Prevent "Not Saved" state in draft due to delayed resetting of options
+                    if (!frm.is_new() && iReset === false) {
+                        frm.save()
+                    }
                 }
                 frm.refresh_field(iAttributeName);
             }
         });
     },
-    
+    // Correct the vector group attribute name 
+    // based on the provided attribute list(ISS-2025-00030).
     fnSetOptionsAndDefault(frm, iReset = false, iIpProtection = false) {
         //Attribute mapping
         const LA_ATTRIBUTES = [
             ['Bushings HV', 'bushing_hv'],
             ['Type of LV', 'type_lv'],
-            ['Vector Group LV1', 'vector_group_lv1'],
-            ['Vector Group LV2', 'vector_group_lv2'],
+            ['Vector Group LV 1', 'vector_group_lv1'], //<<(ISS-2025-00030)
+            ['Vector Group LV 2', 'vector_group_lv2'], //<<(ISS-2025-00030)
             ['Vector Group', 'vector_group'],
             ['Insulation class', 'insulation_class'],
             ['Winding material', 'winding_material'],
