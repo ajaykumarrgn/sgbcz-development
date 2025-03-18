@@ -28,9 +28,10 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
 	//"target_fieldname_in_current_document" as argument
 
     onload(frm) {
-      // Detects newly added elements using DOMNodeInserted
-      // Identify and remove the "Create a new Item" option
-      // Dynamically in the item code, as simple items are not created.
+      // Detect newly added elements using DOMNodeInserted, 
+      // identify and remove the "Create a new Item" option dynamically in the item code, 
+      // as simple items are not created. 
+      // After the design feature adaptation, item creation is done from the design.
 	  // >>ISS-2025-00050
       $(document).on("DOMNodeInserted", function (event) {
         // Remove the "Create a new Item" option whenever it appears

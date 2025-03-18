@@ -19,7 +19,8 @@ frappe.ui.form.on('Sales Order', {
 	        frm.refresh_fields();
         }
 		// Identify and remove the "Create a new Item" option
-		// Dynamically in the item code, as simple items are not created from the sales order>>ISS-2025-00050
+		// Dynamically in the item code, as simple items are not created from the sales order
+		// After the design feature adaptation, item creation is done from the design.>>ISS-2025-00050
 		$(document).on("DOMNodeInserted", function(event) {
 			// Remove the "Create a new Item" option whenever it appears
 			$("div[role='option'] p[title='Create a new Item']").parent().remove();
