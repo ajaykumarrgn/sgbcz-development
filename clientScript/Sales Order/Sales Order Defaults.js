@@ -23,7 +23,7 @@ frappe.ui.form.on('Sales Order', {
 		// After the design feature adaptation, item creation is done from the design.>>ISS-2025-00050
 		$(document).on("DOMNodeInserted", function(event) {
 			// Remove the "Create a new Item" option whenever it appears
-			$("div[role='option'] p[title='Create a new Item']").parent().remove();
+			$("div[role='option'] p[title='" + __("Create a new Item") + "']").parent().remove();
 		}); //<<ISS-2025-00050
 	},
 });

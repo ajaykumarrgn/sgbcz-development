@@ -5,7 +5,7 @@
 
 //Filter Search results
 cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
-  var laParentItems = [];
+  let laParentItems = [];
   //Filter Items not belonging to Accessories
   laParentItems = doc.items
     .filter((ldItem) => ldItem.item_group !== "Accessories")
@@ -29,13 +29,15 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
 
     onload(frm) {
       // Detect newly added elements using DOMNodeInserted, 
-      // identify and remove the "Create a new Item" option dynamically in the item code, 
+      // identify and remove the "Create a new Item" option 
+      // dynamically in the item code, 
       // as simple items are not created. 
-      // After the design feature adaptation, item creation is done from the design.
+      // After the design feature adaptation, 
+      // item creation is done from the design.
 	  // >>ISS-2025-00050
       $(document).on("DOMNodeInserted", function (event) {
         // Remove the "Create a new Item" option whenever it appears
-        $("div[role='option'] p[title='Create a new Item']").parent().remove();
+        $("div[role='option'] p[title='" + __("Create a new Item") + "']").parent().remove();
       }); //<<ISS-2025-00050
 
       frm.add_fetch("party_name", "packaging", "ll_packaging");
@@ -58,7 +60,7 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
         frm.events.fnSetTermsAndConditions(frm);
       }
       // frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-      //     var child = locals[cdt][cdn];
+      //     let child = locals[cdt][cdn];
       //     //console.log(child);
       //     return {
       //         filters:[
@@ -69,7 +71,7 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
       // };
     },
     fnSetQuotationPresets(frm) {
-      var lResponse = frappe.call({
+      let lResponse = frappe.call({
         method: "frappe.client.get_value",
         args: {
           doctype: "Quotation Presets",
@@ -100,7 +102,7 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
           async: false,
         },
         callback: function (ldResponse) {
-          var lDefaultValidity = ldResponse.message.default_validity;
+          let lDefaultValidity = ldResponse.message.default_validity;
           frm.doc.valid_till = frappe.datetime.add_days(
             frm.doc.transaction_date,
             lDefaultValidity
@@ -129,7 +131,7 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
       frm.events.fnSetTermsAndConditions(frm);
     },
     fnGetPos(frm, idItem) {
-      var ldPrevItem = frm.doc.items[item.idx - 2];
+      let ldPrevItem = frm.doc.items[idItem.idx - 2];
       // If a previous item is available (e.g., "DTTZ2N-1600/10/6/75"):
       // - Find the item group.
       // - If the parent item group is "Accessories" 
@@ -189,7 +191,7 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
 
 frappe.ui.form.on("Quotation Item", {
   item_code(frm, cdt, cdn) {
-    var ldItem = locals[cdt][cdn];
+    let ldItem = locals[cdt][cdn];
     if (!ldItem.pos || !ldItem.custom_parent_item_group) {
       //console.log("Item code is being processed...");
       frm.events.fnGetPos(frm, ldItem);
