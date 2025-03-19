@@ -75,10 +75,23 @@ else:
     la_languages = [l_language.language for l_language in ld_datasheet_languages]
 
 
+# for l_doc_item in doc.items:
+#     # Get the item object
+#     ld_item = frappe.get_doc("Item", l_doc_item.item_code).as_dict()
+#     # Call the function to copy files to quotation
+#     fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
+
+
+la_cancelled_items = []
+
+if doc.amended_from:
+
+    la_cancelled_items = [l_doc_item.item_code for l_doc_item in doc.items]
     
 for l_doc_item in doc.items:
+    if la_cancelled_items and (l_doc_item.item_code in la_cancelled_items):
+        continue
     # Get the item object
     ld_item = frappe.get_doc("Item", l_doc_item.item_code).as_dict()
     # Call the function to copy files to quotation
     fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
-
