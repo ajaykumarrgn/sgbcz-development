@@ -81,17 +81,36 @@ else:
 #     # Call the function to copy files to quotation
 #     fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
 
+def fn_remove_attachment_from_quotation(im_doc):
+    
+    la_file_list = frappe.get_all('File', fields=['name'],
+                                  filters={'attached_to_doctype': im_doc.doctype,
+                                           'attached_to_name': im_doc.name})
+    
+    
+    frappe.delete_doc('File', [l_file['name'] for l_file in la_file_list], ignore_permissions=True)
+
 
 la_cancelled_items = []
 
 if doc.amended_from:
 
-    la_cancelled_items = [l_doc_item.item_code for l_doc_item in doc.items]
+    ld_amended_items = frappe.get_doc('Quotation', doc.amended_from)
+
+    la_cancelled_items = [ld_doc_item.item_code for ld_doc_item in ld_amended_items.items]
+
+
+excluded_items = []
+
+for ld_doc_item in doc.items:
     
-for l_doc_item in doc.items:
-    if la_cancelled_items and (l_doc_item.item_code in la_cancelled_items):
-        continue
-    # Get the item object
-    ld_item = frappe.get_doc("Item", l_doc_item.item_code).as_dict()
-    # Call the function to copy files to quotation
+    if la_cancelled_items and (ld_doc_item.item_code in la_cancelled_items):
+        
+        excluded_items.append(ld_doc_item.item_code)
+        
+        fn_remove_attachment_from_quotation(doc)
+    
+    ld_item = frappe.get_doc("Item", ld_doc_item.item_code).as_dict()
+    
     fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
+
