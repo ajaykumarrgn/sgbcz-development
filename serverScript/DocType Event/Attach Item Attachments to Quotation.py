@@ -1,3 +1,4 @@
+# Remove duplicate attachment frmo cancelled to amended quotation (ISS-2025-00051)
 def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
     l_separator = frappe.db.get_value("Gitra Settings","Gitra Settings", "naming_separator")
     def fn_get_language_pattern(im_languages, im_ext):
@@ -74,43 +75,23 @@ if not ld_datasheet_languages:
 else:
     la_languages = [l_language.language for l_language in ld_datasheet_languages]
 
-
-# for l_doc_item in doc.items:
-#     # Get the item object
-#     ld_item = frappe.get_doc("Item", l_doc_item.item_code).as_dict()
-#     # Call the function to copy files to quotation
-#     fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
-
+#>>ISS-2025-00051
 def fn_remove_attachment_from_quotation(im_doc):
-    
+    # Fetch the list of attachments related to the quotation document
     la_file_list = frappe.get_all('File', fields=['name'],
                                   filters={'attached_to_doctype': im_doc.doctype,
                                            'attached_to_name': im_doc.name})
-    
-    
+    # Delete the fetched attachments based on their names
     frappe.delete_doc('File', [l_file['name'] for l_file in la_file_list], ignore_permissions=True)
 
-
-la_cancelled_items = []
-
-if doc.amended_from:
-
-    ld_amended_items = frappe.get_doc('Quotation', doc.amended_from)
-
-    la_cancelled_items = [ld_doc_item.item_code for ld_doc_item in ld_amended_items.items]
-
-
-excluded_items = []
+# Call the function to remove attachments from the quotation document
+fn_remove_attachment_from_quotation(doc) #<<ISS-2025-00051
 
 for ld_doc_item in doc.items:
-    
-    if la_cancelled_items and (ld_doc_item.item_code in la_cancelled_items):
-        
-        excluded_items.append(ld_doc_item.item_code)
-        
-        fn_remove_attachment_from_quotation(doc)
-    
+    # Get the item object
     ld_item = frappe.get_doc("Item", ld_doc_item.item_code).as_dict()
-    
+    # Call the function to copy files to quotation
     fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
+
+
 
