@@ -1,5 +1,6 @@
 //Change References
 //Set second language default as empty(Issue# : ISS-2024-00010) 
+// Remove "Create New Item" Option in Sales Order Item (ISS-2025-00050)
 //>>ISS-2024-00010
 frappe.ui.form.on('Sales Order', {
     // Setup
@@ -17,6 +18,13 @@ frappe.ui.form.on('Sales Order', {
 	        frm.doc.second_language = '';
 	        frm.refresh_fields();
         }
+		// Identify and remove the "Create a new Item" option
+		// Dynamically in the item code, as simple items are not created from the sales order
+		// After the design feature adaptation, item creation is done from the design.>>ISS-2025-00050
+		$(document).on("DOMNodeInserted", function(event) {
+			// Remove the "Create a new Item" option whenever it appears
+			$("div[role='option'] p[title='" + __("Create a new Item") + "']").parent().remove();
+		}); //<<ISS-2025-00050
 	},
 });
 //<<ISS-2024-00010
