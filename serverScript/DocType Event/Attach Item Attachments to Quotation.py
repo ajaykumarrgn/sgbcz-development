@@ -1,4 +1,4 @@
-# Remove duplicate attachment frmo cancelled to amended quotation (ISS-2025-00051)
+# Remove duplicate attachment from cancelled to amended quotation (ISS-2025-00051)
 def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
     l_separator = frappe.db.get_value(
         "Gitra Settings", "Gitra Settings", "naming_separator"
@@ -55,32 +55,32 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
 
     # Filter the attached files in the given item based on the customer print language
     la_print_language_records = [
-        l_record
-        for l_record in la_file_list
-        if fn_matches_any_pattern(l_record["file_name"], la_customer_language_patterns)
+        ld_record
+        for ld_record in la_file_list
+        if fn_matches_any_pattern(ld_record["file_name"], la_customer_language_patterns)
     ]
     # Filter the attached files without any of the language suffix patterns
     la_other_records = [
-        l_record
-        for l_record in la_file_list
-        if not fn_matches_any_pattern(l_record["file_name"], la_all_patterns)
+        ld_record
+        for ld_record in la_file_list
+        if not fn_matches_any_pattern(ld_record["file_name"], la_all_patterns)
     ]
     la_filtered_files = []
     la_filtered_files.extend(la_other_records)
     la_filtered_files.extend(la_print_language_records)
-    for l_file in la_filtered_files:
+    for ld_file in la_filtered_files:
         # Create a new file object for the quotation
         lo_fileQuotation = frappe.get_doc(
             {
                 "doctype": "File",
-                "file_url": l_file["file_url"],
-                "file_name": l_file["file_name"],
+                "file_url": ld_file["file_url"],
+                "file_name": ld_file["file_name"],
                 "attached_to_doctype": im_doc.doctype,
                 "attached_to_name": im_doc.name,
-                "folder": l_file["folder"],
-                "file_size": l_file["file_size"],
-                "is_private": l_file["is_private"],
-                "content_hash": l_file["content_hash"],
+                "folder": ld_file["folder"],
+                "file_size": ld_file["file_size"],
+                "is_private": ld_file["is_private"],
+                "content_hash": ld_file["content_hash"],
             }
         )
         lo_fileQuotation.flags.ignore_permissions = True
@@ -119,7 +119,7 @@ def fn_remove_attachment_from_quotation(im_doc):
     )
     # Delete the fetched attachments based on their names
     frappe.delete_doc(
-        "File", [l_file["name"] for l_file in la_file_list], ignore_permissions=True
+        "File", [ld_file["name"] for ld_file in la_file_list], ignore_permissions=True
     )
 
 
