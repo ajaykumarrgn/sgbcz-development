@@ -24,21 +24,29 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
     //<<ISS-2024-00064
     //The doctype functionality fetch if empty has been depreciated
     //add_fetch function , it take "link_fieldname_that_connect_source_target",
-    //"source_fieldname_to_fetch_from", 
-	//"target_fieldname_in_current_document" as argument
+    //"source_fieldname_to_fetch_from",
+    //"target_fieldname_in_current_document" as argument
 
     onload(frm) {
-      // Detect newly added elements using DOMNodeInserted, 
-      // identify and remove the "Create a new Item" option 
-      // dynamically in the item code, 
-      // as simple items are not created. 
-      // After the design feature adaptation, 
+      // Detect newly added elements using MutationObserver(),
+      // identify and remove the "Create a new Item" option
+      // dynamically in the item code,
+      // as simple items are not created.
+      // After the design feature adaptation,
       // item creation is done from the design.
-	  // >>ISS-2025-00050
-      $(document).on("DOMNodeInserted", function (event) {
-        // Remove the "Create a new Item" option whenever it appears
-        $("div[role='option'] p[title='" + __("Create a new Item") + "']").parent().remove();
-      }); //<<ISS-2025-00050
+      // >>ISS-2025-00050
+      new MutationObserver(() => {
+        $("ul[role='listbox']").each(function () {
+          if (
+            $(this).prev(
+              "input[data-doctype='Quotation Item'][data-fieldname='item_code']"
+            ).length
+          ) {
+            $(this).find("div[role='option']:has(i.fa-plus)").remove();
+          }
+        });
+      }).observe(document.body, { childList: true, subtree: true });
+      //<<ISS-2025-00050
 
       frm.add_fetch("party_name", "packaging", "ll_packaging");
     },
@@ -134,18 +142,18 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
       let ldPrevItem = frm.doc.items[idItem.idx - 2];
       // If a previous item is available (e.g., "DTTZ2N-1600/10/6/75"):
       // - Find the item group.
-      // - If the parent item group is "Accessories" 
-	  // or the item group is "Services":
-      // - Increment the position (pos) by 0.1 
-	  // (e.g., change 10 to 10.1, or 10.1 to 10.2).
+      // - If the parent item group is "Accessories"
+      // or the item group is "Services":
+      // - Increment the position (pos) by 0.1
+      // (e.g., change 10 to 10.1, or 10.1 to 10.2).
       // - Set the parent item group to the previous item's parent item group.
       // - If the item group is "DTTZ2N":
-      // - Round the previous position (pos) down 
-	  // to the nearest whole number (e.g., from 10.4 to 10).
+      // - Round the previous position (pos) down
+      // to the nearest whole number (e.g., from 10.4 to 10).
       // - Add 10 to the position (e.g., change 10.4 to 20).
       // - Set the parent item group to the item's item group.
-      // - Carry forward the main item quantity 
-	  // (items with whole number positions, i.e.,
+      // - Carry forward the main item quantity
+      // (items with whole number positions, i.e.,
       //item groups other than "Accessories" or "Services") to their sub-items.
       if (ldPrevItem) {
         frappe.call({
@@ -163,16 +171,16 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
               "old_parent",
               function (idItemgroup) {
                 if (
-				  idItemgroup.old_parent == "Accessories" ||
+                  idItemgroup.old_parent == "Accessories" ||
                   ldResponse.message.item_group == "Services"
                 ) {
-					idItem.pos = ldPrevItem.pos + 1 / 10;
-					idItem.qty = ldPrevItem.qty;
-					idItem.custom_parent_item_group =
+                  idItem.pos = ldPrevItem.pos + 1 / 10;
+                  idItem.qty = ldPrevItem.qty;
+                  idItem.custom_parent_item_group =
                     ldPrevItem.custom_parent_item_group;
                   frm.refresh_fields();
                 } else {
-				  idItem.pos = Math.floor(ldPrevItem.pos) + 10;
+                  idItem.pos = Math.floor(ldPrevItem.pos) + 10;
                   fnGetParentItemGroup(idItem);
                   frm.refresh_fields();
                 }
@@ -212,7 +220,7 @@ function fnGetParentItemGroup(idItem) {
     idItem.item_group,
     "parent_item_group",
     function (iValue) {
-		idItem.custom_parent_item_group =
+      idItem.custom_parent_item_group =
         iValue.parent_item_group === "All Item Groups"
           ? idItem.item_group
           : iValue.parent_item_group;
