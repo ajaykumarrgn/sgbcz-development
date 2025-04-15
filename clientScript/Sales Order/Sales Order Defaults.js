@@ -31,7 +31,7 @@ frappe.ui.form.on("Sales Order", {
             "input[data-doctype='Sales Order Item'][data-fieldname='item_code']"
           ).length
         ) {
-          $(this).find("div[role='option']:has(i.fa-plus)").remove();
+            $(this).find("div[role='option']:has(i.fa-plus)").hide();
         }
       });
     }).observe(document.body, { childList: true, subtree: true });
