@@ -1,7 +1,7 @@
 // Change References
 // Packaging details are not automatically fetched from
 // the customer record during the quotation creation process (ISS-2024-00064)
-// Remove "Create New Item" Option in Quotation Item (ISS-2025-00050)
+// Hide "Create New Item" Option in Quotation Item (ISS-2025-00050)
 
 //Filter Search results
 cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
@@ -29,7 +29,7 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
 
     onload(frm) {
       // Detect newly added elements using MutationObserver(),
-      // identify and remove the "Create a new Item" option
+      // identify and hide the "Create a new Item" option
       // dynamically in the item code,
       // as simple items are not created.
       // After the design feature adaptation,
@@ -42,7 +42,7 @@ cur_frm.set_query("parent_item", "items", function (doc, cdt, cdn) {
               "input[data-doctype='Quotation Item'][data-fieldname='item_code']"
             ).length
           ) {
-            $(this).find("div[role='option']:has(i.fa-plus)").remove();
+            $(this).find("div[role='option']:has(i.fa-plus)").hide();
           }
         });
       }).observe(document.body, { childList: true, subtree: true });
