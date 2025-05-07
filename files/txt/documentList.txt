@@ -11,3 +11,4 @@
 # Single Document = Currency Exchange Settings
 
 document/singleDocument/Currency Exchange Settings.json
+
