@@ -5,8 +5,7 @@ on:
     branches:
       - main
       - release
-      - hot-fix
-      - hot-fix-65-70
+      - hot-fix*
     paths-ignore: # Avoid triggering on PR merges with specific commit messages
       - '**/cypress/**'
       - '.github/**'
@@ -22,13 +21,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70') &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70')
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
     steps:
       - name: Use Node.js v20
@@ -80,13 +79,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70') &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70')
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
     needs: code_quality_check
     env:
@@ -212,13 +211,13 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70') &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70')
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
     env:
       USER_NAME: ${{ secrets.TEST_USER_NAME }}
@@ -311,16 +310,16 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70') &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70')
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70'
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
 
     steps:
@@ -341,16 +340,16 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70') &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70')
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70'
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
     env:
       HOST: ${{ vars.PROD_HOST }}
@@ -485,16 +484,16 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70') &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70')
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70'
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
 
     steps:
@@ -515,16 +514,16 @@ jobs:
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
       !(
         github.event_name == 'push' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70') &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
         github.event.before == 'refs/heads/main'
       ) &&
       !(
         github.event_name == 'pull_request' &&
         github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70')
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       ) &&
       !(
-        github.ref == 'refs/heads/hot-fix' || github.ref == 'refs/heads/release' || github.ref == 'refs/heads/hot-fix-65-70'
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
     env:
       HOST: ${{ vars.PROD_HOST }}
