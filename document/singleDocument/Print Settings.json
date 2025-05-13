@@ -17,7 +17,7 @@
   "print_taxes_with_zero_amount": 0,
   "enable_print_server": 0,
   "enable_raw_printing": 0,
-  "print_style": "Modern",
+  "print_style": "Redesign",
   "font": "Default",
   "font_size": 0,
   "doctype": "Print Settings"

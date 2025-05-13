@@ -8,6 +8,6 @@
 # To get the document, we use the format "Document = Doctype."
 # To update the document, we use the format "document/doctype."
 
-#Single Document = Print Settings
+# Single Document = Print Settings
 
 document/singleDocument/Print Settings.json
