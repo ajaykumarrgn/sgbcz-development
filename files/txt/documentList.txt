@@ -10,4 +10,5 @@
 
 # Single Document = Print Settings
 
-document/singleDocument/Print Settings.json
+document/Translation
+filters = {"modified":["Between",["2025-06-09","2025-06-09"]]}
