@@ -10,4 +10,4 @@
 
 # Single Document = Print Settings
 
-document/singleDocument/Print Settings.json
+document/Translation
