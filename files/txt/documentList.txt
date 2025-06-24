@@ -10,4 +10,5 @@
 
 # Single Document = Print Settings
 
-document/Translation
+document/Factory
+document/Item Group

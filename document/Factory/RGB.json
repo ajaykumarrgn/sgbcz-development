@@ -1,11 +1,49 @@
 {
   "name": "RGB",
   "docstatus": 0,
-  "idx": 0,
+  "idx": 6,
   "factory": "RGB",
   "letter_head": "SGB RGB",
   "print_language": "de",
   "doctype": "Factory",
+  "item_template": [
+    {
+      "docstatus": 0,
+      "idx": 1,
+      "item_template": "DTTH2N",
+      "parent": "RGB",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    },
+    {
+      "docstatus": 0,
+      "idx": 2,
+      "item_template": "DTTH2NG",
+      "parent": "RGB",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    },
+    {
+      "docstatus": 0,
+      "idx": 3,
+      "item_template": "DTTHDG",
+      "parent": "RGB",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    },
+    {
+      "docstatus": 0,
+      "idx": 4,
+      "item_template": "DTTHK2NG",
+      "parent": "RGB",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    }
+  ],
   "field_validation_rules": [
     {
       "docstatus": 0,
