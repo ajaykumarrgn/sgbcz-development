@@ -31,15 +31,20 @@ if doc.material_cost:
     # ld_gitra_settings = frappe.get_doc("Gitra Settings", "Gitra Settings")
     #for 603
     # Fetch Design Configuration matching the transformer's variant
+    if doc.has_variants:
+        l_transformer_type = doc.name
+    else:
+        l_transformer_type = doc.variant_of
+
     ld_gitra_settings_list = frappe.get_all(
         "Design Configuration",
-        filters={"transformer_type": doc.variant_of},
+        filters={"transformer_type": l_transformer_type},
         fields=["name"],
         limit=1,
     )
     
     if not ld_gitra_settings_list:
-        frappe.msgprint(f"No Design Configuration found for transformer_type = {doc.variant_of}")
+        frappe.msgprint(f"No Design Configuration found for transformer_type = {l_transformer_type}")
 
     # Now fetch the full document to access child tables and fields
     ld_gitra_settings = frappe.get_doc("Design Configuration", ld_gitra_settings_list[0]["name"])
