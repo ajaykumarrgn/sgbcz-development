@@ -246,19 +246,22 @@ ld_design = frappe.get_doc("Design", l_design_id)  # Define design here
 
 la_parameter_map_def = fn_get_parameter_mapping_def()
 
+l_item_group = frappe.db.get_value("Item", {"name": ld_design.transformer_type, 
+                "has_variants": 1}, ["item_group"])
+
 # Determine item group and variant based on transformer type
 if ld_design.factory == "SGBCZ":
     #603
     # item_group = "DTTHZ2N"
     # variant_of = "DTTHZ2N"
-    item_group = "SGBCZ"
+    item_group = l_item_group
     variant_of = ld_design.transformer_type
     #603
 elif ld_design.factory == "RGB":
-    item_group = "RGB"
+    item_group = l_item_group
     variant_of = ld_design.transformer_type
 elif ld_design.factory == "NEU":
-    item_group = "NEU"
+    item_group = l_item_group
     variant_of = ld_design.transformer_type
 else:
     frappe.response["message"] = "Unsupported transformer type."

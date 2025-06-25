@@ -31,11 +31,15 @@ frappe.ui.form.on('Design', {
                                 frappe.call({
                                     "method": "frappe.client.get",
                                     "args":{
-                                        "doctype": "Gitra Settings"
+                                        "doctype": "Design Configuration",
+                                        "filters" : {"transformer_type": frm.doc.transformer_type,
+                                            "is_design": frm.doc.is_design
+                                        }
                                     },
                                     "callback":function(gitraResponse){
 
                                         if(gitraResponse.message){
+                                            console.log(gitraResponse.message.datasheet_languages);
                                             // After saving, call the fn_pdf_attachment method
                                             const ldDatasheetLanguages = gitraResponse.message.datasheet_languages;
                     

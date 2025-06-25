@@ -357,19 +357,22 @@ function fnCreateItem(frm) {
               args: { doctype: "Design Configuration",
               filters: {transformer_type: frm.doc.transformer_type,
                        is_design: frm.doc.is_design},
-              fields: ["name"]
+              fieldname: ["name"]
               },//for 603
               callback: function (ldGitraResponse) {
                 if (ldGitraResponse.message) {
                     const lDocname = response.message.name;
+                    console.log(lDocname)
                     // Initialize the model with doctype Gitra Settings
                     frappe.model.with_doc(lDoctype, lDocname, function () {
                     // Get the list of settings
                     const LaValue = frappe.model.get_list(lDoctype, lDocname);
+                    console.log(str(LaValue))
                   const LD_DATASHEETLANGUAGES = LaValue.datasheet_languages;
                   const LA_LANGUAGES = LD_DATASHEETLANGUAGES.map(
                     (ldlanguage) => ldlanguage.language
                   );
+                  console.log(LA_LANGUAGES)
                   //the filename is generated using the argument
                   // im_file_name, which takes a string 
                   //that includes a placeholder for language.
