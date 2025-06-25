@@ -79,19 +79,16 @@ frappe.ui.form.on("Design", {
 //603
     //   var lDoctype = "Gitra Settings";
 //For 603
-const lDoctype = "Design Configuration";
-        frappe.db.get_value(lDoctype, {
-        transformer_type: frm.doc.transformer_type,
-        is_design: frm.doc.is_design
-    }, ["name"]).then((response) => {
-        if (response.message) {
-            const lDocname = response.message.name;
+        const lDoctype = "Design Configuration";
       // Initialize the model with doctype Gitra Settings
-      frappe.model.with_doc(lDoctype, lDocname, function () {
+      frappe.model.with_doc(lDoctype, {"transformer_type": frm.doc.transformer_type, 
+      "is_design": frm.doc.is_design}, function () {
         // Then from the model get the list.
         //This will return all attributes of the model including child table
 
-        var laValues = frappe.model.get_doc(lDoctype, lDocname );
+        var laValues = frappe.model.get_doc(lDoctype, {"transformer_type": frm.doc.transformer_type, 
+      "is_design": frm.doc.is_design});
+        
         // Regular expression pattern to match variables in double curly braces
         var lPattern = /\{\{([\w.]+)\}\}/g;
 
@@ -147,11 +144,11 @@ const lDoctype = "Design Configuration";
         var lXmlString = fnAddTappingsXml(frm, lXml, laTappingNodes);
 
         frm.doc.gitra_xml = lXmlString;
+        
       });
 
       frm.refresh_fields();
-    }
-    });
+      
     }
   },
 });
