@@ -247,7 +247,7 @@ ld_design = frappe.get_doc("Design", l_design_id)  # Define design here
 la_parameter_map_def = fn_get_parameter_mapping_def()
 
 l_item_group = frappe.db.get_value("Item", {"name": ld_design.transformer_type, 
-                "has_variants": 1}, "item_group")
+                "has_variants": 1}, ["item_group"])
 
 # Determine item group and variant based on transformer type
 if ld_design.factory == "SGBCZ":
