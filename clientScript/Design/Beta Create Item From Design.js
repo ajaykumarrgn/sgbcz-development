@@ -39,7 +39,7 @@ frappe.ui.form.on('Design', {
                                     "callback":function(gitraResponse){
 
                                         if(gitraResponse.message){
-                                            console.log(gitraResponse.message);
+                                            console.log(gitraResponse.message.datasheet_languages);
                                             // After saving, call the fn_pdf_attachment method
                                             const ldDatasheetLanguages = gitraResponse.message.datasheet_languages;
                     
