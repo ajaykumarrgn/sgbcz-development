@@ -4,7 +4,7 @@ frappe.ui.form.on("Design", {
   // and vice versa
   //refresh(frm){
   onload(frm) {
-      //Added for story >>US-2025-0602
+      //Filtered the Design Configuration for story >>US-2025-0602
     if (frm.is_new()) {
         if (!frm.doc.transformer_type) return;
       const lDoctype = "Design Configuration"
@@ -18,7 +18,7 @@ frappe.ui.form.on("Design", {
       // Initialize the model with doctype Gitra Settings
       frappe.model.with_doc(lDoctype, lDocname, function () {
         let laValues = frappe.model.get_doc(lDoctype, lDocname);
-        // <<US-2025-0602
+      // <<US-2025-0602
         // Set values from Gitra Settings to the form fields
         frm.doc.temperature_rise_gitra = laValues.temperature_rise;
         frm.doc.temperature_rise_datasheet = laValues.temperature_rise;
@@ -39,7 +39,7 @@ frappe.ui.form.on("Design", {
   },
   is_design(frm){
     //   if (frm.is_new()) {
-    //Added for story <<US-2025-0602
+    //Filtered the Design Configuration story >>US-2025-0602
         if (!frm.doc.transformer_type) return;
       const lDoctype = "Design Configuration"
       frappe.db.get_value(lDoctype, {
@@ -52,7 +52,7 @@ frappe.ui.form.on("Design", {
       // Initialize the model with doctype Gitra Settings
       frappe.model.with_doc(lDoctype, lDocname, function () {
         let laValues = frappe.model.get_doc(lDoctype, lDocname);
-        //<<US-2025-0602
+      //<<US-2025-0602
         // Set values from Gitra Settings to the form fields
         frm.doc.temperature_rise_gitra = laValues.temperature_rise;
         frm.doc.temperature_rise_datasheet = laValues.temperature_rise;
@@ -75,7 +75,7 @@ frappe.ui.form.on("Design", {
 
   fnInitializeTemperatureDefaults(frm) {
     if (!frm.doc.transformer_type) return;
-    //Added for story <<US-2025-0602
+    //Filtered the Design Configuration story >>US-2025-0602
     const lDoctype = "Design Configuration"
       frappe.db.get_value(lDoctype, {
            transformer_type: frm.doc.transformer_type,
@@ -105,7 +105,7 @@ frappe.ui.form.on("Design", {
 
   fnCalculateTemperatureRise(frm, on_field) {
     if (!frm.doc.transformer_type) return;
-    //Added for story <<US-2025-0602
+    //Filtered the Design Configuration story >>US-2025-0602
     const lDoctype = "Design Configuration"
       frappe.db.get_value(lDoctype, {
            transformer_type: frm.doc.transformer_type,

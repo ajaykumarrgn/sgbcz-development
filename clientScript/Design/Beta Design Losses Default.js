@@ -5,11 +5,11 @@ frappe.ui.form.on("Design", {
    * @params iLossesSetting field as defined in the Gitra Settings
    */
   fnComputeCustomLosses(frm, iLossesSetting) {
-    //Commented for the story >>US-2025-0602
+//Commented for the story >>US-2025-0602
     // const LOSSES_SETTINGS = iLossesSetting.filter(
     //   (item) => item.transformer_type === frm.doc.transformer_type
     // );
-    //<< US-2025-0602
+//<< US-2025-0602
 
     // Sort iLossesSetting by rating, which is
     //defined as a Data type in the Rating Doctype
@@ -117,7 +117,7 @@ frappe.ui.form.on("Design", {
     //   }
     //<<US-2025-0602
     
-    //Added for story >>US-2025-0602
+//Filter the Design Configuration for story >>US-2025-0602
    // place a condition to prevent uncaught error
     if (frm.doc.transformer_type) {
       const lDoctype = "Design Configuration";
@@ -134,7 +134,8 @@ frappe.ui.form.on("Design", {
           // Initialize the model with doctype Gitra Settings
           frappe.model.with_doc(lDoctype, lDocname, function () {
             // Access loaded doc from `locals`
-            const gitraDoc = frappe.model.get_doc(lDoctype, lDocname);  // <<US-2025-0602
+            const gitraDoc = frappe.model.get_doc(lDoctype, lDocname);  
+// <<US-2025-0602
             //get the losses based on rating and transformer type
             let lRatingLosses = (gitraDoc.losses_setting || []).find(row => row.rating === frm.doc.rating);
 
