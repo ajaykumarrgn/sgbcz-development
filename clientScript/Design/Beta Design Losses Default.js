@@ -5,11 +5,11 @@ frappe.ui.form.on("Design", {
    * @params iLossesSetting field as defined in the Gitra Settings
    */
   fnComputeCustomLosses(frm, iLossesSetting) {
-//Commented for the story >>US-2025-0602
+    //Commented for the story >>US-2025-0602
     // const LOSSES_SETTINGS = iLossesSetting.filter(
     //   (item) => item.transformer_type === frm.doc.transformer_type
     // );
-//<< US-2025-0602
+    //<< US-2025-0602
 
     // Sort iLossesSetting by rating, which is
     //defined as a Data type in the Rating Doctype
@@ -117,23 +117,30 @@ frappe.ui.form.on("Design", {
     //   }
     //<<US-2025-0602
     
-//Filter the Design Configuration for story >>US-2025-0602
+    //Filter the Design Configuration for story >>US-2025-0602
    // place a condition to prevent uncaught error
     if (frm.doc.transformer_type) {
       const lDoctype = "Design Configuration";
-      // Initialize the model with doctype Gitra Settings
-      frappe.model.with_doc(lDoctype, {"transformer_type": frm.doc.transformer_type, 
-      "is_design": frm.doc.is_design}, function () {
+      frappe.db.get_value(
+        lDoctype,
+        {
+          transformer_type: frm.doc.transformer_type,
+          is_design: frm.doc.is_design
+        },
+        ["name"]
+      ).then((ldRresponse) => {
+        if (ldRresponse.message) {
+          const lDocname = ldRresponse.message.name;
+          // Initialize the model with doctype Gitra Settings
+          frappe.model.with_doc(lDoctype, lDocname, function () {
             // Access loaded doc from `locals`
-            const ldGitraDoc = frappe.model.get_doc(lDoctype, {"transformer_type": frm.doc.transformer_type, 
-              "is_design": frm.doc.is_design}); 
-// <<US-2025-0602
+            const ldDoc = frappe.model.get_doc(lDoctype, lDocname);  // <<US-2025-0602
             //get the losses based on rating and transformer type
-            let lRatingLosses = (ldGitraDoc.losses_setting || []).find(row => row.rating === frm.doc.rating);
+            let lRatingLosses = (ldDoc.losses_setting || []).find(row => row.rating === frm.doc.rating);
 
             if (!lRatingLosses) {
               // Calculate custom losses if rating_losses not found
-              lRatingLosses = frm.events.fnComputeCustomLosses(frm, ldGitraDoc.losses_setting);
+              lRatingLosses = frm.events.fnComputeCustomLosses(frm, ldDoc.losses_setting);
             }
       if (iSetDefaultValue) {
         frm.doc.no_load_loss_guarantee = lRatingLosses.no_load_loss;
@@ -171,6 +178,8 @@ frappe.ui.form.on("Design", {
 
       frm.refresh_fields();
          });
+        }
+      });
     }
   },
   refresh(frm) {
