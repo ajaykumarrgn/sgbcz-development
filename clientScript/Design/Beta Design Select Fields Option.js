@@ -9,21 +9,25 @@
 frappe.ui.form.on('Design', {
     fnGetAttributeOptionAndDefault(frm, iAttributeLabel, 
             iAttributeName, iIsDesign, iReset = false) {
-        //Get the Design Configuration for story >>US-2025-0602
+    ///Get the Design Configuration for story >>US-2025-0602
         const lDoctype = "Design Configuration";
+            frappe.db.get_value(lDoctype, {
+        transformer_type: frm.doc.transformer_type,
+        is_design: iIsDesign
+    }, ["name"]).then((response) => {
+        if (response.message) {
+            const lDocname = response.message.name;
         // Initialize the model with doctype Gitra Settings
-        frappe.model.with_doc(lDoctype, {"transformer_type": frm.doc.transformer_type, 
-        "is_design": frm.doc.is_design}, function () {
+        frappe.model.with_doc(lDoctype, lDocname, function() {
             // Then from the model get the list. This will
             // return all attributes of the model including child table
-            let ldDoc = frappe.model.get_doc(lDoctype, {"transformer_type": frm.doc.transformer_type,
-                "is_design": frm.doc.is_design}); 
+            let laDoc = frappe.model.get_doc(lDoctype, lDocname );
 
             // Find the specific attribute based on the attribute_label
             //and transformer_type
-            let ldAttribute = ldDoc.attributes.find( ldAttribute=> 
-                ldAttribute.parameter === iAttributeLabel);
-//<<US-2025-0602
+            let ldAttribute = laDoc.attributes.find( ldAttribute=> 
+                ldAttribute.parameter === iAttributeLabel)
+                //602
                 // && ldAttribute.transformer_type === iTransformerType
                 // && ldAttribute.is_design === iIsDesign);
             //Get the default value and options from the Gitra Attribute,
@@ -47,6 +51,8 @@ frappe.ui.form.on('Design', {
             iAttributeName, iReset);
             }
         });
+        }
+    })
     },
     
     //get values from item attribute through 
