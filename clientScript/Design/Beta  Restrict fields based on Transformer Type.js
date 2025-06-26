@@ -26,7 +26,6 @@ frappe.ui.form.on('Design', {
         frm.trigger('fnToggleFields');
     },
 
-
     factory: function(frm) {
         if (!frm.doc.factory) return;
 
