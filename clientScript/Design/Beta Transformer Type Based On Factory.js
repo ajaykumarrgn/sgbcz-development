@@ -1,19 +1,19 @@
 frappe.ui.form.on("Design", {
-  //602
+  //Function to toggle design field for story >>US-2025-0602
   transformer_type(frm) {
-    fnToggleIsDesignField(frm);  // << Added this line
+    fnToggleIsDesignField(frm);  
   },
   factory(frm) {
         //design creation is only for sgbcz transformer to
         //restrict it in other region by hidding the is_design checkbox
-           //602
+        //Commented for story >>US-2025-0602
         // if (frm.doc.factory != 'SGBCZ') {
         //     frm.set_value('is_design', 0);
         //     frm.set_df_property('is_design', 'hidden', 1);
         // } else {
         //      frm.set_df_property('is_design', 'hidden', 0);
         // }
-        //602
+        //<<US-2025-0602
         fnToggleIsDesignField(frm);
         fnFetchTransformerType(frm);
         fnDirectMaterial(frm);
@@ -24,13 +24,13 @@ frappe.ui.form.on("Design", {
        //design creation is only for sgbcz transformer to
         //restrict it in other region by hidding the is_design checkbox
         
-        //602
+        //Commented for story >>US-2025-0602
         // if (frm.doc.factory != 'SGBCZ') {
         //   frm.set_df_property('is_design', 'hidden', 1);
         // } else {
         //   frm.set_df_property('is_design', 'hidden', 0);
         // }
-        //602    fnToggleIsDesignField(frm);
+        //<<US-2025-0602
         fnToggleIsDesignField(frm);
         fnFetchTransformerType(frm);
         if(frm.is_new()){
@@ -97,7 +97,7 @@ frappe.ui.form.on("Design", {
             }
         });
     }
-   //602
+   //Commented for story >>US-2025-0602
         //  //calling the get_item_variant_based_on_factory
         //     //to get the list of item template available for the
         //     //selected factory
@@ -123,7 +123,7 @@ frappe.ui.form.on("Design", {
         //             }
         //         }
         //     });
- 
+    //<<US-2025-0602
  }
  
  function fnDirectMaterial(frm){
@@ -147,13 +147,14 @@ frappe.ui.form.on("Design", {
    }
     
  }
- //for 602
+ //Function to handle is_design field for story >>US-2025-0602
  function fnToggleIsDesignField(frm) {
   if (!frm.doc.transformer_type) return;
 
   frappe.db.get_value("Item", frm.doc.transformer_type, "custom_external_design_allowed")
     .then(r => {
       const allowed = r.message.custom_external_design_allowed;
+      // Hide is_design field if external_design_allowed is not enabled
       frm.set_df_property("is_design", "hidden", !allowed);
     });
     if (frm.doc.factory != 'SGBCZ') {

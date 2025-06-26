@@ -4,7 +4,7 @@ frappe.ui.form.on("Design", {
   // and vice versa
   //refresh(frm){
   onload(frm) {
-      //Added for story >>US-2025-0602
+      //Filtered the Design Configuration for story >>US-2025-0602
     if (frm.is_new()) {
         if (!frm.doc.transformer_type) return;
         const lDoctype = "Design Configuration";
@@ -32,7 +32,7 @@ frappe.ui.form.on("Design", {
   },
   is_design(frm){
     //   if (frm.is_new()) {
-    //Added for story <<US-2025-0602
+    //Filtered the Design Configuration story >>US-2025-0602
         if (!frm.doc.transformer_type) return;
         const lDoctype = "Design Configuration";
         // Initialize the model with doctype Design Configuration

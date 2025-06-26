@@ -27,15 +27,16 @@ def fn_find_dict_with_keys(id_dict_row, ia_dict_array):
 
 # Begin of Change EBITDA Report (>> #TASK-2024-00157)
 if doc.material_cost:
-    # # Get the Gitra Settings
+    #Commented for story >>US-2025-0603
+    #  Get the Gitra Settings
     # ld_gitra_settings = frappe.get_doc("Gitra Settings", "Gitra Settings")
-    #for 603
+    # <<US-2025-0603
     # Fetch Design Configuration matching the transformer's variant
     if doc.has_variants:
         l_transformer_type = doc.name
     else:
         l_transformer_type = doc.variant_of
-
+#Get the Design Configuration for story >>US-2025-0603
     ld_gitra_settings_list = frappe.get_all(
         "Design Configuration",
         filters={"transformer_type": l_transformer_type},
@@ -48,8 +49,7 @@ if doc.material_cost:
 
     # Now fetch the full document to access child tables and fields
     ld_gitra_settings = frappe.get_doc("Design Configuration", ld_gitra_settings_list[0]["name"])
-    #for 603
-
+    #<<US-2025-0603
 
     # Get the Parent Item Group to validate if it is Transformer or Accessory
     l_parent_item_group = frappe.db.get_value(

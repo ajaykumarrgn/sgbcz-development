@@ -43,7 +43,7 @@ frappe.ui.form.on('Design', {
 
         frm.trigger('fnToggleFields');
     },
-
+//Commented for story >>US-2025-0602
     // When factory is changed, fields also changed for that dependent request.
     //onchange of factory select field event
     // factory: function(frm) {
@@ -65,6 +65,7 @@ frappe.ui.form.on('Design', {
     //     }
     //     frm.trigger('fnToggleFields');
     // },
+// <<US-2025-0602
 
     refresh: function(frm) {
         fnSetFormToReadOnly(frm); //<<ISS-2024-00133
@@ -76,8 +77,10 @@ frappe.ui.form.on('Design', {
         if (frm.is_new()) {
             // Set the default factory as "SGBCZ" and trafo type as "DTTHZ2N" 
             //when the design form is new
+//Commented for story >>US-2025-0602
             // frm.set_value('factory', 'SGBCZ');
             // frm.set_value('transformer_type', 'DTTHZ2N');
+//<<US-2025-0602
             // If factory is SGBCZ, set the LV rated voltage 
             //as a mandatory field
             // not for other Trafo.

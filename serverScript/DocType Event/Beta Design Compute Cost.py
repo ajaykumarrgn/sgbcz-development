@@ -29,14 +29,18 @@ def fn_find_dict_with_keys(doc, ia_dict_array):
 
 
 if not doc.labour and doc.direct_material_cost:
+    #Commented for story >>US-2025-0603
     # Get the Gitra Settings
-    # ld_gitra_settings = frappe.get_doc("Gitra Settings", "Gitra Settings") //602
+    # ld_gitra_settings = frappe.get_doc("Gitra Settings", "Gitra Settings") 
+    #<<US-2025-0603
+    #Get the Design Configuration for story >>US-2025-0603 
     l_docname = frappe.db.get_value(
         "Design Configuration",
         {"transformer_type": doc.transformer_type, "is_design": doc.is_design},
         ["name"]
     )
     ld_gitra_settings = frappe.get_doc("Design Configuration", l_docname)
+    # <<US-2025-0603 
     # Read the production hours record from Gitra Setting labour hours child TABLE
     # identify the record higher then than the Design rating and Design hv_rated_voltage
     # for ex if Design rating is 900KVA and HV is 10000v

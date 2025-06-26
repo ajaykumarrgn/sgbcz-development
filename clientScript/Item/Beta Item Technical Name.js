@@ -153,8 +153,11 @@ frappe.ui.form.on("Item", {
     if (frm.is_new()) {
       // Check if the item is a variant and starts with "DTTHZ2N"
       if (frm.doc.variant_of && 
+      //Added for SGBCZ item group for story >>US-2025-0603
       (frm.doc.variant_of.startsWith("DTTHZ2N") ||
-       frm.doc.variant_of.startsWith("SGBCZ"))) {  //For 603
+       frm.doc.variant_of.startsWith("SGBCZ")))
+      //  >>US-2025-0603
+       {  
         // Find the index of the attribute "Power (kVA)"
         let lIndex = frm.doc.attributes.findIndex(
           (ld_element) => ld_element.attribute == "Power (kVA)"

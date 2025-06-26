@@ -1,6 +1,6 @@
 # Remove duplicate attachment from cancelled to amended quotation (ISS-2025-00051)
 def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
-    # Changed Gitra Settings to Quotation preset for story US-2025-0603
+    # Changed Gitra Settings to Quotation presets for story >>US-2025-0603
     l_separator = frappe.db.get_value(
         "Quotation Presets", "Quotation Presets", "naming_separator"
     )
