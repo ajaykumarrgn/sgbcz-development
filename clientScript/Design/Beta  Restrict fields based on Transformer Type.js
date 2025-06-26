@@ -12,23 +12,14 @@ frappe.ui.form.on('Design', {
         // frm.set_value('transformer_type', null);
 
         // Fetch the default design configuration for the selected factory
-        frappe.call({
-            method: 'frappe.client.get_list',
-            args: {
-                doctype: 'Design Configuration',
-                filters: {
-                    factory: frm.doc.factory,
-                    is_default: 1
-                },
-                fields: ['transformer_type'],
-                limit_page_length: 1
-            },
-            callback: function(response) {
-                if (response.message && response.message.length > 0) {
-                    frm.set_value('transformer_type', response.message[0].transformer_type);
-                } else {
-                    frappe.msgprint(__('No default Design Configuration found for the selected factory.'));
-                }
+        frappe.db.get_value('Design Configuration', 
+            { factory: frm.doc.factory, is_default: 1 }, 
+            'transformer_type'
+        ).then(function(response) {
+            if (response.message) {
+                frm.set_value('transformer_type', response.message.transformer_type);
+            } else {
+                frappe.msgprint(__('No default Design Configuration found for the selected factory.'));
             }
         });
 
@@ -39,27 +30,15 @@ frappe.ui.form.on('Design', {
     factory: function(frm) {
         if (!frm.doc.factory) return;
 
-        // Clear current value (optional)
-        // frm.set_value('transformer_type', null); commented this for not save
-
         // Fetch the default design configuration for the selected factory
-        frappe.call({
-            method: 'frappe.client.get_list',
-            args: {
-                doctype: 'Design Configuration',
-                filters: {
-                    factory: frm.doc.factory,
-                    is_default: 1
-                },
-                fields: ['transformer_type'],
-                limit_page_length: 1
-            },
-            callback: function(response) {
-                if (response.message && response.message.length > 0) {
-                    frm.set_value('transformer_type', response.message[0].transformer_type);
-                } else {
-                    frappe.msgprint(__('No default Design Configuration found for the selected factory.'));
-                }
+        frappe.db.get_value('Design Configuration', 
+            { factory: frm.doc.factory, is_default: 1 }, 
+            'transformer_type'
+        ).then(function(response) {
+            if (response.message) {
+                frm.set_value('transformer_type', response.message.transformer_type);
+            } else {
+                frappe.msgprint(__('No default Design Configuration found for the selected factory.'));
             }
         });
 
