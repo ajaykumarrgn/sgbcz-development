@@ -15,10 +15,10 @@ const lDoctype = "Design Configuration";
  // Initialize the model with doctype Gitra Settings
         frappe.model.with_doc(lDoctype, lDocname, function () {
       // Get list of documents for Gitra Settings
-      var laValues = frappe.model.get_list(lDoctype, filters={"name":lDocname, "is_design": frm.doc.is_design });
+      var laValues = frappe.model.get_doc(lDoctype, lDocname);
 // <<US-2025-0602
       // Initialize LV settings
-      const LA_LV_UNIQUEARRAY = laValues[0].lv_voltage_setting.reduce(
+      const LA_LV_UNIQUEARRAY = laValues.lv_voltage_setting.reduce(
         (iAccumulator, iCurrent) => {
           // Reduce function to filter unique LV voltage values
         //   if (iCurrent.transformer_type === frm.doc.transformer_type) {
@@ -65,8 +65,8 @@ const lDoctype = "Design Configuration";
 
       // Set defaults if new document
       if (frm.is_new()) {
-        fnSetLvDefaults(frm, laValues[0]);
-        fnSetHvDefaults(frm, laValues[0]);
+        fnSetLvDefaults(frm, laValues);
+        fnSetHvDefaults(frm, laValues);
       }
       frm.refresh_fields();
     // });
@@ -318,9 +318,9 @@ const lDoctype = "Design Configuration";
     // Fetch Gitra Settings document asynchronously
     frappe.model.with_doc(lDoctype, lDocname, function () {
       // Get list of documents for Gitra Settings
-      var laValues = frappe.model.get_list(lDoctype, filters={"name":lDocname, "is_design": frm.doc.is_design } );
+      var laValues = frappe.model.get_doc(lDoctype, lDocname);
 // <<US-2025-0602
-      const LA_LV_UNIQUEARRAY = laValues[0].lv_voltage_setting.reduce(
+      const LA_LV_UNIQUEARRAY = laValues.lv_voltage_setting.reduce(
         (iAccumulator, iCurrent) => {
           // Reduce function to filter unique LV voltage values
         //   if (iCurrent.transformer_type === frm.doc.transformer_type) {
@@ -334,9 +334,9 @@ const lDoctype = "Design Configuration";
       );
       set_field_options("highest_operation_voltage_lv", LA_LV_UNIQUEARRAY);
       if (!frm.doc.lv_rated_voltage && !frm.doc.lv_2) {
-        fnSetLvDefaults(frm, laValues[0]);
+        fnSetLvDefaults(frm, laValues);
       }
-      fnSetHvDefaults(frm, laValues[0]);
+      fnSetHvDefaults(frm, laValues);
     });   
     }
     })
