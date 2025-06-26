@@ -51,7 +51,7 @@ cur_frm.cscript.custom_validate = function (doc) {
       case "Reduzierte Verluste":
       case "Umschaltbar":
       case "Umschaltbar ECO+":
-          //for 603
+      // Add switch case for SGBCZ item group for story >>US-2025-0603
       case "SGBCZ":
         doc.item_name = doc.variant_of;
         // Find the index of the "Power (kVA)" attribute in the attributes array

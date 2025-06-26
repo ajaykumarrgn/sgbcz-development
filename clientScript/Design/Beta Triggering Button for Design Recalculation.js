@@ -351,7 +351,7 @@
                 100,
                 __("Please wait")
               );
-              //get the languange and separator from Quotation Presets for story US-2025-0603
+              //get the languange and separator from Quotation Presets for story >>US-2025-0603
               frappe.call({
                 method: "frappe.client.get",
                 args: { doctype: "Quotation Presets"       

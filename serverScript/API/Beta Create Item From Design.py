@@ -251,12 +251,14 @@ l_item_group = frappe.db.get_value("Item", {"name": ld_design.transformer_type,
 
 # Determine item group and variant based on transformer type
 if ld_design.factory == "SGBCZ":
-    #603
+    #Commented for story >>US-2025-0603
     # item_group = "DTTHZ2N"
     # variant_of = "DTTHZ2N"
+    #>>US-2025-0603
+    #Used transformer_type as used for other factories story >>US-2025-0603
     item_group = l_item_group
     variant_of = ld_design.transformer_type
-    #603
+    # <<US-2025-0603
 elif ld_design.factory == "RGB":
     item_group = l_item_group
     variant_of = ld_design.transformer_type

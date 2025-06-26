@@ -76,13 +76,14 @@ frappe.ui.form.on("Design", {
         }
         return iaTappingNodes;
       }
-//603
+//Commented for story >>US-2025-0603
     //   var lDoctype = "Gitra Settings";
-//For 603
+//Get the Design Configuration for >>US-2025-0603
         const lDoctype = "Design Configuration";
       // Initialize the model with doctype Gitra Settings
       frappe.model.with_doc(lDoctype, {"transformer_type": frm.doc.transformer_type, 
       "is_design": frm.doc.is_design}, function () {
+// <<US-2025-0603
         // Then from the model get the list.
         //This will return all attributes of the model including child table
 
