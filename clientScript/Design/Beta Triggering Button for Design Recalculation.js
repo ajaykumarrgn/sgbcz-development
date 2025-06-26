@@ -351,12 +351,10 @@
                 100,
                 __("Please wait")
               );
-              //get the languange and separator from gitra settings
+              //get the languange and separator from Quotation Presets for story US-2025-0603
               frappe.call({
                 method: "frappe.client.get",
-                args: { doctype: "Design Configuration",
-                        filters: { "transformer_type": frm.doc.transformer_type,
-                                    "is_design": frm.doc.is_design },
+                args: { doctype: "Quotation Presets"       
                  },
                 callback: function (ldGitraResponse) { 
                   if (ldGitraResponse.message) {

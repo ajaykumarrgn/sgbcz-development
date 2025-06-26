@@ -1,11 +1,10 @@
 # Remove duplicate attachment from cancelled to amended quotation (ISS-2025-00051)
-def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages, id_design_conf):
-    # l_separator = frappe.db.get_value(
-    #     "Gitra Settings", "Gitra Settings", "naming_separator"
-    # )
-    #for 603
-    l_separator = id_design_conf.get("naming_separator")
-    
+def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages):
+    # Changed Gitra Settings to Quotation preset for story US-2025-0603
+    l_separator = frappe.db.get_value(
+        "Quotation Presets", "Quotation Presets", "naming_separator"
+    )
+
     def fn_get_language_pattern(im_languages, im_ext):
         # Generate language-specific file extensions
         # possibility- language come at start, middle or at end
@@ -34,7 +33,6 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages, id_design
         },
         order_by="creation desc",
     )
-    
     # get the possible pattern with customer language
     la_customer_language_patterns = fn_get_language_pattern([im_doc.language], ".pdf")
     # get the possible pattern for all the datasheet language
@@ -90,26 +88,23 @@ def fn_copy_file_from_item_to_quotation(im_item, im_doc, im_languages, id_design
         try:
             # Insert the created file in the quotation
             lo_fileQuotation.insert()
-            # frappe.throw(str(lo_fileQuotation))
         except frappe.DuplicateEntryError:
             ld_duplicate = frappe.get_doc("File", lo_fileQuotation.duplicate_entry)
 
 
 # begin of execute
-# la_languages = []
-# getting the datasheet languages from gitra settings
-# ld_gitra_settings = frappe.get_doc("Gitra Settings")603
-# ld_gitra_settings = frappe.get_doc("Design Configuration")
+la_languages = []
+# getting the datasheet languages from Quotation Presets
+ld_gitra_settings = frappe.get_doc("Quotation Presets")
+# Accessing the table multiselect field directly
+ld_datasheet_languages = ld_gitra_settings.get("datasheet_languages")
+# Initialize an empty list to store languages
+if not ld_datasheet_languages:
 
-# # Accessing the table multiselect field directly
-# ld_datasheet_languages = ld_gitra_settings.get("datasheet_languages")
-# # Initialize an empty list to store languages
-# if not ld_datasheet_languages:
-
-#     frappe.msgprint("Datasheet Language Not found, proceeding with English Language")
-#     la_languages = ["en"]
-# else:
-#     la_languages = [l_language.language for l_language in ld_datasheet_languages]
+    frappe.msgprint("Datasheet Language Not found, proceeding with English Language")
+    la_languages = ["en"]
+else:
+    la_languages = [l_language.language for l_language in ld_datasheet_languages]
 
 
 # >>ISS-2025-00051
@@ -131,49 +126,9 @@ def fn_remove_attachment_from_quotation(im_doc):
 
 # Call the function to remove attachments from the quotation document
 fn_remove_attachment_from_quotation(doc)  # <<ISS-2025-00051
-#603
-# for ld_doc_item in doc.items:
-#     # Get the item object
-#     ld_item = frappe.get_doc("Item", ld_doc_item.item_code).as_dict()
-#     # Call the function to copy files to quotation
-#     fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
-#for 603
+
 for ld_doc_item in doc.items:
     # Get the item object
     ld_item = frappe.get_doc("Item", ld_doc_item.item_code).as_dict()
-    la_languages = []
-    # Step 1: Get variant_of and external_design_allowed
-    l_variant_of = ld_item.get("variant_of")
-    # l_is_design = int(ld_item.get("external_design_allowed"))
-
-    # Step 2: Use filters to fetch Design Configuration
-    ld_design_config = frappe.db.get_list(
-        "Design Configuration",
-        {
-            "transformer_type": l_variant_of,
-            "is_design": 0
-        },
-        ["name"],
-        limit_page_length = 1
-        
-    )
-
-    # Step 3: Get the full document (optional, if needed for further logic)
-    if ld_design_config:
-        ld_design_doc = frappe.get_doc("Design Configuration", ld_design_config[0].name)
-        # Accessing the table multiselect field directly
-        ld_datasheet_languages = ld_design_doc.get("datasheet_languages")
-        # Initialize an empty list to store languages
-        
-        if not ld_datasheet_languages:
-        
-            frappe.msgprint("Datasheet Language Not found, proceeding with English Language")
-            la_languages = ["en"]
-        else:
-            la_languages = [l_language.language for l_language in ld_datasheet_languages]
-            # frappe.throw(str(la_languages))
-    else:
-        frappe.msgprint(f"No Design Configuration found for transformer '{l_variant_of}' and is_design = {l_is_design}")
-
-    # Step 4: Proceed with copying files from Item to Quotation
-    fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages, ld_design_doc)
+    # Call the function to copy files to quotation
+    fn_copy_file_from_item_to_quotation(ld_item, doc, la_languages)
