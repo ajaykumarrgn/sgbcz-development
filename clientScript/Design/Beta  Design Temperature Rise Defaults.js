@@ -7,17 +7,17 @@ frappe.ui.form.on("Design", {
       //Added for story >>US-2025-0602
     if (frm.is_new()) {
         if (!frm.doc.transformer_type) return;
-      const lDoctype = "Design Configuration"
-      frappe.db.get_value(lDoctype, {
+      const LDoctype = "Design Configuration"
+      frappe.db.get_value(LDoctype, {
            transformer_type: frm.doc.transformer_type,
            is_design: frm.doc.is_design
            }, ["name"]
-    ).then((response) => {
-    if (response.message) {
-        const lDocname = response.message.name;
+    ).then((ldResponse) => {
+    if (ldResponse.message) {
+        const LDocname = ldResponse.message.name;
       // Initialize the model with doctype Gitra Settings
-      frappe.model.with_doc(lDoctype, lDocname, function () {
-        let laValues = frappe.model.get_doc(lDoctype, lDocname);
+      frappe.model.with_doc(LDoctype, LDocname, function () {
+        let laValues = frappe.model.get_doc(LDoctype, LDocname);
         // <<US-2025-0602
         // Set values from Gitra Settings to the form fields
         frm.doc.temperature_rise_gitra = laValues.temperature_rise;
@@ -41,17 +41,17 @@ frappe.ui.form.on("Design", {
     //   if (frm.is_new()) {
     //Added for story <<US-2025-0602
         if (!frm.doc.transformer_type) return;
-      const lDoctype = "Design Configuration"
-      frappe.db.get_value(lDoctype, {
+      const LDoctype = "Design Configuration"
+      frappe.db.get_value(LDoctype, {
            transformer_type: frm.doc.transformer_type,
            is_design: frm.doc.is_design
            }, ["name"]
-    ).then((response) => {
-    if (response.message) {
-        const lDocname = response.message.name;
+    ).then((ldResponse) => {
+    if (ldResponse.message) {
+        const LDocname = ldResponse.message.name;
       // Initialize the model with doctype Gitra Settings
-      frappe.model.with_doc(lDoctype, lDocname, function () {
-        let laValues = frappe.model.get_doc(lDoctype, lDocname);
+      frappe.model.with_doc(LDoctype, LDocname, function () {
+        let laValues = frappe.model.get_doc(LDoctype, LDocname);
         //<<US-2025-0602
         // Set values from Gitra Settings to the form fields
         frm.doc.temperature_rise_gitra = laValues.temperature_rise;
@@ -76,17 +76,17 @@ frappe.ui.form.on("Design", {
   fnInitializeTemperatureDefaults(frm) {
     if (!frm.doc.transformer_type) return;
     //Added for story <<US-2025-0602
-    const lDoctype = "Design Configuration"
-      frappe.db.get_value(lDoctype, {
+    const LDoctype = "Design Configuration"
+      frappe.db.get_value(LDoctype, {
            transformer_type: frm.doc.transformer_type,
            is_design: frm.doc.is_design
            }, ["name"]
-    ).then((response) => {
-    if (response.message) {
-        const lDocname = response.message.name;
+    ).then((ldResponse) => {
+    if (ldResponse.message) {
+        const LDocname = ldResponse.message.name;
       // Initialize the model with doctype Gitra Settings
-      frappe.model.with_doc(lDoctype, lDocname, function () {
-        let laValues = frappe.model.get_doc(lDoctype, lDocname);
+      frappe.model.with_doc(LDoctype, LDocname, function () {
+        let laValues = frappe.model.get_doc(LDoctype, LDocname);
         //<<US-2025-0602
       frm.doc.ambient_max_temperature = laValues.ambient_max_temperature;
       frm.doc.max_average_temperature_per_year =
@@ -106,17 +106,17 @@ frappe.ui.form.on("Design", {
   fnCalculateTemperatureRise(frm, on_field) {
     if (!frm.doc.transformer_type) return;
     //Added for story <<US-2025-0602
-    const lDoctype = "Design Configuration"
-      frappe.db.get_value(lDoctype, {
+    const LDoctype = "Design Configuration"
+      frappe.db.get_value(LDoctype, {
            transformer_type: frm.doc.transformer_type,
            is_design: frm.doc.is_design
            }, ["name"]
-    ).then((response) => {
-    if (response.message) {
-        const lDocname = response.message.name;
+    ).then((ldResponse) => {
+    if (ldResponse.message) {
+        const LDocname = ldResponse.message.name;
       // Initialize the model with doctype Gitra Settings
-      frappe.model.with_doc(lDoctype, lDocname, function () {
-        let laValues = frappe.model.get_doc(lDoctype, lDocname);
+      frappe.model.with_doc(LDoctype, LDocname, function () {
+        let laValues = frappe.model.get_doc(LDoctype, LDocname);
         // <<US-2025-0602
       var lTemperatureDelta = Math.max(
         frm.doc[on_field] - laValues[on_field],

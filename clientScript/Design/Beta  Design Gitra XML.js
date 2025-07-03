@@ -77,17 +77,17 @@ frappe.ui.form.on("Design", {
         return iaTappingNodes;
       }
 //Commented for story >>US-2025-0603
-    //   var lDoctype = "Gitra Settings";
+    //   var LDoctype = "Gitra Settings";
 //Get the Design Configuration for >>US-2025-0603
-        const lDoctype = "Design Configuration";
+        const LDoctype = "Design Configuration";
       // Initialize the model with doctype Gitra Settings
-      frappe.model.with_doc(lDoctype, {"transformer_type": frm.doc.transformer_type, 
+      frappe.model.with_doc(LDoctype, {"transformer_type": frm.doc.transformer_type, 
       "is_design": frm.doc.is_design}, function () {
 // <<US-2025-0603
         // Then from the model get the list.
         //This will return all attributes of the model including child table
 
-        var laValues = frappe.model.get_doc(lDoctype, {"transformer_type": frm.doc.transformer_type, 
+        var laValues = frappe.model.get_doc(LDoctype, {"transformer_type": frm.doc.transformer_type, 
       "is_design": frm.doc.is_design});
         
         // Regular expression pattern to match variables in double curly braces

@@ -15,9 +15,9 @@ frappe.ui.form.on('Design', {
         frappe.db.get_value('Design Configuration', 
             { factory: frm.doc.factory, is_default: 1 }, 
             'transformer_type'
-        ).then(function(response) {
-            if (response.message) {
-                frm.set_value('transformer_type', response.message.transformer_type);
+        ).then(function(ldResponse) {
+            if (ldResponse.message) {
+                frm.set_value('transformer_type', ldResponse.message.transformer_type);
             } else {
                 frappe.msgprint(__('No default Design Configuration found for the selected factory.'));
             }
@@ -33,9 +33,9 @@ frappe.ui.form.on('Design', {
         frappe.db.get_value('Design Configuration', 
             { factory: frm.doc.factory, is_default: 1 }, 
             'transformer_type'
-        ).then(function(response) {
-            if (response.message) {
-                frm.set_value('transformer_type', response.message.transformer_type);
+        ).then(function(ldResponse) {
+            if (ldResponse.message) {
+                frm.set_value('transformer_type', ldResponse.message.transformer_type);
             } else {
                 frappe.msgprint(__('No default Design Configuration found for the selected factory.'));
             }
