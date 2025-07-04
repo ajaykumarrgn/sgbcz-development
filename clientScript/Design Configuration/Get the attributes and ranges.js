@@ -1,6 +1,24 @@
 frappe.ui.form.on('Design Configuration', {
+     onload(frm) {
+        // Check if form is new AND child table has rows => duplicated form
+        const LisDuplicateForm = frm.is_new() && frm.doc.attributes && frm.doc.attributes.length > 0;
+        console.log("duplicate",lIsDuplicateForm)
+    },
     transformer_type(frm) {
+       
+        if (!frm.doc.transformer_type) {
+            frm.clear_table('attributes');
+            frm.refresh_field('attributes');
+            return;
+        }
+
+        // If duplicated form, do NOT update attributes on transformer_type change
+        if (LisDuplicateForm) {
+            console.log("Duplicate form: keep existing attributes");
+            return;
+        }
         if (frm.doc.transformer_type) {
+
             // Get the Item templates from the Item based on the Transformer Type
             frappe.db.get_list('Item', {
                 filters: {
@@ -62,5 +80,6 @@ frappe.ui.form.on('Design Configuration', {
             frm.clear_table('attributes');
             frm.refresh_field('attributes');
         }
+
     }
 });

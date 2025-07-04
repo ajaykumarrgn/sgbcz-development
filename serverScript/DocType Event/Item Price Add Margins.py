@@ -29,7 +29,7 @@ def fn_get_item_price(i_item_code, i_price_list):
 
 if doc.price_list == "Standard Selling":
     l_item = frappe.get_doc("Item", doc.item_code)
-    if l_item.item_group == "DTTHZ2N" and l_item.design:
+    if (l_item.item_group == "DTTHZ2N" or l_item.item_group == "DTTHCZ2N") and l_item.design:
         # Get all price lists
         ld_price_lists = frappe.get_all(
             "Price List",

@@ -1,5 +1,9 @@
 frappe.ui.form.on('Design Configuration', {
     onload(frm) {
+
+        if (frm.doc.factory) {
+            fnfetchItemTemplateFromFactory(frm);
+        }
         new MutationObserver(() => {
             $("ul[role='listbox']").each(function () {
             if (
@@ -90,6 +94,7 @@ function fnfetchItemTemplateFromFactory(frm) {
                 const ldItemTemplateRows = ldResponse.message.item_template || [];
                 const laItemTemplateArray = ldItemTemplateRows.map(ldRow => ldRow.item_template);
                 fnsetTransformerTypeOptions(frm, laItemTemplateArray);
+                frm.refresh_field('transformer_type');
             }
         }
     });
@@ -100,9 +105,11 @@ function fnfetchItemTemplateFromFactory(frm) {
 function fnsetTransformerTypeOptions(frm, laitems) {
     frm.fields_dict.transformer_type.get_query = function(doc, cdt, cdn) {
         return {
-            filters: {
-                name: ["in", laitems]
-            }
+            filters: [
+                ['Item', 'name', 'in', laitems],
+                ['Item', 'has_variants', '=', 1]
+            ]
         };
     };
 }
+
