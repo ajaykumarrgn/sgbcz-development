@@ -15,7 +15,6 @@ def fn_fill_item_basic_details(id_item, i_item_group, i_variant_of):
     id_item.stock_uom = "PC"
     return id_item
 
-
 # Fill item description from template item
 def fn_fill_item_description(id_item, i_template_item_code):
     ld_template_item = frappe.get_doc("Item", i_template_item_code)
