@@ -4,18 +4,18 @@
 frappe.ui.form.on("Design", {
   refresh(frm) {
 // Fetch Design Configuration document for story >>US-2025-0602
-const lDoctype = "Design Configuration";
-    // frappe.model.with_doc(lDoctype, lDoctype, function () {
-    frappe.db.get_value(lDoctype, {
+const LDoctype = "Design Configuration";
+    // frappe.model.with_doc(LDoctype, LDoctype, function () {
+    frappe.db.get_value(LDoctype, {
     transformer_type: frm.doc.transformer_type,
     is_design: frm.doc.is_design
-}, ["name"]).then((response) => {
-    if (response.message) {
-        const lDocname = response.message.name;
+}, ["name"]).then((ldResponse) => {
+    if (ldResponse.message) {
+        const LDocname = ldResponse.message.name;
  // Initialize the model with doctype Gitra Settings
-        frappe.model.with_doc(lDoctype, lDocname, function () {
+        frappe.model.with_doc(LDoctype, LDocname, function () {
       // Get list of documents for Gitra Settings
-      var laValues = frappe.model.get_doc(lDoctype, lDocname);
+      var laValues = frappe.model.get_doc(LDoctype, LDocname);
 // <<US-2025-0602
       // Initialize LV settings
       const LA_LV_UNIQUEARRAY = laValues.lv_voltage_setting.reduce(
@@ -86,24 +86,24 @@ const lDoctype = "Design Configuration";
     type
   ) {
     //Get the Design Configuration >>US-2025-0602
-    const lDoctype = "Design Configuration";
+    const LDoctype = "Design Configuration";
 
     // Determine the settings field based on type (hv or lv)
     const DESIGN_SETTING =
       type === "hv" ? "hv_voltage_setting" : "lv_voltage_setting";
 
     // Load the document for Gitra Settings
-    // frappe.model.with_doc(lDoctype, DOCTYPE, function () {
-        frappe.db.get_value(lDoctype, {
+    // frappe.model.with_doc(LDoctype, DOCTYPE, function () {
+        frappe.db.get_value(LDoctype, {
         transformer_type: frm.doc.transformer_type,
         is_design: frm.doc.is_design
-    }, ["name"]).then((response) => {
-        if (response.message) {
-            const lDocname = response.message.name;
+    }, ["name"]).then((ldResponse) => {
+        if (ldResponse.message) {
+            const LDocname = ldResponse.message.name;
      // Initialize the model with doctype Gitra Settings
-            frappe.model.with_doc(lDoctype, lDocname, function () {
+            frappe.model.with_doc(LDoctype, LDocname, function () {
       // Get the list of settings
-      const LA_VALUE = frappe.model.get_list(lDoctype, filters={"name":lDocname, "is_design": frm.doc.is_design });
+      const LA_VALUE = frappe.model.get_list(LDoctype, filters={"name":LDocname, "is_design": frm.doc.is_design });
   //<<US-2025-0602
       //initializing set to avoid duplicate option
       const LA_OPTIONS = new Set();
@@ -228,18 +228,18 @@ const lDoctype = "Design Configuration";
   highest_operation_voltage_lv(frm) {
     // Local variable for the Gitra Settings doctype
 //Get the Design Configuration for story <<US-2025-0602  
-const lDoctype = "Design Configuration";
+const LDoctype = "Design Configuration";
 
-    frappe.db.get_value(lDoctype, {
+    frappe.db.get_value(LDoctype, {
         transformer_type: frm.doc.transformer_type,
         is_design: frm.doc.is_design
-    }, ["name"]).then((response) => {
-        if (response.message) {
-            const lDocname = response.message.name;
+    }, ["name"]).then((ldResponse) => {
+        if (ldResponse.message) {
+            const LDocname = ldResponse.message.name;
     // Fetch Gitra Settings document asynchronously
-    frappe.model.with_doc(lDoctype, lDocname, function () {
+    frappe.model.with_doc(LDoctype, LDocname, function () {
       // Get list of documents for Gitra Settings
-      const LA_VALUES = frappe.model.get_list(lDoctype, filters={"name":lDocname, "is_design": frm.doc.is_design } );
+      const LA_VALUES = frappe.model.get_list(LDoctype, filters={"name":LDocname, "is_design": frm.doc.is_design } );
 //<<US-2025-0602
       const LA_UNIQUEARRAY = LA_VALUES[0].lv_voltage_setting.reduce(
         (iAccumulator, iCurrent) => {
@@ -267,17 +267,17 @@ const lDoctype = "Design Configuration";
   ac_phase_lv(frm) {
     // Local variable for the Gitra Settings doctype
 //Get the Design Configuration for story <<US-2025-0602
-const lDoctype = "Design Configuration";
-    frappe.db.get_value(lDoctype, {
+const LDoctype = "Design Configuration";
+    frappe.db.get_value(LDoctype, {
         transformer_type: frm.doc.transformer_type,
         is_design: frm.doc.is_design
-    }, ["name"]).then((response) => {
-        if (response.message) {
-            const lDocname = response.message.name;
+    }, ["name"]).then((ldResponse) => {
+        if (ldResponse.message) {
+            const LDocname = ldResponse.message.name;
     // Fetch Gitra Settings document asynchronously
-    frappe.model.with_doc(lDoctype, lDocname, function () {
+    frappe.model.with_doc(LDoctype, LDocname, function () {
       // Get list of documents for Gitra Settings
-      const LA_VALUES = frappe.model.get_list(lDoctype, filters={"name":lDocname, "is_design": frm.doc.is_design } );
+      const LA_VALUES = frappe.model.get_list(LDoctype, filters={"name":LDocname, "is_design": frm.doc.is_design } );
 //<<US-2025-0602
 
       const LA_UNIQUEARRAY = LA_VALUES[0].lv_voltage_setting.reduce(
@@ -308,17 +308,17 @@ const lDoctype = "Design Configuration";
 
   transformer_type(frm) {
 //Get the Design Configuration for story <<US-2025-0602
-const lDoctype = "Design Configuration";
-    frappe.db.get_value(lDoctype, {
+const LDoctype = "Design Configuration";
+    frappe.db.get_value(LDoctype, {
         transformer_type: frm.doc.transformer_type,
         is_design: frm.doc.is_design
-    }, ["name"]).then((response) => {
-        if (response.message) {
-            const lDocname = response.message.name;
+    }, ["name"]).then((ldResponse) => {
+        if (ldResponse.message) {
+            const LDocname = ldResponse.message.name;
     // Fetch Gitra Settings document asynchronously
-    frappe.model.with_doc(lDoctype, lDocname, function () {
+    frappe.model.with_doc(LDoctype, LDocname, function () {
       // Get list of documents for Gitra Settings
-      var laValues = frappe.model.get_doc(lDoctype, lDocname);
+      var laValues = frappe.model.get_doc(LDoctype, LDocname);
 // <<US-2025-0602
       const LA_LV_UNIQUEARRAY = laValues.lv_voltage_setting.reduce(
         (iAccumulator, iCurrent) => {

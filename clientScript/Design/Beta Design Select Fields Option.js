@@ -10,18 +10,18 @@ frappe.ui.form.on('Design', {
     fnGetAttributeOptionAndDefault(frm, iAttributeLabel, 
             iAttributeName, iIsDesign, iReset = false) {
     ///Get the Design Configuration for story >>US-2025-0602
-        const lDoctype = "Design Configuration";
-            frappe.db.get_value(lDoctype, {
+        const LDoctype = "Design Configuration";
+            frappe.db.get_value(LDoctype, {
         transformer_type: frm.doc.transformer_type,
         is_design: iIsDesign
-    }, ["name"]).then((response) => {
-        if (response.message) {
-            const lDocname = response.message.name;
+    }, ["name"]).then((ldResponse) => {
+        if (ldResponse.message) {
+            const LDocname = ldResponse.message.name;
         // Initialize the model with doctype Gitra Settings
-        frappe.model.with_doc(lDoctype, lDocname, function() {
+        frappe.model.with_doc(LDoctype, LDocname, function() {
             // Then from the model get the list. This will
             // return all attributes of the model including child table
-            let laDoc = frappe.model.get_doc(lDoctype, lDocname );
+            let laDoc = frappe.model.get_doc(LDoctype, LDocname );
 
             // Find the specific attribute based on the attribute_label
             //and transformer_type

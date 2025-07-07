@@ -78,18 +78,18 @@ frappe.ui.form.on("Design", {
                 doctype: "Factory",
                 name: frm.doc.factory
             },
-            callback: function(response) {
-                if (response.message) {
-                    const itemTemplateRows = response.message.item_template || [];
+            callback: function(ldResponse) {
+                if (ldResponse.message) {
+                    const laItemTemplateRows = ldResponse.message.item_template || [];
     
                     // Store all child row values into one array
-                    const itemTemplateArray = itemTemplateRows.map(row => row.item_template); // adjust field name as needed
+                    const laItemTemplateArray = laItemTemplateRows.map(lRow => lRow.item_template); // adjust field name as needed
     
                     // Set options for transformer_type field
                     frm.fields_dict.transformer_type.get_query = function(doc, cdt, cdn) {
                     return {
                         filters: {
-                            "name": ["in", itemTemplateArray]
+                            "name": ["in", laItemTemplateArray]
                         }
                     };
                 };
@@ -152,10 +152,10 @@ frappe.ui.form.on("Design", {
   if (!frm.doc.transformer_type) return;
 
   frappe.db.get_value("Item", frm.doc.transformer_type, "custom_external_design_allowed")
-    .then(r => {
-      const allowed = r.message.custom_external_design_allowed;
+    .then(ldResponse => {
+      const LAllowed = ldResponse.message.custom_external_design_allowed;
       // Hide is_design field if external_design_allowed is not enabled
-      frm.set_df_property("is_design", "hidden", !allowed);
+      frm.set_df_property("is_design", "hidden", !LAllowed);
     });
     if (frm.doc.factory != 'SGBCZ') {
             frm.set_value('is_design', 0);

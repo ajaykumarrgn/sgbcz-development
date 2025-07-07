@@ -120,9 +120,9 @@ frappe.ui.form.on("Design", {
     //Filter the Design Configuration for story >>US-2025-0602
    // place a condition to prevent uncaught error
     if (frm.doc.transformer_type) {
-      const lDoctype = "Design Configuration";
+      const LDoctype = "Design Configuration";
       frappe.db.get_value(
-        lDoctype,
+        LDoctype,
         {
           transformer_type: frm.doc.transformer_type,
           is_design: frm.doc.is_design
@@ -130,11 +130,11 @@ frappe.ui.form.on("Design", {
         ["name"]
       ).then((ldRresponse) => {
         if (ldRresponse.message) {
-          const lDocname = ldRresponse.message.name;
+          const LDocname = ldRresponse.message.name;
           // Initialize the model with doctype Gitra Settings
-          frappe.model.with_doc(lDoctype, lDocname, function () {
+          frappe.model.with_doc(LDoctype, LDocname, function () {
             // Access loaded doc from `locals`
-            const ldDoc = frappe.model.get_doc(lDoctype, lDocname);  // <<US-2025-0602
+            const ldDoc = frappe.model.get_doc(LDoctype, LDocname);  // <<US-2025-0602
             //get the losses based on rating and transformer type
             let lRatingLosses = (ldDoc.losses_setting || []).find(row => row.rating === frm.doc.rating);
 
