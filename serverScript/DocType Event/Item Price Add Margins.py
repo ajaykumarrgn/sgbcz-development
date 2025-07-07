@@ -1,6 +1,7 @@
 # Change Request: Updating prices in the Pricelist
 # based on the Recalculating design item [US-2024-0167]
 # Get the item price document based on the price list for an item
+# Generate Item Prices under all Price Lists for the Item Group "SGBCZ" [ISS-2025-00076]
 def fn_get_item_price(i_item_code, i_price_list):
     la_item_price = frappe.get_all(
         "Item Price",
@@ -29,7 +30,9 @@ def fn_get_item_price(i_item_code, i_price_list):
 
 if doc.price_list == "Standard Selling":
     l_item = frappe.get_doc("Item", doc.item_code)
-    if (l_item.item_group == "DTTHZ2N" or l_item.item_group == "DTTHCZ2N") and l_item.design:
+    if (
+        l_item.item_group == "DTTHZ2N" or l_item.item_group == "SGBCZ"
+    ) and l_item.design:  # <<ISS-2025-00076 Included SGBCZ item group
         # Get all price lists
         ld_price_lists = frappe.get_all(
             "Price List",
@@ -106,7 +109,7 @@ if doc.price_list == "Standard Selling":
                     add_nine = 9
                     # Round up to next 10
                     # Round Up logic is rounded_number = ((number + 9) // 10) * 10
-                    #this is equivalent to ceil
+                    # this is equivalent to ceil
                     ld_target_item_price.price_list_rate = (
                         (ld_target_item_price.price_list_rate + add_nine) // 10
                     ) * 10
