@@ -13,5 +13,44 @@
   "l2_discount_limit": 15,
   "l3_discount_limit": 20,
   "price_recalculation_frequency": 90,
-  "doctype": "Quotation Presets"
+  "naming_separator": "_",
+  "doctype": "Quotation Presets",
+  "datasheet_languages": [
+    {
+      "docstatus": 0,
+      "idx": 1,
+      "language": "de",
+      "parent": "Quotation Presets",
+      "parentfield": "datasheet_languages",
+      "parenttype": "Quotation Presets",
+      "doctype": "Pdf Print Languages"
+    },
+    {
+      "docstatus": 0,
+      "idx": 2,
+      "language": "cs",
+      "parent": "Quotation Presets",
+      "parentfield": "datasheet_languages",
+      "parenttype": "Quotation Presets",
+      "doctype": "Pdf Print Languages"
+    },
+    {
+      "docstatus": 0,
+      "idx": 3,
+      "language": "fr",
+      "parent": "Quotation Presets",
+      "parentfield": "datasheet_languages",
+      "parenttype": "Quotation Presets",
+      "doctype": "Pdf Print Languages"
+    },
+    {
+      "docstatus": 0,
+      "idx": 4,
+      "language": "en",
+      "parent": "Quotation Presets",
+      "parentfield": "datasheet_languages",
+      "parenttype": "Quotation Presets",
+      "doctype": "Pdf Print Languages"
+    }
+  ]
 }

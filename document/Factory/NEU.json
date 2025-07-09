@@ -1,11 +1,49 @@
 {
   "name": "NEU",
   "docstatus": 0,
-  "idx": 0,
+  "idx": 81,
   "factory": "NEU",
   "letter_head": "SGB NEU",
   "print_language": "de",
   "doctype": "Factory",
+  "item_template": [
+    {
+      "docstatus": 0,
+      "idx": 1,
+      "item_template": "DOTML",
+      "parent": "NEU",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    },
+    {
+      "docstatus": 0,
+      "idx": 2,
+      "item_template": "DSTML",
+      "parent": "NEU",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    },
+    {
+      "docstatus": 0,
+      "idx": 3,
+      "item_template": "DOTDG",
+      "parent": "NEU",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    },
+    {
+      "docstatus": 0,
+      "idx": 4,
+      "item_template": "DMTML",
+      "parent": "NEU",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    }
+  ],
   "field_validation_rules": [
     {
       "docstatus": 0,

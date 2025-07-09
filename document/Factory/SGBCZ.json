@@ -1,11 +1,22 @@
 {
   "name": "SGBCZ",
   "docstatus": 0,
-  "idx": 0,
+  "idx": 6689,
   "factory": "SGBCZ",
   "letter_head": "SGBCZ",
   "print_language": "de",
   "doctype": "Factory",
+  "item_template": [
+    {
+      "docstatus": 0,
+      "idx": 1,
+      "item_template": "DTTHZ2N",
+      "parent": "SGBCZ",
+      "parentfield": "item_template",
+      "parenttype": "Factory",
+      "doctype": "Item Template"
+    }
+  ],
   "field_validation_rules": [
     {
       "docstatus": 0,
