@@ -12,5 +12,5 @@
 
 document/Factory
 document/Item Group
-
-Document = Design Configuration
+document/Design Configuration
+document/singleDocument/Quotation Presets.json
