@@ -68,7 +68,7 @@ const LDoctype = "Design Configuration";
         fnSetLvDefaults(frm, laValues);
         fnSetHvDefaults(frm, laValues);
       }
-      frm.refresh_fields();
+      // frm.refresh_fields();
     // });
   });
     }
