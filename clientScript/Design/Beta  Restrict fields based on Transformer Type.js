@@ -10,20 +10,21 @@ frappe.ui.form.on('Design', {
 
         // Clear current value (optional)
         // frm.set_value('transformer_type', null);
+        if (frm.is_new() && !frm.doc.transformer_type){
+            // Fetch the default design configuration for the selected factory
+            frappe.db.get_value('Design Configuration', 
+                { factory: frm.doc.factory, is_default: 1 }, 
+                'transformer_type'
+            ).then(function(ldResponse) {
+                if (ldResponse.message) {
+                    frm.set_value('transformer_type', ldResponse.message.transformer_type);
+                } else {
+                    frappe.msgprint(__('No default Design Configuration found for the selected factory.'));
+                }
+            });
 
-        // Fetch the default design configuration for the selected factory
-        frappe.db.get_value('Design Configuration', 
-            { factory: frm.doc.factory, is_default: 1 }, 
-            'transformer_type'
-        ).then(function(ldResponse) {
-            if (ldResponse.message) {
-                frm.set_value('transformer_type', ldResponse.message.transformer_type);
-            } else {
-                frappe.msgprint(__('No default Design Configuration found for the selected factory.'));
-            }
-        });
-
-        frm.trigger('fnToggleFields');
+            frm.trigger('fnToggleFields');
+        }
     },
 
     factory: function(frm) {
