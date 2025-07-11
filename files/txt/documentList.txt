@@ -10,4 +10,7 @@
 
 # Single Document = Print Settings
 
-document/Translation
+document/Factory
+document/Item Group
+document/Design Configuration
+document/singleDocument/Quotation Presets.json
