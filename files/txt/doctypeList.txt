@@ -1,13 +1,7 @@
 # Each line represents a custom doctype name (e.g., Design.).
 # Example:
 
-Design Attributes
-Design IP Protection
-Design Losses
-Design Labour Hours
-Design Voltage Setting
-Item Template
-Factory
-Design
-Design Configuration
-Quotation Presets
+#Design
+
+Delivery Schedule
+

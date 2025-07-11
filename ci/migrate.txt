@@ -1,4 +1,1 @@
 custom_doctype
-custom_fields
-files
-documents
