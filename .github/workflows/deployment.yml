@@ -500,7 +500,7 @@ jobs:
       - uses: trstringer/manual-approval@v1
         with:
           secret: ${{ github.TOKEN }}
-          approvers: arun-lmnas
+          approvers: ajaykumarrgn
           minimum-approvals: 1
           issue-title: "Deploying to the production"
           issue-body: "Please approve or deny the production deployment"
