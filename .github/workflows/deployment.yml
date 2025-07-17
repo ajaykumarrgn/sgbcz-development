@@ -26,27 +26,26 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get current run ID
-        id: get_run_id
-        run: echo "run_id=${{ github.run_id }}" >> $GITHUB_OUTPUT
+      - name: Get current run number
+        id: current
+        run: echo "run_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      - name: Check if another workflow is running on same branch
-        id: check
+      - name: Check if another workflow is running on same branch (excluding self)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Checking for other running workflows on branch: $GITHUB_REF_NAME"
           
-          # Get current run ID
-          current_run_id=${{ steps.get_run_id.outputs.run_id }}
+          current_run_number=${{ steps.current.outputs.run_number }}
 
-          # Get all in-progress runs of the same workflow on this branch, excluding current run
-           other_running_runs=$(gh run list \
+          other_running_runs=$(gh run list \
             --workflow="Auto-Deployment" \
             --branch="$GITHUB_REF_NAME" \
             --status="in_progress" \
-            --json id,headBranch,status -q \
-            ".[] | select(.id != ${current_run_id}) | .id")
+            --json number,status,headBranch -q \
+            ".[] | select(.number != ${current_run_number}) | .number")
+
+          echo "Other running runs: $other_running_runs"
 
           if [[ -n "$other_running_runs" ]]; then
             echo "Another workflow is already running on $GITHUB_REF_NAME. Skipping this run."
@@ -54,7 +53,6 @@ jobs:
           else
             echo "No other workflows in progress. Proceeding."
           fi
-
 
   code_quality_check:
     runs-on: ubuntu-latest
