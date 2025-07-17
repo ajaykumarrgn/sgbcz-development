@@ -8,7 +8,6 @@ on:
       - hot-fix*
     paths-ignore: # Avoid triggering on PR merges with specific commit messages
       - '**/cypress/**'
-      - '.github/**'
       - '.pylintrc'
       - 'eslint.config.js'
       - 'eslint-plugin-custom-rules.js' 
