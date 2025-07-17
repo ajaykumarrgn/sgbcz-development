@@ -41,12 +41,12 @@ jobs:
           current_run_id=${{ steps.get_run_id.outputs.run_id }}
 
           # Get all in-progress runs of the same workflow on this branch, excluding current run
-          other_running_runs=$(gh run list \
+           other_running_runs=$(gh run list \
             --workflow="Auto-Deployment" \
             --branch="$GITHUB_REF_NAME" \
             --status="in_progress" \
-            --json databaseId,name,headBranch,status -q \
-            ".[] | select(.databaseId != $current_run_id) | .databaseId")
+            --json id,headBranch,status -q \
+            ".[] | select(.id != ${current_run_id}) | .id")
 
           if [[ -n "$other_running_runs" ]]; then
             echo "Another workflow is already running on $GITHUB_REF_NAME. Skipping this run."
