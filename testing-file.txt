@@ -1,1 +1,10 @@
 new files added
+<<<<<<< HEAD
+fvf
+testing
+testing
+new add linke
+new file 
+=======
+>>>>>>> 569d6832b01d026a9741e2ee01f0503247e4086d
+fgfg
