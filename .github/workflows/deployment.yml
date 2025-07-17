@@ -106,7 +106,7 @@ jobs:
           done || exit 1
 
   quality:
-    needs: check_running_workflow
+    needs: [check_running_workflow, code_quality_check]
 
     runs-on: ubuntu-latest
     if: |
@@ -123,7 +123,7 @@ jobs:
         github.base_ref == 'refs/heads/main' &&
         (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
-      needs: code_quality_check
+    
     env:
       HOST: ${{ vars.QA_HOST }}
       PROTOCOL: ${{ vars.QA_PROTOCOL }}
