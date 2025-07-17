@@ -6,11 +6,7 @@ on:
       - main
       - release
       - hot-fix*
-  pull_request:
-    types:
-      - closed
-    branches:
-      - pre-*
+
 
 jobs:
   get-base-branch:
