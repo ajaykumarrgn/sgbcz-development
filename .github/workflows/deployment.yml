@@ -14,32 +14,47 @@ on:
 
 jobs:
   check_running_workflow:
-   runs-on: ubuntu-latest
-   steps:
-    - name: Checkout the repository
-      uses: actions/checkout@v4
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
 
-    - name: Set up GitHub CLI
-      run: |
-        sudo apt update
-        sudo apt install gh -y
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install gh -y
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Check if another workflow is running
-      id: check
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "Checking for running workflows on branch: $GITHUB_REF"
-        runs=$(gh run list --branch="$GITHUB_REF_NAME" --workflow="Auto-Deployment" --status="in_progress" --json databaseId -q '.[].databaseId')
+      - name: Get current run ID
+        id: get_run_id
+        run: echo "run_id=${{ github.run_id }}" >> $GITHUB_OUTPUT
 
-        if [[ -n "$runs" ]]; then
-          echo "Another workflow is already running on $GITHUB_REF_NAME. Skipping this run."
-          exit 1
-        else
-          echo "No other workflow running on $GITHUB_REF_NAME. Continuing."
-        fi
+      - name: Check if another workflow is running on same branch
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking for other running workflows on branch: $GITHUB_REF_NAME"
+          
+          # Get current run ID
+          current_run_id=${{ steps.get_run_id.outputs.run_id }}
+
+          # Get all in-progress runs of the same workflow on this branch, excluding current run
+          other_running_runs=$(gh run list \
+            --workflow="Auto-Deployment" \
+            --branch="$GITHUB_REF_NAME" \
+            --status="in_progress" \
+            --json databaseId,name,headBranch,status -q \
+            ".[] | select(.databaseId != $current_run_id) | .databaseId")
+
+          if [[ -n "$other_running_runs" ]]; then
+            echo "Another workflow is already running on $GITHUB_REF_NAME. Skipping this run."
+            exit 1
+          else
+            echo "No other workflows in progress. Proceeding."
+          fi
+
 
   code_quality_check:
     runs-on: ubuntu-latest
