@@ -348,6 +348,8 @@ jobs:
     needs: [cypress_test, quality] # List all your dependent jobs here
     runs-on: ubuntu-latest
     name: 🚨 Revert Merge if Any Job Fails
+    env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v4
