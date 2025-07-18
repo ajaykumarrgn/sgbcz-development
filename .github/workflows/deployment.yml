@@ -343,14 +343,17 @@ jobs:
         working-directory: testAutomate
         run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
-    revert_merge:
-     name: 🔁 Revert Merge
-     needs: [cypress_test, quality] # List all required jobs here
-     if: failure() # Run only if any of the needs failed
-     runs-on: ubuntu-latest
-     steps:
+  revert_merge:
+    name: 🔁 Revert Merge
+    needs: [cypress_test, quality]
+    if: failure() # Only runs if one of the required jobs failed
+    runs-on: ubuntu-latest
+
+    steps:
       - name: 🧾 Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed to access full history for reverts
 
       - name: ⚙️ Set Git config
         run: |
@@ -362,28 +365,28 @@ jobs:
         run: |
           parents=$(git log -1 --pretty=%P)
           echo "Parents: $parents"
-          if [[ $(echo $parents | wc -w) -gt 1 ]]; then
-            echo "is_merge=true" >> $GITHUB_OUTPUT
+          if [[ $(echo "$parents" | wc -w) -gt 1 ]]; then
+            echo "is_merge=true" >> "$GITHUB_OUTPUT"
           else
-            echo "is_merge=false" >> $GITHUB_OUTPUT
+            echo "is_merge=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: ❌ Revert merge commit
         if: steps.check_merge.outputs.is_merge == 'true'
         run: |
-          git revert -m 1 HEAD
-          git commit --amend --no-edit --author="github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          git revert -m 1 HEAD --no-edit
 
       - name: 🔁 Revert normal commit (fallback)
         if: steps.check_merge.outputs.is_merge == 'false'
         run: |
-          git revert HEAD
+          git revert HEAD --no-edit
 
-      - name: 🚀 Push Revert Commit using PAT
+      - name: 🚀 Push revert commit using PAT
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git push https://x-access-token:${GH_PAT}@github.com/ajaykumarrgn/sgbcz-development.git HEAD:main
+
 
 
 
