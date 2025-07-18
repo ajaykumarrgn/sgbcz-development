@@ -344,11 +344,11 @@ jobs:
         run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
     revert_merge:
-    name: 🔁 Revert Merge
-    needs: [cypress_test, quality] # List all required jobs here
-    if: failure() # Run only if any of the needs failed
-    runs-on: ubuntu-latest
-    steps:
+     name: 🔁 Revert Merge
+     needs: [cypress_test, quality] # List all required jobs here
+     if: failure() # Run only if any of the needs failed
+     runs-on: ubuntu-latest
+     steps:
       - name: 🧾 Checkout repo
         uses: actions/checkout@v4
 
