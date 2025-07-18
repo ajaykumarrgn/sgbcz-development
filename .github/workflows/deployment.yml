@@ -343,42 +343,48 @@ jobs:
         working-directory: testAutomate
         run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
-  revert_merge:
-    if: ${{ failure() }}
-    needs: [cypress_test, quality] # List all your dependent jobs here
+    revert_merge:
+    name: 🔁 Revert Merge
+    needs: [cypress_test, quality] # List all required jobs here
+    if: failure() # Run only if any of the needs failed
     runs-on: ubuntu-latest
-    name: 🚨 Revert Merge if Any Job Fails
-    env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: ⬇️ Checkout code
+      - name: 🧾 Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-          token: ${{ secrets.GITHUB_TOKEN }} # 👈 Ensures push access
 
-      - name: ⚙️ Set up Git config
+      - name: ⚙️ Set Git config
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: 🔁 Revert the commit
+      - name: 🔍 Detect if it's a merge commit
+        id: check_merge
         run: |
           parents=$(git log -1 --pretty=%P)
-          parent_count=$(echo $parents | wc -w)
-
-          if [ "$parent_count" = "2" ]; then
-            echo "✅ Merge commit detected, reverting with -m 1..."
-            git revert -m 1 HEAD --no-edit
-          elif [ "$parent_count" = "1" ]; then
-            echo "✅ Normal commit detected, reverting HEAD..."
-            git revert HEAD --no-edit
+          echo "Parents: $parents"
+          if [[ $(echo $parents | wc -w) -gt 1 ]]; then
+            echo "is_merge=true" >> $GITHUB_OUTPUT
           else
-            echo "❌ Cannot determine commit type, skipping revert."
-            exit 1
+            echo "is_merge=false" >> $GITHUB_OUTPUT
           fi
 
-          git push origin HEAD
+      - name: ❌ Revert merge commit
+        if: steps.check_merge.outputs.is_merge == 'true'
+        run: |
+          git revert -m 1 HEAD
+          git commit --amend --no-edit --author="github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+      - name: 🔁 Revert normal commit (fallback)
+        if: steps.check_merge.outputs.is_merge == 'false'
+        run: |
+          git revert HEAD
+
+      - name: 🚀 Push Revert Commit using PAT
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git push https://x-access-token:${GH_PAT}@github.com/ajaykumarrgn/sgbcz-development.git HEAD:main
+
 
 
 
