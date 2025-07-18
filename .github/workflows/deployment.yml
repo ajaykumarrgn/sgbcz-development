@@ -277,105 +277,105 @@ jobs:
 
   # ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
-  # cypress_test:
-  #   runs-on: ubuntu-latest
-  #   needs: quality
-  #   if: |
-  #     !contains(github.event.head_commit.message, 'skipcy') &&
-  #     !contains(github.event.head_commit.message, '[skip ci]') &&
-  #     !contains(github.event.head_commit.message, '(ecr)') &&
-  #     !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-  #     !(
-  #       github.event_name == 'push' &&
-  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
-  #       github.event.before == 'refs/heads/main'
-  #     ) &&
-  #     !(
-  #       github.event_name == 'pull_request' &&
-  #       github.base_ref == 'refs/heads/main' &&
-  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-  #     )
-  #   env:
-  #     USER_NAME: ${{ secrets.TEST_USER_NAME }}
-  #     PASSWORD: ${{ secrets.TEST_PASSWORD }}
-  #     BASE_URL: ${{ secrets.TEST_BASE_URL }}
-  #     KEY: ${{ secrets.TEST_KEY}}
+  cypress_test:
+    runs-on: ubuntu-latest
+    needs: quality
+    if: |
+      !contains(github.event.head_commit.message, 'skipcy') &&
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, '(ecr)') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+      )
+    env:
+      USER_NAME: ${{ secrets.TEST_USER_NAME }}
+      PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      BASE_URL: ${{ secrets.TEST_BASE_URL }}
+      KEY: ${{ secrets.TEST_KEY}}
 
-  #   steps:
-  #     - name: Use Node.js v20
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
+    steps:
+      - name: Use Node.js v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
           
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         submodules: true
-  #         token: ${{ secrets.TEST_REPO_KEY }}
-  #         fetch-depth: 0 # fetch full history
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          token: ${{ secrets.TEST_REPO_KEY }}
+          fetch-depth: 0 # fetch full history
 
-  #     - name: Read Commit Hash
-  #       id: read_commit_hash
-  #       run: |
-  #         COMMIT_HASH=$(cat ci/commit.txt)
-  #         echo "COMMIT_HASH=${COMMIT_HASH}" >> $GITHUB_ENV
+      - name: Read Commit Hash
+        id: read_commit_hash
+        run: |
+          COMMIT_HASH=$(cat ci/commit.txt)
+          echo "COMMIT_HASH=${COMMIT_HASH}" >> $GITHUB_ENV
 
-  #     - name: Initialize and Update Submodule to Specific Commit
-  #       run: |
-  #         git submodule update --init --recursive --remote
-  #         cd testAutomate
-  #         git fetch origin
-  #         git checkout ${{ env.COMMIT_HASH }}
-  #         cd -
+      - name: Initialize and Update Submodule to Specific Commit
+        run: |
+          git submodule update --init --recursive --remote
+          cd testAutomate
+          git fetch origin
+          git checkout ${{ env.COMMIT_HASH }}
+          cd -
 
-  #     - name: Install Dependencies in Submodule
-  #       working-directory: testAutomate
-  #       run: |
-  #         npm i
+      - name: Install Dependencies in Submodule
+        working-directory: testAutomate
+        run: |
+          npm i
 
-  #     - name: Clean Up Existing Cypress Folder in Parent Repo
-  #       run: |
-  #         rm -rf cypress
-  #         mkdir -p cypress/e2e cypress/fixtures cypress/support
+      - name: Clean Up Existing Cypress Folder in Parent Repo
+        run: |
+          rm -rf cypress
+          mkdir -p cypress/e2e cypress/fixtures cypress/support
 
-  #     - name: Copy Cypress Folder from Submodule to Parent Repo
-  #       run: |
-  #         rsync -a testAutomate/cypress/e2e/ cypress/e2e/
-  #         rsync -a testAutomate/cypress/fixtures/ cypress/fixtures/
-  #         rsync -a testAutomate/cypress/support/ cypress/support/
+      - name: Copy Cypress Folder from Submodule to Parent Repo
+        run: |
+          rsync -a testAutomate/cypress/e2e/ cypress/e2e/
+          rsync -a testAutomate/cypress/fixtures/ cypress/fixtures/
+          rsync -a testAutomate/cypress/support/ cypress/support/
 
-  #     - name: Commit and Push Changes to New Branch in Parent Repo
-  #       env:
-  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: |
-  #         git config --global user.name 'Fathima786Irfana'
-  #         git config --global user.email 'fathima.irfana@lmnas.com'
-  #         CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  #         BRANCH_NAME=cypress-results-$(date +%Y%m%d%H%M%S)
-  #         git checkout -b $BRANCH_NAME
-  #         git add ./cypress/e2e ./cypress/fixtures ./cypress/support
-  #         git commit -m 'Replace Cypress folder from submodule [skip ci]'
-  #         git push origin $BRANCH_NAME
-  #         echo "Creating pull request from $BRANCH_NAME to $CURRENT_BRANCH"
-  #         gh pr create --base $CURRENT_BRANCH --head $BRANCH_NAME --title "Replace Cypress folder from submodule" --body "This PR includes the Cypress test results from the submodule, replacing the existing Cypress folder."
-  #       continue-on-error: true
+      - name: Commit and Push Changes to New Branch in Parent Repo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name 'Fathima786Irfana'
+          git config --global user.email 'fathima.irfana@lmnas.com'
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          BRANCH_NAME=cypress-results-$(date +%Y%m%d%H%M%S)
+          git checkout -b $BRANCH_NAME
+          git add ./cypress/e2e ./cypress/fixtures ./cypress/support
+          git commit -m 'Replace Cypress folder from submodule [skip ci]'
+          git push origin $BRANCH_NAME
+          echo "Creating pull request from $BRANCH_NAME to $CURRENT_BRANCH"
+          gh pr create --base $CURRENT_BRANCH --head $BRANCH_NAME --title "Replace Cypress folder from submodule" --body "This PR includes the Cypress test results from the submodule, replacing the existing Cypress folder."
+        continue-on-error: true
 
-  #     - name: Merge PR and Delete Branch
-  #       env:
-  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: |
-  #         PR_NUMBER=$(gh pr list --head $BRANCH_NAME --json number,title --jq '.[] | select(.title | contains("[skip ci]")) | .number' | head -n 1)
-  #         gh pr merge $PR_NUMBER --merge --delete-branch --admin
-  #       continue-on-error: true
+      - name: Merge PR and Delete Branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --head $BRANCH_NAME --json number,title --jq '.[] | select(.title | contains("[skip ci]")) | .number' | head -n 1)
+          gh pr merge $PR_NUMBER --merge --delete-branch --admin
+        continue-on-error: true
 
-  #     - name: Clean Up GitHub CLI Credentials
-  #       if: always()
-  #       run: |
-  #         rm -f ~/.config/gh/hosts.yml
+      - name: Clean Up GitHub CLI Credentials
+        if: always()
+        run: |
+          rm -f ~/.config/gh/hosts.yml
 
-  #     - name: Run Cypress Tests in Submodule
-  #       working-directory: testAutomate
-  #       run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
+      - name: Run Cypress Tests in Submodule
+        working-directory: testAutomate
+        run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
   # wait_for_approval:
   #   runs-on: ubuntu-latest
