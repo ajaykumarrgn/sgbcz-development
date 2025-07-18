@@ -345,7 +345,7 @@ jobs:
 
   revert_merge:
     runs-on: ubuntu-latest
-    needs: [cypress_test, quality, check_running_workflow]  # Waits for both jobs
+    needs: [cypress_test, quality]  # Waits for both jobs
     if: always()  # Must run no matter what
     steps:
       - name: Checkout with full history
@@ -361,8 +361,8 @@ jobs:
       - name: Check failures and revert if needed
         run: |
           echo "🔍 Job results:"
-          echo " - Build: ${{ needs.build.result }}"
-          echo " - Test:  ${{ needs.test.result }}"
+          echo " - cypress_test: ${{ needs.cypress_test.result }}"
+          echo " - Quality_Test: ${{ needs.quality.result }}"
 
           # If either failed
           if [[ "${{ needs.build.result }}" == "failure" || "${{ needs.test.result }}" == "failure" ]]; then
