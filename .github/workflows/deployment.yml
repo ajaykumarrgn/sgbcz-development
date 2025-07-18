@@ -344,44 +344,43 @@ jobs:
         run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
   revert_merge:
-    runs-on: ubuntu-latest
-    needs: [cypress_test, quality]  # Waits for both jobs
-    if: always()  # Must run no matter what
-    steps:
-      - name: Checkout with full history
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+  runs-on: ubuntu-latest
+  needs: [cypress_test, quality]
+  if: always()
+  steps:
+    - name: Checkout with full history
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: Configure Git
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+    - name: Configure Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
 
-      - name: Check failures and revert if needed
-        run: |
-          echo "🔍 Job results:"
-          echo " - cypress_test: ${{ needs.cypress_test.result }}"
-          echo " - Quality_Test: ${{ needs.quality.result }}"
+    - name: Check failures and revert if needed
+      run: |
+        echo "🔍 Job results:"
+        echo " - cypress_test: ${{ needs.cypress_test.result }}"
+        echo " - quality: ${{ needs.quality.result }}"
 
-          # If either failed
-          if [[ "${{ needs.build.result }}" == "failure" || "${{ needs.test.result }}" == "failure" ]]; then
-            echo "❌ One or more jobs failed. Attempting revert..."
+        if [[ "${{ needs.cypress_test.result }}" == "failure" || "${{ needs.quality.result }}" == "failure" ]]; then
+          echo "❌ One or more jobs failed. Attempting revert..."
 
-            # Check if last commit is a merge
-            parents=$(git rev-list --count --parents -n 1 HEAD)
-            if [ "$parents" -eq 2 ]; then
-              echo "✅ Merge commit detected. Reverting..."
-              git revert -m 1 HEAD --no-edit
-              git push origin HEAD
-            else
-              echo "⚠️ Not a merge commit. Skipping revert."
-            fi
+          parents=$(git rev-list --count --parents -n 1 HEAD)
+          if [ "$parents" -eq 2 ]; then
+            echo "✅ Merge commit detected. Reverting..."
+            git revert -m 1 HEAD --no-edit
+            git push origin HEAD
           else
-            echo "✅ All jobs passed. No revert needed."
+            echo "⚠️ Not a merge commit. Skipping revert."
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        else
+          echo "✅ All jobs passed. No revert needed."
+        fi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # wait_for_approval:
   #   runs-on: ubuntu-latest
   #   needs: quality
