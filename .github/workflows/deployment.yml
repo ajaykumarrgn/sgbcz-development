@@ -352,35 +352,32 @@ jobs:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # Needed to get previous commit
+          fetch-depth: 2
+          token: ${{ secrets.GITHUB_TOKEN }} # 👈 Ensures push access
 
       - name: ⚙️ Set up Git config
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: 🔍 Check commit parents
-        id: check_commit
+      - name: 🔁 Revert the commit
         run: |
           parents=$(git log -1 --pretty=%P)
           parent_count=$(echo $parents | wc -w)
-          echo "parent_count=$parent_count" >> $GITHUB_OUTPUT
-          echo "parents=$parents"
-          echo "📌 Parent count: $parent_count"
 
-      - name: ⏪ Revert the commit
-        run: |
-          if [ "${{ steps.check_commit.outputs.parent_count }}" = "2" ]; then
-            echo "✅ Detected a merge commit. Reverting using -m 1..."
+          if [ "$parent_count" = "2" ]; then
+            echo "✅ Merge commit detected, reverting with -m 1..."
             git revert -m 1 HEAD --no-edit
-          elif [ "${{ steps.check_commit.outputs.parent_count }}" = "1" ]; then
-            echo "ℹ️ Detected a single-parent commit (squash or rebase). Reverting..."
+          elif [ "$parent_count" = "1" ]; then
+            echo "✅ Normal commit detected, reverting HEAD..."
             git revert HEAD --no-edit
           else
-            echo "❓ Unexpected commit structure. Skipping revert."
+            echo "❌ Cannot determine commit type, skipping revert."
             exit 1
           fi
+
           git push origin HEAD
+
 
 
   # wait_for_approval:
