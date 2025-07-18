@@ -240,6 +240,41 @@ jobs:
             exit 0
           fi
 
+
+  revert_merge:
+    if: failure()  # This runs only if any previous job fails
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git user
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Detect and revert merge commit
+        run: |
+          echo "🔁 Checking if last commit is a merge..."
+
+          parents=$(git rev-list --count --parents -n 1 HEAD)
+          if [ "$parents" -eq 2 ]; then
+            echo "✅ Merge commit detected. Reverting..."
+
+            # Revert the merge commit (parent 1 is mainline)
+            git revert -m 1 HEAD --no-edit
+
+            echo "🚀 Pushing revert commit..."
+            git push origin HEAD
+          else
+            echo "⚠️ Not a merge commit. Skipping revert."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
   # ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
   # cypress_test:
