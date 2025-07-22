@@ -10,7 +10,12 @@ on:
       - '**/cypress/**'
       - '.pylintrc'
       - 'eslint.config.js'
-      - 'eslint-plugin-custom-rules.js' 
+      - 'eslint-plugin-custom-rules.js'
+concurrency:
+  group: workflow-${{ github.ref }}
+  cancel-in-progress: false
+  max-parallel: 1
+
 #
 jobs:
   check_running_workflow:
