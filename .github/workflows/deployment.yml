@@ -14,7 +14,7 @@ on:
 concurrency:
   group: workflow-${{ github.ref }}
   cancel-in-progress: false
-  max-parallel: 1
+  
 
 #
 jobs:
