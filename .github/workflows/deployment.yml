@@ -7,9 +7,6 @@ on:
       - release
       - hot-fix*
       - pre-*
-      - pre-main
-      - pre-release
-      - pre-hotfix
     paths-ignore:
       - '**/cypress/**'
       - '.pylintrc'
@@ -24,386 +21,409 @@ env:
   MERGE_COMMIT_SHA: ${{ github.sha }}
 
 jobs:
-  prevent-merge-if-target-active:
+  check_running_workflow:
     runs-on: ubuntu-latest
     steps:
-      - name: 🧠 Determine Target Branch
-        id: target
-        run: |
-          staging_branch="${GITHUB_REF##*/}"  # Extract branch name
-          target_branch="${staging_branch#pre-}"  # Remove "pre-" prefix
-          echo "target_branch=$target_branch" >> "$GITHUB_OUTPUT"
+      - name: Checkout the repository
+        uses: actions/checkout@v4
 
-      - name: 🛰️ Check Running Workflows on Target Branch
-        id: check_running
+      - name: Set up GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install gh -y
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current run number
+        id: current
+        run: echo "run_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+      - name: Detect base branch from pre-* branch
+        id: base_branch
+        run: |
+          REF_NAME="${GITHUB_REF##*/}"
+          echo "Detected branch: $REF_NAME"
+
+          if [[ "$REF_NAME" =~ ^pre-(main|release|hot[-]?fix.*)$ ]]; then
+            BASE_BRANCH="${REF_NAME#pre-}"
+            echo "Base branch: $BASE_BRANCH"
+            echo "base_branch=$BASE_BRANCH" >> $GITHUB_OUTPUT
+          else
+            echo "Not a pre-* branch. Skipping auto-merge logic."
+            echo "base_branch=none" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check if another workflow is running on base branch (excluding self)
+        if: steps.base_branch.outputs.base_branch != 'none'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          running=$(gh run list \
-            --branch ${{ steps.target.outputs.target_branch }} \
-            --workflow "${{ github.workflow }}" \
-            --json status,headBranch \
-            --jq '.[] | select(.status == "in_progress" or .status == "queued") | .headBranch')
+          base_branch="${{ steps.base_branch.outputs.base_branch }}"
+          current_run_number=${{ steps.current.outputs.run_number }}
 
-          echo "Running workflows on target: $running"
-          if [ -n "$running" ]; then
-            echo "running=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "running=false" >> "$GITHUB_OUTPUT"
+          echo "Checking if workflows are running on base branch: $base_branch"
+
+          other_running_runs=$(gh run list \
+            --workflow="Auto-Deployment" \
+            --branch="$base_branch" \
+            --status="in_progress" \
+            --json number,status,headBranch -q \
+            ".[] | select(.number != ${current_run_number}) | .number")
+
+          echo "Other running runs: $other_running_runs"
+
+          if [[ -n "$other_running_runs" ]]; then
+            echo "Workflow in progress on $base_branch. Skipping merge."
+            exit 1
           fi
 
-      - name: ⚙️ Git Config
-        if: steps.check_running.outputs.running == 'true'
+      - name: Merge pre-* into base branch
+        if: steps.base_branch.outputs.base_branch != 'none'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: 🔁 Revert Last Commit on Staging Branch
-        if: steps.check_running.outputs.running == 'true'
-        run: |
-          git fetch origin ${{ github.ref_name }}
-          git checkout ${{ github.ref_name }}
-          git revert --no-edit HEAD
-          git push origin ${{ github.ref_name }}
+          git fetch origin
+          git checkout ${{ steps.base_branch.outputs.base_branch }}
+          git merge origin/${GITHUB_REF##*/} --ff-only
+          git push origin ${{ steps.base_branch.outputs.base_branch }}
 
 # Other jobs like code_quality_check, quality, cypress_test, and revert_merge remain unchanged.
 
-# #
-#   code_quality_check:
-#     runs-on: ubuntu-latest
-#     needs: check_running_workflow
-#     if: |
-#       !contains(github.event.head_commit.message, '[skip ci]') &&
-#       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-#       !(
-#         github.event_name == 'push' &&
-#         (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
-#         github.event.before == 'refs/heads/main'
-#       ) &&
-#       !(
-#         github.event_name == 'pull_request' &&
-#         github.base_ref == 'refs/heads/main' &&
-#         (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-#       )
-#     steps:
-#       - name: Use Node.js v20
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: 20
+#
+  code_quality_check:
+    runs-on: ubuntu-latest
+    needs: check_running_workflow
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+      )
+    steps:
+      - name: Use Node.js v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
           
-#       - name: Checkout head branch
-#         uses: actions/checkout@v4
-#         with:
-#           ref: ${{ github.event.pull_request.head.ref }}
-#           fetch-depth: 0
+      - name: Checkout head branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
 
-#       - name: Install dependencies
-#         run: |
-#           npm install -g eslint
-#           pip install pylint
+      - name: Install dependencies
+        run: |
+          npm install -g eslint
+          pip install pylint
 
-#       - name: Lint JavaScript files
-#         run: |
-#           set -e
-#           git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep -E '\.js$' | grep -v '\.cy\.js$' | while IFS= read -r file; do
-#             output=$(npx eslint --config=./eslint.config.js "$file")
-#             echo "$output"
-#             total_errors_warnings=$(echo "$output" | grep -Eo '[0-9]+ (error|warning)' | awk '{sum += $1} END {print sum}')
-#             if [ "${total_errors_warnings:-0}" -gt 90 ]; then
-#               echo "Linting problems are not within acceptable range (>90) for file: $file. Failing the job."
-#               exit 1
-#             fi
-#           done || exit 1
+      - name: Lint JavaScript files
+        run: |
+          set -e
+          git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep -E '\.js$' | grep -v '\.cy\.js$' | while IFS= read -r file; do
+            output=$(npx eslint --config=./eslint.config.js "$file")
+            echo "$output"
+            total_errors_warnings=$(echo "$output" | grep -Eo '[0-9]+ (error|warning)' | awk '{sum += $1} END {print sum}')
+            if [ "${total_errors_warnings:-0}" -gt 90 ]; then
+              echo "Linting problems are not within acceptable range (>90) for file: $file. Failing the job."
+              exit 1
+            fi
+          done || exit 1
 
-#       - name: Lint Python files
-#         run: |
-#           set -e
-#           git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep '.py$' | while IFS= read -r file; do
-#             output=$(pylint "$file")
-#             echo "$output"
-#             rating=$(echo "$output" | grep 'rated at' | grep -oE '[0-9]+\.[0-9]+' | head -1)
-#             if (( $(echo "$rating < 6" | bc -l) )); then
-#               echo "Linting rating is less than 6 for file: $file. Failing the job."
-#               exit 1
-#             fi
-#           done || exit 1
+      - name: Lint Python files
+        run: |
+          set -e
+          git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep '.py$' | while IFS= read -r file; do
+            output=$(pylint "$file")
+            echo "$output"
+            rating=$(echo "$output" | grep 'rated at' | grep -oE '[0-9]+\.[0-9]+' | head -1)
+            if (( $(echo "$rating < 6" | bc -l) )); then
+              echo "Linting rating is less than 6 for file: $file. Failing the job."
+              exit 1
+            fi
+          done || exit 1
 
-#   quality:
-#     runs-on: ubuntu-latest
-#     needs: code_quality_check
-#     if: |
-#       !contains(github.event.head_commit.message, '[skip ci]') &&
-#       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-#       !(
-#         github.event_name == 'push' &&
-#         (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
-#         github.event.before == 'refs/heads/main'
-#       ) &&
-#       !(
-#         github.event_name == 'pull_request' &&
-#         github.base_ref == 'refs/heads/main' &&
-#         (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-#       )
-#     env:
-#       HOST: ${{ vars.QA_HOST }}
-#       PROTOCOL: ${{ vars.QA_PROTOCOL }}
-#       CLIENT_SCRIPT_END_POINT: ${{ vars.QA_CLIENT_SCRIPT_END_POINT }}
-#       SERVER_SCRIPT_END_POINT: ${{ vars.QA_SERVER_SCRIPT_END_POINT }}
-#       REPORT_END_POINT: ${{ vars.QA_REPORT_END_POINT }}
-#       LETTER_HEAD_END_POINT: ${{ vars.QA_LETTER_HEAD_END_POINT }}
-#       PRINT_FORMAT_END_POINT: ${{ vars.QA_PRINT_FORMAT_END_POINT }}
-#       PERM_END_POINT: ${{ vars.QA_PERM_END_POINT }}
-#       CUSTOM_FIELD_END_POINT: ${{ vars.QA_CUSTOM_FIELD_END_POINT }}
-#       DOCTYPE_END_POINT: ${{ vars.QA_DOCTYPE_END_POINT }}
-#       USER_PERMISSION : ${{ vars.QA_USER_PERMISSION }}
-#       KEY: ${{ vars.QA_KEY }}
+  quality:
+    runs-on: ubuntu-latest
+    needs: code_quality_check
+    if: |
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+      )
+    env:
+      HOST: ${{ vars.QA_HOST }}
+      PROTOCOL: ${{ vars.QA_PROTOCOL }}
+      CLIENT_SCRIPT_END_POINT: ${{ vars.QA_CLIENT_SCRIPT_END_POINT }}
+      SERVER_SCRIPT_END_POINT: ${{ vars.QA_SERVER_SCRIPT_END_POINT }}
+      REPORT_END_POINT: ${{ vars.QA_REPORT_END_POINT }}
+      LETTER_HEAD_END_POINT: ${{ vars.QA_LETTER_HEAD_END_POINT }}
+      PRINT_FORMAT_END_POINT: ${{ vars.QA_PRINT_FORMAT_END_POINT }}
+      PERM_END_POINT: ${{ vars.QA_PERM_END_POINT }}
+      CUSTOM_FIELD_END_POINT: ${{ vars.QA_CUSTOM_FIELD_END_POINT }}
+      DOCTYPE_END_POINT: ${{ vars.QA_DOCTYPE_END_POINT }}
+      USER_PERMISSION : ${{ vars.QA_USER_PERMISSION }}
+      KEY: ${{ vars.QA_KEY }}
 
-#     steps:
-#       - name: Use Node.js v20
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: 20
+    steps:
+      - name: Use Node.js v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-#       - name: Checkout
-#         uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-#       - name: Uploading the Custom DocType
-#         run: |
-#           if grep -q "custom_doctype" ci/migrate.txt; then
-#             echo "Allows the Custom DocType Configuration job to proceed."
-#             npm i
-#             npm run update_doctype
-#           else
-#             echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
-#             exit 0
-#           fi
+      - name: Uploading the Custom DocType
+        run: |
+          if grep -q "custom_doctype" ci/migrate.txt; then
+            echo "Allows the Custom DocType Configuration job to proceed."
+            npm i
+            npm run update_doctype
+          else
+            echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
+            exit 0
+          fi
 
-#       - name: Upload Custom DocFields
-#         run: |
-#           if grep -q "custom_fields" ci/migrate.txt; then
-#             echo "Allows the DocFields Configuration job to proceed."
-#             npm i
-#             npm run update_field
-#           else
-#             echo "Does not allow the DocFields Configuration job to proceed, skipping."
-#             exit 0
-#           fi
+      - name: Upload Custom DocFields
+        run: |
+          if grep -q "custom_fields" ci/migrate.txt; then
+            echo "Allows the DocFields Configuration job to proceed."
+            npm i
+            npm run update_field
+          else
+            echo "Does not allow the DocFields Configuration job to proceed, skipping."
+            exit 0
+          fi
 
-#       - name: Upload the files
-#         run: |
-#           if grep -q "files" ci/migrate.txt; then
-#             echo "Allows the Files Configuration job to proceed."
-#             npm i
-#             npm run upload
-#           else
-#             echo "Does not allow the Files Configuration job to proceed, skipping."
-#             exit 0
-#           fi
+      - name: Upload the files
+        run: |
+          if grep -q "files" ci/migrate.txt; then
+            echo "Allows the Files Configuration job to proceed."
+            npm i
+            npm run upload
+          else
+            echo "Does not allow the Files Configuration job to proceed, skipping."
+            exit 0
+          fi
 
-#       - name: Upload Roles and Permission
-#         run: |
-#           if grep -q "roles_permission" ci/migrate.txt; then
-#             echo "Allows the Roles and Permission Configuration job to proceed."
-#             npm i
-#             npm run upload_perm
-#           else
-#             echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
-#             exit 0
-#           fi
+      - name: Upload Roles and Permission
+        run: |
+          if grep -q "roles_permission" ci/migrate.txt; then
+            echo "Allows the Roles and Permission Configuration job to proceed."
+            npm i
+            npm run upload_perm
+          else
+            echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
+            exit 0
+          fi
 
-#       - name: Upload User Permission
-#         run: |
-#           if grep -q "user_permission" ci/migrate.txt; then
-#             echo "Allows the User Permission Configuration job to proceed."
-#             npm i
-#             npm run update_user_permission
-#           else
-#             echo "Does not allow the User Permission Configuration job to proceed, skipping."
-#             exit 0
-#           fi
+      - name: Upload User Permission
+        run: |
+          if grep -q "user_permission" ci/migrate.txt; then
+            echo "Allows the User Permission Configuration job to proceed."
+            npm i
+            npm run update_user_permission
+          else
+            echo "Does not allow the User Permission Configuration job to proceed, skipping."
+            exit 0
+          fi
 
-#       - name: Upload Letterhead and Printformat
-#         run: |
-#           if grep -q "print_format" ci/migrate.txt; then
-#             echo "Allows the Letter Head and Print Format Configuration job to proceed."
-#             npm i
-#             npm run upload_letterhead_printformat
-#           else
-#             echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
-#             exit 0
-#           fi
+      - name: Upload Letterhead and Printformat
+        run: |
+          if grep -q "print_format" ci/migrate.txt; then
+            echo "Allows the Letter Head and Print Format Configuration job to proceed."
+            npm i
+            npm run upload_letterhead_printformat
+          else
+            echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
+            exit 0
+          fi
 
-#       - name: Upload Documents
-#         run: |
-#           if grep -q "documents" ci/migrate.txt; then
-#             echo "Allows the Documents Configuration job to proceed."
-#             npm i
-#             npm run update_document
-#           else
-#             echo "Does not allow the Documents Configuration job to proceed, skipping."
-#             exit 0
-#           fi
+      - name: Upload Documents
+        run: |
+          if grep -q "documents" ci/migrate.txt; then
+            echo "Allows the Documents Configuration job to proceed."
+            npm i
+            npm run update_document
+          else
+            echo "Does not allow the Documents Configuration job to proceed, skipping."
+            exit 0
+          fi
 
-#       - name: Delete Files
-#         run: |
-#           if grep -q "delete_files" ci/migrate.txt; then
-#             echo "Allows the Deletion of Files to proceed"
-#             npm i
-#             npm run delete_record
-#           else
-#             echo "Does not allows the Deletion of Files to proceed, skipping."
-#             exit 0
-#           fi
+      - name: Delete Files
+        run: |
+          if grep -q "delete_files" ci/migrate.txt; then
+            echo "Allows the Deletion of Files to proceed"
+            npm i
+            npm run delete_record
+          else
+            echo "Does not allows the Deletion of Files to proceed, skipping."
+            exit 0
+          fi
 
 
     # ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
-  # cypress_test:
-  #   runs-on: ubuntu-latest
-  #   needs: quality
-  #   if: |
-  #     !contains(github.event.head_commit.message, 'skipcy') &&
-  #     !contains(github.event.head_commit.message, '[skip ci]') &&
-  #     !contains(github.event.head_commit.message, '(ecr)') &&
-  #     !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-  #     !(
-  #       github.event_name == 'push' &&
-  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
-  #       github.event.before == 'refs/heads/main'
-  #     ) &&
-  #     !(
-  #       github.event_name == 'pull_request' &&
-  #       github.base_ref == 'refs/heads/main' &&
-  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-  #     )
-  #   env:
-  #     USER_NAME: ${{ secrets.TEST_USER_NAME }}
-  #     PASSWORD: ${{ secrets.TEST_PASSWORD }}
-  #     BASE_URL: ${{ secrets.TEST_BASE_URL }}
-  #     KEY: ${{ secrets.TEST_KEY}}
+  cypress_test:
+    runs-on: ubuntu-latest
+    needs: quality
+    if: |
+      !contains(github.event.head_commit.message, 'skipcy') &&
+      !contains(github.event.head_commit.message, '[skip ci]') &&
+      !contains(github.event.head_commit.message, '(ecr)') &&
+      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+      !(
+        github.event_name == 'push' &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
+        github.event.before == 'refs/heads/main'
+      ) &&
+      !(
+        github.event_name == 'pull_request' &&
+        github.base_ref == 'refs/heads/main' &&
+        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+      )
+    env:
+      USER_NAME: ${{ secrets.TEST_USER_NAME }}
+      PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      BASE_URL: ${{ secrets.TEST_BASE_URL }}
+      KEY: ${{ secrets.TEST_KEY}}
 
-  #   steps:
-  #     - name: Use Node.js v20
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: 20
+    steps:
+      - name: Use Node.js v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
           
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v3
-  #       with:
-  #         submodules: true
-  #         token: ${{ secrets.TEST_REPO_KEY }}
-  #         fetch-depth: 0 # fetch full history
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          token: ${{ secrets.TEST_REPO_KEY }}
+          fetch-depth: 0 # fetch full history
 
-  #     - name: Read Commit Hash
-  #       id: read_commit_hash
-  #       run: |
-  #         COMMIT_HASH=$(cat ci/commit.txt)
-  #         echo "COMMIT_HASH=${COMMIT_HASH}" >> $GITHUB_ENV
+      - name: Read Commit Hash
+        id: read_commit_hash
+        run: |
+          COMMIT_HASH=$(cat ci/commit.txt)
+          echo "COMMIT_HASH=${COMMIT_HASH}" >> $GITHUB_ENV
 
-  #     - name: Initialize and Update Submodule to Specific Commit
-  #       run: |
-  #         git submodule update --init --recursive --remote
-  #         cd testAutomate
-  #         git fetch origin
-  #         git checkout ${{ env.COMMIT_HASH }}
-  #         cd -
+      - name: Initialize and Update Submodule to Specific Commit
+        run: |
+          git submodule update --init --recursive --remote
+          cd testAutomate
+          git fetch origin
+          git checkout ${{ env.COMMIT_HASH }}
+          cd -
 
-  #     - name: Install Dependencies in Submodule
-  #       working-directory: testAutomate
-  #       run: |
-  #         npm i
+      - name: Install Dependencies in Submodule
+        working-directory: testAutomate
+        run: |
+          npm i
 
-  #     - name: Clean Up Existing Cypress Folder in Parent Repo
-  #       run: |
-  #         rm -rf cypress
-  #         mkdir -p cypress/e2e cypress/fixtures cypress/support
+      - name: Clean Up Existing Cypress Folder in Parent Repo
+        run: |
+          rm -rf cypress
+          mkdir -p cypress/e2e cypress/fixtures cypress/support
 
-  #     - name: Copy Cypress Folder from Submodule to Parent Repo
-  #       run: |
-  #         rsync -a testAutomate/cypress/e2e/ cypress/e2e/
-  #         rsync -a testAutomate/cypress/fixtures/ cypress/fixtures/
-  #         rsync -a testAutomate/cypress/support/ cypress/support/
+      - name: Copy Cypress Folder from Submodule to Parent Repo
+        run: |
+          rsync -a testAutomate/cypress/e2e/ cypress/e2e/
+          rsync -a testAutomate/cypress/fixtures/ cypress/fixtures/
+          rsync -a testAutomate/cypress/support/ cypress/support/
 
-  #     - name: Commit and Push Changes to New Branch in Parent Repo
-  #       env:
-  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: |
-  #         git config --global user.name 'Fathima786Irfana'
-  #         git config --global user.email 'fathima.irfana@lmnas.com'
-  #         CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-  #         BRANCH_NAME=cypress-results-$(date +%Y%m%d%H%M%S)
-  #         git checkout -b $BRANCH_NAME
-  #         git add ./cypress/e2e ./cypress/fixtures ./cypress/support
-  #         git commit -m 'Replace Cypress folder from submodule [skip ci]'
-  #         git push origin $BRANCH_NAME
-  #         echo "Creating pull request from $BRANCH_NAME to $CURRENT_BRANCH"
-  #         gh pr create --base $CURRENT_BRANCH --head $BRANCH_NAME --title "Replace Cypress folder from submodule" --body "This PR includes the Cypress test results from the submodule, replacing the existing Cypress folder."
-  #       continue-on-error: true
+      - name: Commit and Push Changes to New Branch in Parent Repo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name 'Fathima786Irfana'
+          git config --global user.email 'fathima.irfana@lmnas.com'
+          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          BRANCH_NAME=cypress-results-$(date +%Y%m%d%H%M%S)
+          git checkout -b $BRANCH_NAME
+          git add ./cypress/e2e ./cypress/fixtures ./cypress/support
+          git commit -m 'Replace Cypress folder from submodule [skip ci]'
+          git push origin $BRANCH_NAME
+          echo "Creating pull request from $BRANCH_NAME to $CURRENT_BRANCH"
+          gh pr create --base $CURRENT_BRANCH --head $BRANCH_NAME --title "Replace Cypress folder from submodule" --body "This PR includes the Cypress test results from the submodule, replacing the existing Cypress folder."
+        continue-on-error: true
 
-  #     - name: Merge PR and Delete Branch
-  #       env:
-  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       run: |
-  #         PR_NUMBER=$(gh pr list --head $BRANCH_NAME --json number,title --jq '.[] | select(.title | contains("[skip ci]")) | .number' | head -n 1)
-  #         gh pr merge $PR_NUMBER --merge --delete-branch --admin
-  #       continue-on-error: true
+      - name: Merge PR and Delete Branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --head $BRANCH_NAME --json number,title --jq '.[] | select(.title | contains("[skip ci]")) | .number' | head -n 1)
+          gh pr merge $PR_NUMBER --merge --delete-branch --admin
+        continue-on-error: true
 
-  #     - name: Clean Up GitHub CLI Credentials
-  #       if: always()
-  #       run: |
-  #         rm -f ~/.config/gh/hosts.yml
+      - name: Clean Up GitHub CLI Credentials
+        if: always()
+        run: |
+          rm -f ~/.config/gh/hosts.yml
 
-  #     - name: Run Cypress Tests in Submodule
-  #       working-directory: testAutomate
-  #       run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
+      - name: Run Cypress Tests in Submodule
+        working-directory: testAutomate
+        run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
-  # revert_merge:
-  #   name: 🔁 Revert Merge
-  #   if: failure()
-  #   runs-on: ubuntu-latest
-  #   needs: [quality, cypress_test]
+  revert_merge:
+    name: 🔁 Revert Merge
+    if: failure()
+    runs-on: ubuntu-latest
+    needs: [quality, cypress_test]
 
-  #   steps:
-  #     - name: 🧾 Checkout repo
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0
+    steps:
+      - name: 🧾 Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-  #     - name: ⚙️ Git config
-  #       run: |
-  #         git config user.name "github-actions[bot]"
-  #         git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: ⚙️ Git config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-  #     - name: 🔍 Check merge
-  #       id: check_merge
-  #       run: |
-  #         parents=$(git log -1 --pretty=%P $MERGE_COMMIT_SHA)
-  #         echo "Parents: $parents"
-  #         if [[ $(echo "$parents" | wc -w) -gt 1 ]]; then
-  #           echo "is_merge=true" >> "$GITHUB_OUTPUT"
-  #         else
-  #           echo "is_merge=false" >> "$GITHUB_OUTPUT"
-  #         fi
+      - name: 🔍 Check merge
+        id: check_merge
+        run: |
+          parents=$(git log -1 --pretty=%P $MERGE_COMMIT_SHA)
+          echo "Parents: $parents"
+          if [[ $(echo "$parents" | wc -w) -gt 1 ]]; then
+            echo "is_merge=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_merge=false" >> "$GITHUB_OUTPUT"
+          fi
 
-  #     - name: ❌ Revert merge commit
-  #       if: steps.check_merge.outputs.is_merge == 'true'
-  #       run: |
-  #         git revert -m 1 $MERGE_COMMIT_SHA --no-edit
+      - name: ❌ Revert merge commit
+        if: steps.check_merge.outputs.is_merge == 'true'
+        run: |
+          git revert -m 1 $MERGE_COMMIT_SHA --no-edit
 
-  #     - name: 🔁 Revert normal commit
-  #       if: steps.check_merge.outputs.is_merge == 'false'
-  #       run: |
-  #         git revert $MERGE_COMMIT_SHA --no-edit
+      - name: 🔁 Revert normal commit
+        if: steps.check_merge.outputs.is_merge == 'false'
+        run: |
+          git revert $MERGE_COMMIT_SHA --no-edit
 
-  #     - name: 🚀 Push revert
-  #       env:
-  #         GH_PAT: ${{ secrets.GH_PAT }}
-  #       run: |
-  #         git push https://x-access-token:${GH_PAT}@github.com/ajaykumarrgn/sgbcz-development.git HEAD:main
-
-
-
+      - name: 🚀 Push revert
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git push https://x-access-token:${GH_PAT}@github.com/ajaykumarrgn/sgbcz-development.git HEAD:main
 
 
   # wait_for_approval:
