@@ -8,14 +8,60 @@ on:
       - hot-fix*
     paths-ignore: # Avoid triggering on PR merges with specific commit messages
       - '**/cypress/**'
-      - '.github/**'
       - '.pylintrc'
       - 'eslint.config.js'
-      - 'eslint-plugin-custom-rules.js' 
+      - 'eslint-plugin-custom-rules.js'
+concurrency:
+  group: workflow-${{ github.ref }}
+  cancel-in-progress: false
+  
 
+#
 jobs:
+  check_running_workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Set up GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install gh -y
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current run number
+        id: current
+        run: echo "run_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
+
+      - name: Check if another workflow is running on same branch (excluding self)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking for other running workflows on branch: $GITHUB_REF_NAME"
+          
+          current_run_number=${{ steps.current.outputs.run_number }}
+
+          other_running_runs=$(gh run list \
+            --workflow="Auto-Deployment" \
+            --branch="$GITHUB_REF_NAME" \
+            --status="in_progress" \
+            --json number,status,headBranch -q \
+            ".[] | select(.number != ${current_run_number}) | .number")
+
+          echo "Other running runs: $other_running_runs"
+
+          if [[ -n "$other_running_runs" ]]; then
+            echo "Another workflow is already running on $GITHUB_REF_NAME. Skipping this run."
+            exit 1
+          else
+            echo "No other workflows in progress. Proceeding."
+          fi
+#
   code_quality_check:
     runs-on: ubuntu-latest
+    needs: check_running_workflow
     if: |
       !contains(github.event.head_commit.message, '[skip ci]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
@@ -74,6 +120,7 @@ jobs:
 
   quality:
     runs-on: ubuntu-latest
+    needs: code_quality_check
     if: |
       !contains(github.event.head_commit.message, '[skip ci]') &&
       !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
@@ -87,7 +134,6 @@ jobs:
         github.base_ref == 'refs/heads/main' &&
         (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
       )
-    needs: code_quality_check
     env:
       HOST: ${{ vars.QA_HOST }}
       PROTOCOL: ${{ vars.QA_PROTOCOL }}
@@ -199,7 +245,8 @@ jobs:
             exit 0
           fi
 
-  ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
+
+    # ### Settings > Action > General --  Allow github actions to create and approve pr (to create pr in workflow)
 
   cypress_test:
     runs-on: ubuntu-latest
@@ -301,350 +348,398 @@ jobs:
         working-directory: testAutomate
         run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
-  wait_for_approval:
+  revert_merge:
+    name: 🔁 Revert Merge
+    needs: [cypress_test, quality]
+    if: failure() # Only runs if one of the required jobs failed
     runs-on: ubuntu-latest
-    needs: quality
-    if: |
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      !contains(github.event.head_commit.message, '(ecr)') &&
-      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-      !(
-        github.event_name == 'push' &&
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
-        github.event.before == 'refs/heads/main'
-      ) &&
-      !(
-        github.event_name == 'pull_request' &&
-        github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-      ) &&
-      !(
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-      )
 
     steps:
-      - uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.TOKEN }}
-          approvers: arun-lmnas
-          minimum-approvals: 1
-          issue-title: "Deploying to the production"
-          issue-body: "Please approve or deny the production deployment"
-
-  production:
-    runs-on: ubuntu-latest
-    needs: wait_for_approval
-    if: |
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      !contains(github.event.head_commit.message, '(ecr)') &&
-      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-      !(
-        github.event_name == 'push' &&
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
-        github.event.before == 'refs/heads/main'
-      ) &&
-      !(
-        github.event_name == 'pull_request' &&
-        github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-      ) &&
-      !(
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-      )
-    env:
-      HOST: ${{ vars.PROD_HOST }}
-      PROTOCOL: ${{ vars.PROD_PROTOCOL }}
-      CLIENT_SCRIPT_END_POINT: ${{ vars.PROD_CLIENT_SCRIPT_END_POINT }}
-      SERVER_SCRIPT_END_POINT: ${{ vars.PROD_SERVER_SCRIPT_END_POINT }}
-      REPORT_END_POINT: ${{ vars.PROD_REPORT_END_POINT }}
-      LETTER_HEAD_END_POINT: ${{ vars.PROD_LETTER_HEAD_END_POINT }}
-      PRINT_FORMAT_END_POINT: ${{ vars.PROD_PRINT_FORMAT_END_POINT }}
-      PERM_END_POINT: ${{ vars.PROD_PERM_END_POINT }}
-      CUSTOM_FIELD_END_POINT: ${{ vars.PROD_CUSTOM_FIELD_END_POINT }}
-      DOCTYPE_END_POINT: ${{ vars.PROD_DOCTYPE_END_POINT }}
-      USER_PERMISSION : ${{ vars.PROD_USER_PERMISSION }}
-      KEY: ${{ vars.PROD_KEY }}
-
-    steps:
-      - name: Use Node.js v20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          
-      - name: Checkout
+      - name: 🧾 Checkout repo
         uses: actions/checkout@v4
-
-      - name: Uploading the Custom DocType
-        run: |
-          if grep -q "custom_doctype" ci/migrate.txt; then
-            echo "Allows the Custom DocType Configuration job to proceed."
-            npm i
-            npm run update_doctype
-          else
-            echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
-            exit 0
-          fi
-
-      - name: Upload Custom DocFields
-        run: |
-          if grep -q "custom_fields" ci/migrate.txt; then
-            echo "Allows the DocFields Configuration job to proceed."
-            npm i
-            npm run update_field
-          else
-            echo "Does not allow the DocFields Configuration job to proceed, skipping."
-            exit 0
-          fi
-
-      - name: Upload the files
-        run: |
-          if grep -q "files" ci/migrate.txt; then
-            echo "Allows the Files Configuration job to proceed."
-            npm i
-            npm run upload
-          else
-            echo "Does not allow the Files Configuration job to proceed, skipping."
-            exit 0
-          fi
-
-      - name: Upload Roles and Permission
-        env:
-          KEY: ${{ vars.PROD_ROLE_KEY }}
-        run: |
-          if grep -q "roles_permission" ci/migrate.txt; then
-            echo "Allows the Roles and Permission Configuration job to proceed."
-            npm i
-            npm run upload_perm
-          else
-            echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
-            exit 0
-          fi
-
-      - name: Upload User Permission
-        run: |
-          if grep -q "user_permission" ci/migrate.txt; then
-            echo "Allows the User Permission Configuration job to proceed."
-            npm i
-            npm run update_user_permission
-          else
-            echo "Does not allow the User Permission Configuration job to proceed, skipping."
-            exit 0
-          fi
-
-      - name: Upload Letterhead and Printformat
-        run: |
-          if grep -q "print_format" ci/migrate.txt; then
-            echo "Allows the Letter Head and Print Format Configuration job to proceed."
-            npm i
-            npm run upload_letterhead_printformat
-          else
-            echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
-            exit 0
-          fi
-
-      - name: Upload Documents
-        run: |
-          if grep -q "documents" ci/migrate.txt; then
-            echo "Allows the Documents Configuration job to proceed."
-            npm i
-            npm run update_document
-          else
-            echo "Does not allow the Documents Configuration job to proceed, skipping."
-            exit 0
-          fi
-      
-      - name: Delete Files
-        run: |
-          if grep -q "delete_files" ci/migrate.txt; then
-            echo "Allows the Deletion of Files to proceed"
-            npm i
-            npm run delete_record
-          else
-            echo "Does not allows the Deletion of Files to proceed, skipping."
-            exit 0
-          fi
-
-      - name: Update Property Setter
-        run: |
-          if grep -q "update_property_setter" ci/migrate.txt; then
-            echo "Allows the Updation of Core Doc Fields to proceed"
-            npm i
-            npm run update_property_setter
-          else
-            echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
-            exit 0
-          fi
-          
-  ecr_wait_for_approval:
-    runs-on: ubuntu-latest
-    needs: quality
-    if: |
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      contains(github.event.head_commit.message, '(ecr)') &&
-      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-      !(
-        github.event_name == 'push' &&
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
-        github.event.before == 'refs/heads/main'
-      ) &&
-      !(
-        github.event_name == 'pull_request' &&
-        github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-      ) &&
-      !(
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-      )
-
-    steps:
-      - uses: trstringer/manual-approval@v1
         with:
-          secret: ${{ github.TOKEN }}
-          approvers: arun-lmnas
-          minimum-approvals: 1
-          issue-title: "Deploying to the production"
-          issue-body: "Please approve or deny the production deployment"
+          fetch-depth: 0 # Needed to access full history for reverts
 
-  ecr_production_deployment:
-    runs-on: ubuntu-latest
-    needs: ecr_wait_for_approval
-    if: |
-      !contains(github.event.head_commit.message, '[skip ci]') &&
-      contains(github.event.head_commit.message, '(ecr)') &&
-      !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
-      !(
-        github.event_name == 'push' &&
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
-        github.event.before == 'refs/heads/main'
-      ) &&
-      !(
-        github.event_name == 'pull_request' &&
-        github.base_ref == 'refs/heads/main' &&
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-      ) &&
-      !(
-        (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
-      )
-    env:
-      HOST: ${{ vars.PROD_HOST }}
-      PROTOCOL: ${{ vars.PROD_PROTOCOL }}
-      CLIENT_SCRIPT_END_POINT: ${{ vars.PROD_CLIENT_SCRIPT_END_POINT }}
-      SERVER_SCRIPT_END_POINT: ${{ vars.PROD_SERVER_SCRIPT_END_POINT }}
-      REPORT_END_POINT: ${{ vars.PROD_REPORT_END_POINT }}
-      LETTER_HEAD_END_POINT: ${{ vars.PROD_LETTER_HEAD_END_POINT }}
-      PRINT_FORMAT_END_POINT: ${{ vars.PROD_PRINT_FORMAT_END_POINT }}
-      PERM_END_POINT: ${{ vars.PROD_PERM_END_POINT }}
-      CUSTOM_FIELD_END_POINT: ${{ vars.PROD_CUSTOM_FIELD_END_POINT }}
-      DOCTYPE_END_POINT: ${{ vars.PROD_DOCTYPE_END_POINT }}
-      USER_PERMISSION : ${{ vars.PROD_USER_PERMISSION }}
-      KEY: ${{ vars.PROD_KEY }}
-
-    steps:
-      - name: Use Node.js v20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Uploading the Custom DocType
+      - name: ⚙️ Set Git config
         run: |
-          if grep -q "custom_doctype" ci/migrate.txt; then
-            echo "Allows the Custom DocType Configuration job to proceed."
-            npm i
-            npm run update_doctype
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 🔍 Detect if it's a merge commit
+        id: check_merge
+        run: |
+          parents=$(git log -1 --pretty=%P)
+          echo "Parents: $parents"
+          if [[ $(echo "$parents" | wc -w) -gt 1 ]]; then
+            echo "is_merge=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
-            exit 0
+            echo "is_merge=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Upload Custom DocFields
+      - name: ❌ Revert merge commit
+        if: steps.check_merge.outputs.is_merge == 'true'
         run: |
-          if grep -q "custom_fields" ci/migrate.txt; then
-            echo "Allows the DocFields Configuration job to proceed."
-            npm i
-            npm run update_field
-          else
-            echo "Does not allow the DocFields Configuration job to proceed, skipping."
-            exit 0
-          fi
+          git revert -m 1 HEAD --no-edit
 
-      - name: Upload the files
+      - name: 🔁 Revert normal commit (fallback)
+        if: steps.check_merge.outputs.is_merge == 'false'
         run: |
-          if grep -q "files" ci/migrate.txt; then
-            echo "Allows the Files Configuration job to proceed."
-            npm i
-            npm run upload
-          else
-            echo "Does not allow the Files Configuration job to proceed, skipping."
-            exit 0
-          fi
+          git revert HEAD --no-edit
 
-      - name: Upload Roles and Permission
+      - name: 🚀 Push revert commit using PAT
         env:
-          KEY: ${{ vars.PROD_ROLE_KEY }}
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          if grep -q "roles_permission" ci/migrate.txt; then
-            echo "Allows the Roles and Permission Configuration job to proceed."
-            npm i
-            npm run upload_perm
-          else
-            echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
-            exit 0
-          fi
+          git push https://x-access-token:${GH_PAT}@github.com/ajaykumarrgn/sgbcz-development.git HEAD:main
 
-      - name: Upload User Permission
-        run: |
-          if grep -q "user_permission" ci/migrate.txt; then
-            echo "Allows the User Permission Configuration job to proceed."
-            npm i
-            npm run update_user_permission
-          else
-            echo "Does not allow the User Permission Configuration job to proceed, skipping."
-            exit 0
-          fi
 
-      - name: Upload Letterhead and Printformat
-        run: |
-          if grep -q "print_format" ci/migrate.txt; then
-            echo "Allows the Letter Head and Print Format Configuration job to proceed."
-            npm i
-            npm run upload_letterhead_printformat
-          else
-            echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
-            exit 0
-          fi
 
-      - name: Upload Documents
-        run: |
-          if grep -q "documents" ci/migrate.txt; then
-            echo "Allows the Documents Configuration job to proceed."
-            npm i
-            npm run update_document
-          else
-            echo "Does not allow the Documents Configuration job to proceed, skipping."
-            exit 0
-          fi
+
+
+  # wait_for_approval:
+  #   runs-on: ubuntu-latest
+  #   needs: quality
+  #   if: |
+  #     !contains(github.event.head_commit.message, '[skip ci]') &&
+  #     !contains(github.event.head_commit.message, '(ecr)') &&
+  #     !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+  #     !(
+  #       github.event_name == 'push' &&
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
+  #       github.event.before == 'refs/heads/main'
+  #     ) &&
+  #     !(
+  #       github.event_name == 'pull_request' &&
+  #       github.base_ref == 'refs/heads/main' &&
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+  #     ) &&
+  #     !(
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+  #     )
+
+  #   steps:
+  #     - uses: trstringer/manual-approval@v1
+  #       with:
+  #         secret: ${{ github.TOKEN }}
+  #         approvers: arun-lmnas
+  #         minimum-approvals: 1
+  #         issue-title: "Deploying to the production"
+  #         issue-body: "Please approve or deny the production deployment"
+
+  # production:
+  #   runs-on: ubuntu-latest
+  #   needs: wait_for_approval
+  #   if: |
+  #     !contains(github.event.head_commit.message, '[skip ci]') &&
+  #     !contains(github.event.head_commit.message, '(ecr)') &&
+  #     !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+  #     !(
+  #       github.event_name == 'push' &&
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
+  #       github.event.before == 'refs/heads/main'
+  #     ) &&
+  #     !(
+  #       github.event_name == 'pull_request' &&
+  #       github.base_ref == 'refs/heads/main' &&
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+  #     ) &&
+  #     !(
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+  #     )
+  #   env:
+  #     HOST: ${{ vars.PROD_HOST }}
+  #     PROTOCOL: ${{ vars.PROD_PROTOCOL }}
+  #     CLIENT_SCRIPT_END_POINT: ${{ vars.PROD_CLIENT_SCRIPT_END_POINT }}
+  #     SERVER_SCRIPT_END_POINT: ${{ vars.PROD_SERVER_SCRIPT_END_POINT }}
+  #     REPORT_END_POINT: ${{ vars.PROD_REPORT_END_POINT }}
+  #     LETTER_HEAD_END_POINT: ${{ vars.PROD_LETTER_HEAD_END_POINT }}
+  #     PRINT_FORMAT_END_POINT: ${{ vars.PROD_PRINT_FORMAT_END_POINT }}
+  #     PERM_END_POINT: ${{ vars.PROD_PERM_END_POINT }}
+  #     CUSTOM_FIELD_END_POINT: ${{ vars.PROD_CUSTOM_FIELD_END_POINT }}
+  #     DOCTYPE_END_POINT: ${{ vars.PROD_DOCTYPE_END_POINT }}
+  #     USER_PERMISSION : ${{ vars.PROD_USER_PERMISSION }}
+  #     KEY: ${{ vars.PROD_KEY }}
+
+  #   steps:
+  #     - name: Use Node.js v20
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+          
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Uploading the Custom DocType
+  #       run: |
+  #         if grep -q "custom_doctype" ci/migrate.txt; then
+  #           echo "Allows the Custom DocType Configuration job to proceed."
+  #           npm i
+  #           npm run update_doctype
+  #         else
+  #           echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload Custom DocFields
+  #       run: |
+  #         if grep -q "custom_fields" ci/migrate.txt; then
+  #           echo "Allows the DocFields Configuration job to proceed."
+  #           npm i
+  #           npm run update_field
+  #         else
+  #           echo "Does not allow the DocFields Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload the files
+  #       run: |
+  #         if grep -q "files" ci/migrate.txt; then
+  #           echo "Allows the Files Configuration job to proceed."
+  #           npm i
+  #           npm run upload
+  #         else
+  #           echo "Does not allow the Files Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload Roles and Permission
+  #       env:
+  #         KEY: ${{ vars.PROD_ROLE_KEY }}
+  #       run: |
+  #         if grep -q "roles_permission" ci/migrate.txt; then
+  #           echo "Allows the Roles and Permission Configuration job to proceed."
+  #           npm i
+  #           npm run upload_perm
+  #         else
+  #           echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload User Permission
+  #       run: |
+  #         if grep -q "user_permission" ci/migrate.txt; then
+  #           echo "Allows the User Permission Configuration job to proceed."
+  #           npm i
+  #           npm run update_user_permission
+  #         else
+  #           echo "Does not allow the User Permission Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload Letterhead and Printformat
+  #       run: |
+  #         if grep -q "print_format" ci/migrate.txt; then
+  #           echo "Allows the Letter Head and Print Format Configuration job to proceed."
+  #           npm i
+  #           npm run upload_letterhead_printformat
+  #         else
+  #           echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload Documents
+  #       run: |
+  #         if grep -q "documents" ci/migrate.txt; then
+  #           echo "Allows the Documents Configuration job to proceed."
+  #           npm i
+  #           npm run update_document
+  #         else
+  #           echo "Does not allow the Documents Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
       
-      - name: Delete Files
-        run: |
-          if grep -q "delete_files" ci/migrate.txt; then
-            echo "Allows the Deletion of Files to proceed"
-            npm i
-            npm run delete_record
-          else
-            echo "Does not allows the Deletion of Files to proceed, skipping."
-            exit 0
-          fi
+  #     - name: Delete Files
+  #       run: |
+  #         if grep -q "delete_files" ci/migrate.txt; then
+  #           echo "Allows the Deletion of Files to proceed"
+  #           npm i
+  #           npm run delete_record
+  #         else
+  #           echo "Does not allows the Deletion of Files to proceed, skipping."
+  #           exit 0
+  #         fi
 
-      - name: Update Property Setter
-        run: |
-          if grep -q "update_property_setter" ci/migrate.txt; then
-            echo "Allows the Updation of Core Doc Fields to proceed"
-            npm i
-            npm run update_property_setter
-          else
-            echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
-            exit 0
-          fi
+  #     - name: Update Property Setter
+  #       run: |
+  #         if grep -q "update_property_setter" ci/migrate.txt; then
+  #           echo "Allows the Updation of Core Doc Fields to proceed"
+  #           npm i
+  #           npm run update_property_setter
+  #         else
+  #           echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
+  #           exit 0
+  #         fi
+          
+  # ecr_wait_for_approval:
+  #   runs-on: ubuntu-latest
+  #   needs: quality
+  #   if: |
+  #     !contains(github.event.head_commit.message, '[skip ci]') &&
+  #     contains(github.event.head_commit.message, '(ecr)') &&
+  #     !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+  #     !(
+  #       github.event_name == 'push' &&
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
+  #       github.event.before == 'refs/heads/main'
+  #     ) &&
+  #     !(
+  #       github.event_name == 'pull_request' &&
+  #       github.base_ref == 'refs/heads/main' &&
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+  #     ) &&
+  #     !(
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+  #     )
+
+  #   steps:
+  #     - uses: trstringer/manual-approval@v1
+  #       with:
+  #         secret: ${{ github.TOKEN }}
+  #         approvers: arun-lmnas
+  #         minimum-approvals: 1
+  #         issue-title: "Deploying to the production"
+  #         issue-body: "Please approve or deny the production deployment"
+
+  # ecr_production_deployment:
+  #   runs-on: ubuntu-latest
+  #   needs: ecr_wait_for_approval
+  #   if: |
+  #     !contains(github.event.head_commit.message, '[skip ci]') &&
+  #     contains(github.event.head_commit.message, '(ecr)') &&
+  #     !contains(github.event.head_commit.message, 'Merge branch ''main'' into ') &&
+  #     !(
+  #       github.event_name == 'push' &&
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix')) &&
+  #       github.event.before == 'refs/heads/main'
+  #     ) &&
+  #     !(
+  #       github.event_name == 'pull_request' &&
+  #       github.base_ref == 'refs/heads/main' &&
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+  #     ) &&
+  #     !(
+  #       (github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/hot-fix'))
+  #     )
+  #   env:
+  #     HOST: ${{ vars.PROD_HOST }}
+  #     PROTOCOL: ${{ vars.PROD_PROTOCOL }}
+  #     CLIENT_SCRIPT_END_POINT: ${{ vars.PROD_CLIENT_SCRIPT_END_POINT }}
+  #     SERVER_SCRIPT_END_POINT: ${{ vars.PROD_SERVER_SCRIPT_END_POINT }}
+  #     REPORT_END_POINT: ${{ vars.PROD_REPORT_END_POINT }}
+  #     LETTER_HEAD_END_POINT: ${{ vars.PROD_LETTER_HEAD_END_POINT }}
+  #     PRINT_FORMAT_END_POINT: ${{ vars.PROD_PRINT_FORMAT_END_POINT }}
+  #     PERM_END_POINT: ${{ vars.PROD_PERM_END_POINT }}
+  #     CUSTOM_FIELD_END_POINT: ${{ vars.PROD_CUSTOM_FIELD_END_POINT }}
+  #     DOCTYPE_END_POINT: ${{ vars.PROD_DOCTYPE_END_POINT }}
+  #     USER_PERMISSION : ${{ vars.PROD_USER_PERMISSION }}
+  #     KEY: ${{ vars.PROD_KEY }}
+
+  #   steps:
+  #     - name: Use Node.js v20
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+          
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Uploading the Custom DocType
+  #       run: |
+  #         if grep -q "custom_doctype" ci/migrate.txt; then
+  #           echo "Allows the Custom DocType Configuration job to proceed."
+  #           npm i
+  #           npm run update_doctype
+  #         else
+  #           echo "Does not allow the Custom DocType Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload Custom DocFields
+  #       run: |
+  #         if grep -q "custom_fields" ci/migrate.txt; then
+  #           echo "Allows the DocFields Configuration job to proceed."
+  #           npm i
+  #           npm run update_field
+  #         else
+  #           echo "Does not allow the DocFields Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload the files
+  #       run: |
+  #         if grep -q "files" ci/migrate.txt; then
+  #           echo "Allows the Files Configuration job to proceed."
+  #           npm i
+  #           npm run upload
+  #         else
+  #           echo "Does not allow the Files Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload Roles and Permission
+  #       env:
+  #         KEY: ${{ vars.PROD_ROLE_KEY }}
+  #       run: |
+  #         if grep -q "roles_permission" ci/migrate.txt; then
+  #           echo "Allows the Roles and Permission Configuration job to proceed."
+  #           npm i
+  #           npm run upload_perm
+  #         else
+  #           echo "Does not allow the Roles and Permission Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload User Permission
+  #       run: |
+  #         if grep -q "user_permission" ci/migrate.txt; then
+  #           echo "Allows the User Permission Configuration job to proceed."
+  #           npm i
+  #           npm run update_user_permission
+  #         else
+  #           echo "Does not allow the User Permission Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload Letterhead and Printformat
+  #       run: |
+  #         if grep -q "print_format" ci/migrate.txt; then
+  #           echo "Allows the Letter Head and Print Format Configuration job to proceed."
+  #           npm i
+  #           npm run upload_letterhead_printformat
+  #         else
+  #           echo "Does not allow the Letter Head and Print Format Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Upload Documents
+  #       run: |
+  #         if grep -q "documents" ci/migrate.txt; then
+  #           echo "Allows the Documents Configuration job to proceed."
+  #           npm i
+  #           npm run update_document
+  #         else
+  #           echo "Does not allow the Documents Configuration job to proceed, skipping."
+  #           exit 0
+  #         fi
+      
+  #     - name: Delete Files
+  #       run: |
+  #         if grep -q "delete_files" ci/migrate.txt; then
+  #           echo "Allows the Deletion of Files to proceed"
+  #           npm i
+  #           npm run delete_record
+  #         else
+  #           echo "Does not allows the Deletion of Files to proceed, skipping."
+  #           exit 0
+  #         fi
+
+  #     - name: Update Property Setter
+  #       run: |
+  #         if grep -q "update_property_setter" ci/migrate.txt; then
+  #           echo "Allows the Updation of Core Doc Fields to proceed"
+  #           npm i
+  #           npm run update_property_setter
+  #         else
+  #           echo "Does not allows the Updation of Core Doc Fields to proceed, skipping."
+  #           exit 0
+  #         fi
