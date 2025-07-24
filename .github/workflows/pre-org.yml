@@ -1,0 +1,57 @@
+
+name: 🔐 Safe Pre-Branch to Main Branch Merge
+
+on:
+  push:
+    branches:
+      - pre-*
+
+jobs:
+  safe_merge:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/pre-')  # Ensures only pre-* triggers
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Git config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: 🧠 Extract Target Branch
+        id: extract_branch
+        run: |
+          source_branch="${GITHUB_REF##*/}"
+          target_branch="${source_branch#pre-}"
+          echo "source_branch=$source_branch" >> $GITHUB_OUTPUT
+          echo "target_branch=$target_branch" >> $GITHUB_OUTPUT
+
+      - name: 🛡️ Check for running workflows on target branch
+        id: check_workflows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          target_branch="${{ steps.extract_branch.outputs.target_branch }}"
+          count=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?branch=$target_branch&status=in_progress" \
+            | jq '.workflow_runs | length')
+
+          echo "Running workflow count: $count"
+          if [ "$count" -gt 0 ]; then
+            echo "❌ Workflow is running on $target_branch. Merge aborted."
+            exit 1
+          fi
+
+      - name: 🔁 Fast-forward Merge pre-* to target branch
+        run: |
+          source_branch="${{ steps.extract_branch.outputs.source_branch }}"
+          target_branch="${{ steps.extract_branch.outputs.target_branch }}"
+
+          git fetch origin $source_branch
+          git fetch origin $target_branch
+
+          git checkout $target_branch
+          git merge origin/$source_branch --ff-only
+          git push origin $target_branch
+
