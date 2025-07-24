@@ -7,6 +7,9 @@ on:
       - release
       - hot-fix*
       - pre-*
+      - pre-main
+      - pre-release
+      - pre-hotfix
     paths-ignore:
       - '**/cypress/**'
       - '.pylintrc'
@@ -21,73 +24,47 @@ env:
   MERGE_COMMIT_SHA: ${{ github.sha }}
 
 jobs:
-  check_running_workflow:
+  prevent-merge-if-target-active:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-
-      - name: Set up GitHub CLI
+      - name: 🧠 Determine Target Branch
+        id: target
         run: |
-          sudo apt update
-          sudo apt install gh -y
+          staging_branch="${GITHUB_REF##*/}"  # Extract branch name
+          target_branch="${staging_branch#pre-}"  # Remove "pre-" prefix
+          echo "target_branch=$target_branch" >> "$GITHUB_OUTPUT"
+
+      - name: 🛰️ Check Running Workflows on Target Branch
+        id: check_running
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get current run number
-        id: current
-        run: echo "run_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
-
-      - name: Detect base branch from pre-* branch
-        id: base_branch
         run: |
-          REF_NAME="${GITHUB_REF##*/}"
-          echo "Detected branch: $REF_NAME"
+          running=$(gh run list \
+            --branch ${{ steps.target.outputs.target_branch }} \
+            --workflow "${{ github.workflow }}" \
+            --json status,headBranch \
+            --jq '.[] | select(.status == "in_progress" or .status == "queued") | .headBranch')
 
-          if [[ "$REF_NAME" =~ ^pre-(main|release|hot[-]?fix.*)$ ]]; then
-            BASE_BRANCH="${REF_NAME#pre-}"
-            echo "Base branch: $BASE_BRANCH"
-            echo "base_branch=$BASE_BRANCH" >> $GITHUB_OUTPUT
+          echo "Running workflows on target: $running"
+          if [ -n "$running" ]; then
+            echo "running=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Not a pre-* branch. Skipping auto-merge logic."
-            echo "base_branch=none" >> $GITHUB_OUTPUT
+            echo "running=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Check if another workflow is running on base branch (excluding self)
-        if: steps.base_branch.outputs.base_branch != 'none'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          base_branch="${{ steps.base_branch.outputs.base_branch }}"
-          current_run_number=${{ steps.current.outputs.run_number }}
-
-          echo "Checking if workflows are running on base branch: $base_branch"
-
-          other_running_runs=$(gh run list \
-            --workflow="Auto-Deployment" \
-            --branch="$base_branch" \
-            --status="in_progress" \
-            --json number,status,headBranch -q \
-            ".[] | select(.number != ${current_run_number}) | .number")
-
-          echo "Other running runs: $other_running_runs"
-
-          if [[ -n "$other_running_runs" ]]; then
-            echo "Workflow in progress on $base_branch. Skipping merge."
-            exit 1
-          fi
-
-      - name: Merge pre-* into base branch
-        if: steps.base_branch.outputs.base_branch != 'none'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: ⚙️ Git Config
+        if: steps.check_running.outputs.running == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin
-          git checkout ${{ steps.base_branch.outputs.base_branch }}
-          git merge origin/${GITHUB_REF##*/} --ff-only
-          git push origin ${{ steps.base_branch.outputs.base_branch }}
+
+      - name: 🔁 Revert Last Commit on Staging Branch
+        if: steps.check_running.outputs.running == 'true'
+        run: |
+          git fetch origin ${{ github.ref_name }}
+          git checkout ${{ github.ref_name }}
+          git revert --no-edit HEAD
+          git push origin ${{ github.ref_name }}
 
 # Other jobs like code_quality_check, quality, cypress_test, and revert_merge remain unchanged.
 
