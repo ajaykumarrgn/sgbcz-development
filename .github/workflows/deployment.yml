@@ -23,11 +23,13 @@ env:
 jobs:
   check_running_workflow:
     runs-on: ubuntu-latest
+    outputs:
+      merged: ${{ steps.result.outputs.merged }}
     steps:
-      - name: Checkout the repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up GitHub CLI
+      - name: Setup GitHub CLI
         run: |
           sudo apt update
           sudo apt install gh -y
@@ -38,57 +40,69 @@ jobs:
         id: current
         run: echo "run_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
 
-      - name: Detect base branch from pre-* branch
+      - name: Determine target base branch
         id: base_branch
         run: |
           REF_NAME="${GITHUB_REF##*/}"
-          echo "Detected branch: $REF_NAME"
+          echo "Ref name: $REF_NAME"
 
-          if [[ "$REF_NAME" =~ ^pre-(main|release|hot[-]?fix.*)$ ]]; then
+          if [[ "$REF_NAME" =~ ^pre-(main|release|hotfix.*)$ ]]; then
             BASE_BRANCH="${REF_NAME#pre-}"
-            echo "Base branch: $BASE_BRANCH"
+            echo "Detected base branch: $BASE_BRANCH"
             echo "base_branch=$BASE_BRANCH" >> $GITHUB_OUTPUT
           else
-            echo "Not a pre-* branch. Skipping auto-merge logic."
+            echo "No valid pre- branch. Skipping..."
             echo "base_branch=none" >> $GITHUB_OUTPUT
-          fi
 
-      - name: Check if another workflow is running on base branch (excluding self)
+      - name: Check if workflow is running on base branch
         if: steps.base_branch.outputs.base_branch != 'none'
+        id: check_workflow
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           base_branch="${{ steps.base_branch.outputs.base_branch }}"
           current_run_number=${{ steps.current.outputs.run_number }}
 
-          echo "Checking if workflows are running on base branch: $base_branch"
-
-          other_running_runs=$(gh run list \
+          running=$(gh run list \
             --workflow="Auto-Deployment" \
             --branch="$base_branch" \
             --status="in_progress" \
-            --json number,status,headBranch -q \
+            --json number -q \
             ".[] | select(.number != ${current_run_number}) | .number")
 
-          echo "Other running runs: $other_running_runs"
+          if [[ -n "$running" ]]; then
+            echo "Workflow running on $base_branch, preventing merge."
+            echo "should_merge=false" >> $GITHUB_OUTPUT
+          else
+            echo "No running workflow. Safe to merge."
+            echo "should_merge=true" >> $GITHUB_OUTPUT
 
-          if [[ -n "$other_running_runs" ]]; then
-            echo "Workflow in progress on $base_branch. Skipping merge."
-            exit 1
-          fi
-
-      - name: Merge pre-* into base branch
+      - name: Attempt Merge or Revert
         if: steps.base_branch.outputs.base_branch != 'none'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: result
         run: |
+          set -e
+          BRANCH=${{ github.ref_name }}
+          BASE=${{ steps.base_branch.outputs.base_branch }}
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin
-          git checkout ${{ steps.base_branch.outputs.base_branch }}
-          git merge origin/${GITHUB_REF##*/} --ff-only
-          git push origin ${{ steps.base_branch.outputs.base_branch }}
 
+          git fetch origin
+          git checkout $BASE
+
+          if [[ "${{ steps.check_workflow.outputs.should_merge }}" == "true" ]]; then
+            echo "Merging $BRANCH into $BASE..."
+            git merge origin/$BRANCH --ff-only
+            git push origin $BASE
+            echo "merged=true" >> $GITHUB_OUTPUT
+          else
+            echo "Reverting last commit on $BRANCH"
+            git checkout origin/$BRANCH -b tmp-revert
+            git revert ${{ github.sha }} --no-edit
+            git push origin HEAD:$BRANCH --force
+            echo "merged=false" >> $GITHUB_OUTPUT
+          fi
 # Other jobs like code_quality_check, quality, cypress_test, and revert_merge remain unchanged.
 
 #
