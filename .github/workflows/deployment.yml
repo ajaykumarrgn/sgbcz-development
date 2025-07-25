@@ -91,8 +91,8 @@ jobs:
     outputs:
       skip_merge: ${{ steps.check.outputs.skip_merge }}
     steps:
-      - name: 🔧 Install GH CLI
-        uses: cli/cli-action@v2
+      # - name: 🔧 Install GH CLI
+      #   uses: cli/cli-action@v2
 
       - name: 🧠 Check for running workflows on base
         id: check
