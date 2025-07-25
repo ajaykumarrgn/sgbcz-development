@@ -30,14 +30,17 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up GitHub CLI
-        uses: cli/cli-action@v2
+        uses: actions/setup-gh@v3
         with:
           version: latest
 
-      - name: Check for running workflows on main
-        id: check_workflows
+      - name: Authenticate GitHub CLI
+        run: gh auth setup-git
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for running workflows on main
+        id: check_workflows
         run: |
           RUNNING=$(gh run list -b main --limit 10 --json status -q '.[] | select(.status == "in_progress" or .status == "queued")')
           if [[ -n "$RUNNING" ]]; then
@@ -46,19 +49,19 @@ jobs:
           else
             echo "No running workflows on main. Proceeding with merge."
             echo "skip_merge=false" >> $GITHUB_OUTPUT
-          fi
 
       - name: Merge pre-main into main
         if: steps.check_workflows.outputs.skip_merge == 'false'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin
           git checkout -B main origin/main
-          git merge origin/pre-main --no-ff --no-edit
+          git merge origin/pre-main --no-ff --no-edit || exit 1
           git push origin main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
       
