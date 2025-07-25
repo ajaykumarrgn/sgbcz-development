@@ -21,73 +21,56 @@ env:
   MERGE_COMMIT_SHA: ${{ github.sha }}
 
 jobs:
-  check_running_workflow:
+  auto-merge-pre-to-base:
+    name: Auto Merge Pre Branch to Base Branch
+    if: startsWith(github.ref_name, 'pre-')
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout the repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up GitHub CLI
+      - name: Set base branch
+        id: vars
         run: |
-          sudo apt update
-          sudo apt install gh -y
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CURRENT_BRANCH="${{ github.ref_name }}"
+          BASE_BRANCH="${CURRENT_BRANCH#pre-}"  # Remove 'pre-' prefix
+          echo "base_branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Current Branch: $CURRENT_BRANCH"
+          echo "Target Base Branch: $BASE_BRANCH"
 
-      - name: Get current run number
-        id: current
-        run: echo "run_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
-
-      - name: Detect base branch from pre-* branch
-        id: base_branch
+      - name: Authenticate with GitHub CLI
         run: |
-          REF_NAME="${GITHUB_REF##*/}"
-          echo "Detected branch: $REF_NAME"
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          gh auth status
 
-          if [[ "$REF_NAME" =~ ^pre-(main|release|hot[-]?fix.*)$ ]]; then
-            BASE_BRANCH="${REF_NAME#pre-}"
-            echo "Base branch: $BASE_BRANCH"
-            echo "base_branch=$BASE_BRANCH" >> $GITHUB_OUTPUT
+      - name: Check for running workflows on base branch
+        id: check_workflows
+        run: |
+          BASE_BRANCH=${{ steps.vars.outputs.base_branch }}
+          RUNNING=$(gh run list -b "$BASE_BRANCH" --limit 10 --json status -q '.[] | select(.status == "in_progress" or .status == "queued")')
+          if [[ -n "$RUNNING" ]]; then
+            echo "Workflows are still running on $BASE_BRANCH. Skipping merge."
+            echo "skip_merge=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Not a pre-* branch. Skipping auto-merge logic."
-            echo "base_branch=none" >> $GITHUB_OUTPUT
+            echo "No running workflows on $BASE_BRANCH. Proceeding with merge."
+            echo "skip_merge=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Check if another workflow is running on base branch (excluding self)
-        if: steps.base_branch.outputs.base_branch != 'none'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          base_branch="${{ steps.base_branch.outputs.base_branch }}"
-          current_run_number=${{ steps.current.outputs.run_number }}
-
-          echo "Checking if workflows are running on base branch: $base_branch"
-
-          other_running_runs=$(gh run list \
-            --workflow="Auto-Deployment" \
-            --branch="$base_branch" \
-            --status="in_progress" \
-            --json number,status,headBranch -q \
-            ".[] | select(.number != ${current_run_number}) | .number")
-
-          echo "Other running runs: $other_running_runs"
-
-          if [[ -n "$other_running_runs" ]]; then
-            echo "Workflow in progress on $base_branch. Skipping merge."
-            exit 1
-          fi
-
-      - name: Merge pre-* into base branch
-        if: steps.base_branch.outputs.base_branch != 'none'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Merge pre-* into target base branch
+        if: steps.check_workflows.outputs.skip_merge == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin
-          git checkout ${{ steps.base_branch.outputs.base_branch }}
-          git merge origin/${GITHUB_REF##*/} --ff-only
-          git push origin ${{ steps.base_branch.outputs.base_branch }}
+
+          BASE_BRANCH=${{ steps.vars.outputs.base_branch }}
+          CURRENT_BRANCH=${{ github.ref_name }}
+
+          git checkout -B "$BASE_BRANCH" "origin/$BASE_BRANCH"
+          git merge "origin/$CURRENT_BRANCH" --no-ff --no-edit --allow-unrelated-histories
+          git push origin "$BASE_BRANCH"
+
 
 # Other jobs like code_quality_check, quality, cypress_test, and revert_merge remain unchanged.
 
