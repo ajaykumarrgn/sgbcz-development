@@ -3,9 +3,6 @@ name: Auto-Deployment
 on:
   push:
     branches:
-      - main
-      - release
-      - hot-fix*
       - pre-*
     paths-ignore:
       - '**/cypress/**'
