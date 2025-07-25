@@ -53,8 +53,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin
           git checkout -B main origin/main
-          git merge origin/pre-main --no-ff --no-edit
+          git merge origin/pre-main --no-ff --no-edit --allow-unrelated-histories
           git push origin main
+
 
 
 
