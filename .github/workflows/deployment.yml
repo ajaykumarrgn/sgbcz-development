@@ -21,84 +21,46 @@ env:
   MERGE_COMMIT_SHA: ${{ github.sha }}
 
 jobs:
-  check_running_workflow:
+  merge_pre_main:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repository
+      - name: Checkout pre-main branch
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # fetch all history
 
-      - name: Set up GitHub CLI
+      - name: Install GitHub CLI
         run: |
-          sudo apt update
-          sudo apt install gh -y
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Check if workflows are running on main
+        id: check_main
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get current run number
-        id: current
-        run: echo "run_number=${{ github.run_number }}" >> $GITHUB_OUTPUT
-
-      - name: Detect base branch from pre-* branch
-        id: base_branch
         run: |
-          REF_NAME="${GITHUB_REF##*/}"
-          echo "Detected branch: $REF_NAME"
-
-          if [[ "$REF_NAME" =~ ^pre-(main|release|hot[-]?fix.*)$ ]]; then
-            BASE_BRANCH="${REF_NAME#pre-}"
-            echo "Base branch: $BASE_BRANCH"
-            echo "base_branch=$BASE_BRANCH" >> $GITHUB_OUTPUT
+          echo "Checking for running workflows on 'main' branch..."
+          RUNNING=$(gh run list --branch main --status in_progress --json status --jq 'length')
+          echo "Number of workflows running: $RUNNING"
+          if [ "$RUNNING" -gt 0 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
           else
-            echo "Not a pre-* branch. Skipping auto-merge logic."
-            echo "base_branch=none" >> $GITHUB_OUTPUT
+            echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Check if another workflow is running on base branch (excluding self)
-        if: steps.base_branch.outputs.base_branch != 'none'
+      - name: Merge pre-main into main
+        if: steps.check_main.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          base_branch="${{ steps.base_branch.outputs.base_branch }}"
-          current_run_number=${{ steps.current.outputs.run_number }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          echo "Checking if workflows are running on base branch: $base_branch"
-
-          other_running_runs=$(gh run list \
-            --workflow="Auto-Deployment" \
-            --branch="$base_branch" \
-            --status="in_progress" \
-            --json number,status,headBranch -q \
-            ".[] | select(.number != ${current_run_number}) | .number")
-
-          echo "Other running runs: $other_running_runs"
-
-          if [[ -n "$other_running_runs" ]]; then
-            echo "Workflow in progress on $base_branch. Skipping merge."
-            exit 1
-          fi
-
-      - name: Merge pre-* into base branch
-        if: steps.check_running.outputs.skip == 'false'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-         git config user.name "github-actions[bot]"
-         git config user.email "github-actions[bot]@users.noreply.github.com"
-    
-         git fetch origin
-
-         base_branch="${{ steps.base_branch.outputs.base_branch }}"
-         source_branch="${GITHUB_REF##*/}"
-
-         echo "Merging $source_branch into $base_branch"
-    
-         git checkout "$base_branch"
-         git merge origin/"$source_branch" --ff-only || {
-         echo "❌ Fast-forward merge not possible. Merge aborted."
-         exit 1
-         }
-
-         git push origin "$base_branch"
+          git fetch origin
+          git checkout main
+          git merge origin/pre-main --ff-only
+          git push origin main
+      
 
 
 # Other jobs like code_quality_check, quality, cypress_test, and revert_merge remain unchanged.
