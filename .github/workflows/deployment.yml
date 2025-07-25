@@ -13,9 +13,6 @@ on:
       - 'eslint.config.js'
       - 'eslint-plugin-custom-rules.js'
 
-concurrency:
-  group: workflow-${{ github.ref }}
-  cancel-in-progress: false
 
 env:
   MERGE_COMMIT_SHA: ${{ github.sha }}
