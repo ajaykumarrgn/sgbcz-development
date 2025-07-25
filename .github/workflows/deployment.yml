@@ -19,6 +19,12 @@ concurrency:
 
 env:
   MERGE_COMMIT_SHA: ${{ github.sha }}
+steps:
+  - name: Set up GitHub CLI
+    uses: cli/cli-action@v2
+    with:
+      version: latest
+
 
 jobs:
   merge_pre_main:
@@ -34,22 +40,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gh
 
-      - name: Check if workflows are running on main
-        id: check_main
+      - name: Check for running workflows on main
+        id: check_workflows
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Checking for running workflows on 'main' branch..."
-          RUNNING=$(gh run list --branch main --status in_progress --json status --jq 'length')
-          echo "Number of workflows running: $RUNNING"
-          if [ "$RUNNING" -gt 0 ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
+          RUNNING=$(gh run list -b main --limit 10 --json status -q '.[] | select(.status == "in_progress" or .status == "queued")')
+          if [[ -n "$RUNNING" ]]; then
+            echo "Workflows are still running on main. Skipping merge."
+            echo "skip_merge=true" >> $GITHUB_OUTPUT
           else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "No running workflows on main. Proceeding with merge."
+            echo "skip_merge=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Merge pre-main into main
-        if: steps.check_main.outputs.skip == 'false'
+        if: steps.check_workflows.outputs.skip_merge == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -57,9 +63,16 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git fetch origin
-          git checkout main
-          git merge origin/pre-main --ff-only
+
+          # Checkout main branch (locally if not present)
+          git checkout -B main origin/main
+
+          # Merge pre-main into main using no-ff (required if histories diverge)
+          git merge origin/pre-main --no-ff --no-edit
+
+          # Push back the merged main branch
           git push origin main
+
       
 
 
