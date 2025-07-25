@@ -1,177 +1,81 @@
-# name: Auto-Deployment
+name: Auto-Deployment
 
-# on:
-#   push:
-#     branches:
-#       - main
-#       - release
-#       - hot-fix*
-#       - pre-*
-#     paths-ignore:
-#       - '**/cypress/**'
-#       - '.pylintrc'
-#       - 'eslint.config.js'
-#       - 'eslint-plugin-custom-rules.js'
+on:
+  push:
+    branches:
+      - main
+      - release
+      - hot-fix*
+      - pre-*
+    paths-ignore:
+      - '**/cypress/**'
+      - '.pylintrc'
+      - 'eslint.config.js'
+      - 'eslint-plugin-custom-rules.js'
 
-# concurrency:
-#   group: workflow-${{ github.ref }}
-#   cancel-in-progress: false
+concurrency:
+  group: workflow-${{ github.ref }}
+  cancel-in-progress: false
 
-# env:
-#   MERGE_COMMIT_SHA: ${{ github.sha }}
+env:
+  MERGE_COMMIT_SHA: ${{ github.sha }}
 
-# jobs:
-#   auto-merge-pre-to-base:
-#     name: Auto Merge Pre Branch to Base Branch
-#     if: startsWith(github.ref_name, 'pre-')
-#     runs-on: ubuntu-latest
+jobs:
+  auto-merge-pre-to-base:
+    name: Auto Merge Pre Branch to Base Branch
+    if: startsWith(github.ref_name, 'pre-')
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-#       - name: Set base branch
-#         id: vars
-#         run: |
-#           CURRENT_BRANCH="${{ github.ref_name }}"
-#           BASE_BRANCH="${CURRENT_BRANCH#pre-}"  # Remove 'pre-' prefix
-#           echo "base_branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
-#           echo "Current Branch: $CURRENT_BRANCH"
-#           echo "Target Base Branch: $BASE_BRANCH"
+      - name: Set base branch
+        id: vars
+        run: |
+          CURRENT_BRANCH="${{ github.ref_name }}"
+          BASE_BRANCH="${CURRENT_BRANCH#pre-}"  # Remove 'pre-' prefix
+          echo "base_branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Current Branch: $CURRENT_BRANCH"
+          echo "Target Base Branch: $BASE_BRANCH"
 
-#       - name: Authenticate with GitHub CLI
-#         run: |
-#           echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-#           gh auth status
+      - name: Authenticate with GitHub CLI
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          gh auth status
 
-#       - name: Check for running workflows on base branch
-#         id: check_workflows
-#         run: |
-#           BASE_BRANCH=${{ steps.vars.outputs.base_branch }}
-#           RUNNING=$(gh run list -b "$BASE_BRANCH" --limit 10 --json status -q '.[] | select(.status == "in_progress" or .status == "queued")')
-#           if [[ -n "$RUNNING" ]]; then
-#             echo "Workflows are still running on $BASE_BRANCH. Skipping merge."
-#             echo "skip_merge=true" >> "$GITHUB_OUTPUT"
-#           else
-#             echo "No running workflows on $BASE_BRANCH. Proceeding with merge."
-#             echo "skip_merge=false" >> "$GITHUB_OUTPUT"
-#           fi
+      - name: Check for running workflows on base branch
+        id: check_workflows
+        run: |
+          BASE_BRANCH=${{ steps.vars.outputs.base_branch }}
+          RUNNING=$(gh run list -b "$BASE_BRANCH" --limit 10 --json status -q '.[] | select(.status == "in_progress" or .status == "queued")')
+          if [[ -n "$RUNNING" ]]; then
+            echo "Workflows are still running on $BASE_BRANCH. Skipping merge."
+            echo "skip_merge=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No running workflows on $BASE_BRANCH. Proceeding with merge."
+            echo "skip_merge=false" >> "$GITHUB_OUTPUT"
+          fi
 
-#       - name: Merge pre-* into target base branch
-#         if: steps.check_workflows.outputs.skip_merge == 'false'
-#         run: |
-#           git config user.name "github-actions[bot]"
-#           git config user.email "github-actions[bot]@users.noreply.github.com"
-#           git fetch origin
+      - name: Merge pre-* into target base branch
+        if: steps.check_workflows.outputs.skip_merge == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin
 
-#           BASE_BRANCH=${{ steps.vars.outputs.base_branch }}
-#           CURRENT_BRANCH=${{ github.ref_name }}
+          BASE_BRANCH=${{ steps.vars.outputs.base_branch }}
+          CURRENT_BRANCH=${{ github.ref_name }}
 
-#           git checkout -B "$BASE_BRANCH" "origin/$BASE_BRANCH"
-#           git merge "origin/$CURRENT_BRANCH" --no-ff --no-edit --allow-unrelated-histories
-#           git push origin "$BASE_BRANCH"
+          git checkout -B "$BASE_BRANCH" "origin/$BASE_BRANCH"
+          git merge "origin/$CURRENT_BRANCH" --no-ff --no-edit --allow-unrelated-histories
+          git push origin "$BASE_BRANCH"
 
 
 
 ## above is merge workable code.
 
-name: Auto-Merge Pre to Base
 
-on:
-  push:
-    branches:
-      - pre-main
-      - pre-release
-      - pre-hotfix*
-
-jobs:
-  check-if-critical-busy:
-    name: 🔍 Check if base branch is busy
-    runs-on: ubuntu-latest
-    outputs:
-      skip_merge: ${{ steps.check.outputs.skip_merge }}
-    steps:
-      # - name: 🔧 Install GH CLI
-      #   uses: cli/cli-action@v2
-
-      - name: 🧠 Check for running workflows on base
-        id: check
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          echo "Current pre-branch: $BRANCH"
-
-          if [[ "$BRANCH" == "pre-main" ]]; then BASE_BRANCH="main"; fi
-          if [[ "$BRANCH" == "pre-release" ]]; then BASE_BRANCH="release"; fi
-          if [[ "$BRANCH" == pre-hotfix* ]]; then BASE_BRANCH="hotfix-${BRANCH#pre-hotfix-}"; fi
-
-          echo "Base branch: $BASE_BRANCH"
-
-          RUNNING=$(gh run list -b "$BASE_BRANCH" --json status --jq '[.[] | select(.status=="in_progress" or .status=="queued")] | length')
-          echo "Running workflows on $BASE_BRANCH: $RUNNING"
-
-          if [[ "$RUNNING" -gt 0 ]]; then
-            echo "skip_merge=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip_merge=false" >> "$GITHUB_OUTPUT"
-          fi
-
-  revert-pre-branch-if-skipped:
-    name: ❌ Revert Pre Branch Commit
-    runs-on: ubuntu-latest
-    needs: check-if-critical-busy
-    if: needs.check-if-critical-busy.outputs.skip_merge == 'true'
-    steps:
-      - name: 📥 Checkout Pre Branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: ⚙️ Git Config
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: 🔁 Revert Last Commit on Pre Branch
-        run: |
-          git revert HEAD --no-edit
-          git push origin HEAD
-
-  merge-pre-to-base:
-    name: 🔀 Merge Pre to Base
-    runs-on: ubuntu-latest
-    needs: check-if-critical-busy
-    if: needs.check-if-critical-busy.outputs.skip_merge == 'false'
-    steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: ⚙️ Git Config
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: 🧠 Determine Base Branch
-        id: vars
-        run: |
-          BRANCH="${GITHUB_REF#refs/heads/}"
-          echo "Current pre-branch: $BRANCH"
-
-          if [[ "$BRANCH" == "pre-main" ]]; then BASE_BRANCH="main"; fi
-          if [[ "$BRANCH" == "pre-release" ]]; then BASE_BRANCH="release"; fi
-          if [[ "$BRANCH" == pre-hotfix* ]]; then BASE_BRANCH="hotfix-${BRANCH#pre-hotfix-}"; fi
-
-          echo "BASE_BRANCH=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
-
-      - name: 🔀 Merge Pre to Base
-        run: |
-          git fetch origin
-          git checkout ${{ steps.vars.outputs.BASE_BRANCH }}
-          git merge ${{ github.ref_name }} --no-ff --no-edit
-          git push origin HEAD
 
 
 # Other jobs like code_quality_check, quality, cypress_test, and revert_merge remain unchanged.
@@ -467,13 +371,17 @@ jobs:
         run: npx cypress run --spec "cypress/e2e/*.cy.js" --headless --browser chrome --config-file=./cypress.config.cjs
 
   revert_merge:
-    name: 🔁 Revert Merge
-    if: failure()
+    name: 🔁 Revert Pre-Branch Commit
+    if: needs.auto-merge-pre-to-base.outputs.skip_merge == 'true'
     runs-on: ubuntu-latest
-    needs: [quality, cypress_test]
+    needs: auto-merge-pre-to-base
+
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_PAT: ${{ secrets.GH_PAT }}
 
     steps:
-      - name: 🧾 Checkout repo
+      - name: 🧾 Checkout repo with full history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -483,10 +391,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: 🔍 Check merge
+      - name: 🔍 Get latest commit SHA
+        id: latest_commit
+        run: |
+          echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: 🔍 Check if latest commit is a merge commit
         id: check_merge
         run: |
-          parents=$(git log -1 --pretty=%P $MERGE_COMMIT_SHA)
+          sha=${{ steps.latest_commit.outputs.commit_sha }}
+          parents=$(git log -1 --pretty=%P $sha)
           echo "Parents: $parents"
           if [[ $(echo "$parents" | wc -w) -gt 1 ]]; then
             echo "is_merge=true" >> "$GITHUB_OUTPUT"
@@ -494,21 +408,69 @@ jobs:
             echo "is_merge=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: ❌ Revert merge commit
+      - name: ❌ Revert merge commit in pre-* branch
         if: steps.check_merge.outputs.is_merge == 'true'
         run: |
-          git revert -m 1 $MERGE_COMMIT_SHA --no-edit
+          git revert -m 1 ${{ steps.latest_commit.outputs.commit_sha }} --no-edit
 
-      - name: 🔁 Revert normal commit
+      - name: 🔁 Revert normal commit in pre-* branch
         if: steps.check_merge.outputs.is_merge == 'false'
         run: |
-          git revert $MERGE_COMMIT_SHA --no-edit
+          git revert ${{ steps.latest_commit.outputs.commit_sha }} --no-edit
 
-      - name: 🚀 Push revert
-        env:
-          GH_PAT: ${{ secrets.GH_PAT }}
+      - name: 🚀 Push revert to pre-* branch
         run: |
-          git push https://x-access-token:${GH_PAT}@github.com/ajaykumarrgn/sgbcz-development.git HEAD:main
+          CURRENT_BRANCH="${{ github.ref_name }}"
+          git push https://x-access-token:${GH_PAT}@github.com/${{ github.repository }} HEAD:$CURRENT_BRANCH
+
+
+
+
+## the below merge is only for crtical branches.
+
+  # revert_merge:
+  #   name: 🔁 Revert Merge
+  #   if: failure()
+  #   runs-on: ubuntu-latest
+  #   needs: [quality, cypress_test]
+
+  #   steps:
+  #     - name: 🧾 Checkout repo
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+
+  #     - name: ⚙️ Git config
+  #       run: |
+  #         git config user.name "github-actions[bot]"
+  #         git config user.email "github-actions[bot]@users.noreply.github.com"
+
+  #     - name: 🔍 Check merge
+  #       id: check_merge
+  #       run: |
+  #         parents=$(git log -1 --pretty=%P $MERGE_COMMIT_SHA)
+  #         echo "Parents: $parents"
+  #         if [[ $(echo "$parents" | wc -w) -gt 1 ]]; then
+  #           echo "is_merge=true" >> "$GITHUB_OUTPUT"
+  #         else
+  #           echo "is_merge=false" >> "$GITHUB_OUTPUT"
+  #         fi
+
+  #     - name: ❌ Revert merge commit
+  #       if: steps.check_merge.outputs.is_merge == 'true'
+  #       run: |
+  #         git revert -m 1 $MERGE_COMMIT_SHA --no-edit
+
+  #     - name: 🔁 Revert normal commit
+  #       if: steps.check_merge.outputs.is_merge == 'false'
+  #       run: |
+  #         git revert $MERGE_COMMIT_SHA --no-edit
+
+  #     - name: 🚀 Push revert
+  #       env:
+  #         GH_PAT: ${{ secrets.GH_PAT }}
+  #       run: |
+  #         git push https://x-access-token:${GH_PAT}@github.com/ajaykumarrgn/sgbcz-development.git HEAD:main
 
 
   # wait_for_approval:
