@@ -40,10 +40,11 @@ jobs:
           RUNNING=$(gh run list -b main --limit 10 --json status -q '.[] | select(.status == "in_progress" or .status == "queued")')
           if [[ -n "$RUNNING" ]]; then
             echo "Workflows are still running on main. Skipping merge."
-            echo "skip_merge=true" >> $GITHUB_OUTPUT
+            echo "skip_merge=true" >> "$GITHUB_OUTPUT"
           else
             echo "No running workflows on main. Proceeding with merge."
-            echo "skip_merge=false" >> $GITHUB_OUTPUT
+            echo "skip_merge=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Merge pre-main into main
         if: steps.check_workflows.outputs.skip_merge == 'false'
@@ -52,7 +53,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin
           git checkout -B main origin/main
-          git merge origin/pre-main --no-ff --no-edit || exit 1
+          git merge origin/pre-main --no-ff --no-edit
           git push origin main
 
 
